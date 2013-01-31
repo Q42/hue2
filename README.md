@@ -1,4 +1,4 @@
 hue2
 ====
 
-A Android app for hue
+An Android app for hue
