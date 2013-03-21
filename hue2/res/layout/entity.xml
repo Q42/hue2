@@ -2,36 +2,56 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/entity_lamp"
+            android:src="@drawable/lamp" />
 
         <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
+            android:id="@+id/entity_name"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Lammmmp"
             android:paddingLeft="10dp"
-            android:textSize="20sp" />
+            android:textSize="16sp" />
 
         <Button
-            android:id="@+id/off"
+            android:id="@+id/entity_off"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="off" />
-        <Button
-            android:id="@+id/on"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="on" />
+            android:background="@drawable/toggle_off"
+            android:textColor="@color/color_off"
+            android:text="@string/entity_off" />
 
+        <Button
+            android:id="@+id/entity_on"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/toggle_on"
+            android:text="@string/entity_on" />
     </LinearLayout>
 
-    <LinearLayout
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider" />
+
+    <!--
+         <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
@@ -49,5 +69,6 @@
             android:layout_height="wrap_content"
             android:text="Relaxed" />
     </LinearLayout>
+    -->
 
 </LinearLayout>

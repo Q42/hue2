@@ -4,14 +4,23 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity" >
-    
-    
-    <include layout="@layout/entity" />
 
-    <include layout="@layout/entity" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:src="@drawable/colorbar" />
 
-    <include layout="@layout/entity" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
 
-    <include layout="@layout/entity" />
+        <LinearLayout
+            android:id="@+id/activity_main_lights"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
