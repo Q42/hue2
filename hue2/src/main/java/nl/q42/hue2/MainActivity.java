@@ -19,43 +19,43 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	private final static String STATE_LIGHTS = "stateLights";
-	
+
 	private Map<String, Light> lights;
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		
+		if (savedInstanceState != null) {
+			lights = (Map<String, Light>) savedInstanceState.getSerializable(STATE_LIGHTS);
+			createViews();
+		} else {
+			getLights();
+		}
+	}
 	
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        
-        /*
-        final Button button = (Button) findViewById(R.id.button1);
-		button.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Log.d("hue2", "clicked");
-				AndroidHueService.turnLightOn(true);
-			}
-		});
-		*/
-        
-		getLights();
-    }
+	private void createViews() {
+		ViewGroup container = (ViewGroup) findViewById(R.id.activity_main_lights);
+		for (final String id : lights.keySet()) {
+			Light l = lights.get(id);
+			View view = createEntityView(id, l);
+			container.addView(view);
+		}
+	}
 
 	private void getLights() {
-		new AsyncTask<Void, Void, Map<String, Light>>() {
+		new AsyncTask<Void, Void, Void>() {
 			@Override
-			protected Map<String, Light> doInBackground(Void... params) {
-				return HueService.getLights();
+			protected Void doInBackground(Void... params) {
+				lights = HueService.getLights();
+				return null;
 			}
-			
+
 			@Override
-			protected void onPostExecute(Map<String, Light> lights) {
-				ViewGroup container = (ViewGroup) findViewById(R.id.activity_main_lights);
-				for (final String id : lights.keySet()) {
-					Light l = lights.get(id);
-					View view = createEntityView(id, l);
-					container.addView(view);
-				}
+			protected void onPostExecute(Void params) {
+				createViews();
 			}
 		}.execute();
 	}
@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
 		View view = getLayoutInflater().inflate(R.layout.entity, null);
 		TextView nameView = (TextView) view.findViewById(R.id.entity_name);
 		nameView.setText(l.name);
-		
+
 		Button on = (Button) view.findViewById(R.id.entity_on);
 		on.setOnClickListener(new OnClickListener() {
 			@Override
@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 				AndroidHueService.turnLightOn(id, true);
 			}
 		});
-		
+
 		Button off = (Button) view.findViewById(R.id.entity_off);
 		off.setOnClickListener(new OnClickListener() {
 			@Override
@@ -82,11 +82,10 @@ public class MainActivity extends Activity {
 		});
 		return view;
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		// TODO
 		outState.putSerializable(STATE_LIGHTS, (Serializable) lights);
 	}
 }
