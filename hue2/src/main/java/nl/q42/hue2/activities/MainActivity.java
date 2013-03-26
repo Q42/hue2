@@ -1,13 +1,18 @@
-package nl.q42.hue2;
+package nl.q42.hue2.activities;
 
 import info.chees.androidhueapi.AndroidHueService;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
+import nl.q42.hue2.BridgesDataSource;
+import nl.q42.hue2.R;
+import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +25,8 @@ public class MainActivity extends Activity {
 
 	private final static String STATE_LIGHTS = "stateLights";
 
+	private BridgesDataSource datasource;
+	
 	private Map<String, Light> lights;
 
 	@SuppressWarnings("unchecked")
@@ -28,12 +35,21 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		if (savedInstanceState != null) {
-			lights = (Map<String, Light>) savedInstanceState.getSerializable(STATE_LIGHTS);
-			createViews();
-		} else {
-			getLights();
-		}
+		datasource = new BridgesDataSource(this);
+	    datasource.open();
+
+	    List<Bridge> bridges = datasource.getAllBridges();
+	    if (bridges.size() == 0) {
+	    	Intent i = new Intent(this, LinkActivity.class);
+	    	startActivity(i);
+	    } else {
+			if (savedInstanceState != null) {
+				lights = (Map<String, Light>) savedInstanceState.getSerializable(STATE_LIGHTS);
+				createViews();
+			} else {
+				getLights();
+			}
+	    }
 	}
 	
 	private void createViews() {
@@ -87,5 +103,17 @@ public class MainActivity extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable(STATE_LIGHTS, (Serializable) lights);
+	}
+
+	@Override
+	protected void onResume() {
+		datasource.open();
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		datasource.close();
+		super.onPause();
 	}
 }
