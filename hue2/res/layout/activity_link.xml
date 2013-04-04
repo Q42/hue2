@@ -12,4 +12,10 @@
         android:layout_marginTop="20dp"
         android:text="@string/link_status_looking" />
 
+    <ListView
+        android:id="@+id/link_bridges"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
+
 </LinearLayout>

@@ -6,14 +6,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper{
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 
     DBHelper(Context context) {
         super(context, "bridges", null, DATABASE_VERSION);
     }
 
     public String[] allColumns() {
-    	return new String[]{ "_id", "name", "fullConfig", "user", "lastUsed" };
+    	return new String[]{ "_id", "name", "fullConfig", "user", "lastUsed", "ip" };
     }
     
     @Override
@@ -23,7 +23,8 @@ public class DBHelper extends SQLiteOpenHelper{
         		"name TEXT," +
         		"fullConfig TEXT," +
         		"user TEXT," +
-        		"lastUsed INTEGER)");
+        		"lastUsed INTEGER," +
+        		"ip TEXT)");
     }
 
 	@Override

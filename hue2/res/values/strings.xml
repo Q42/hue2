@@ -6,5 +6,6 @@
     <string name="entity_on">ON</string>
     <string name="entity_off">OFF</string>
     
-    <string name="link_status_looking">Looking for your bridge...</string>
+    <string name="link_status_looking">Looking for your bridge&#8230;</string>
+    <string name="link_status_select">Select your bridge:</string>
 </resources>

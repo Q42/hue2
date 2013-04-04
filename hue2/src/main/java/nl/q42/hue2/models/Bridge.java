@@ -7,11 +7,23 @@ public class Bridge {
 	private String fullConfig;
 	private String user;
 	private long lastUsed;
+	private String ip;
+	
+	public Bridge() {}
+	
+	public Bridge(String ip, String name) {
+		this.ip = ip;
+		this.name = name;
+	}
 	
 	public void setId(long id) {
 		this.id = id;
 	}
 
+	public String getName() {
+		return name;
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -28,4 +40,11 @@ public class Bridge {
 		this.lastUsed = lastUsed;
 	}
 
+	public String getIp() {
+		return ip;
+	}
+	
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
 }

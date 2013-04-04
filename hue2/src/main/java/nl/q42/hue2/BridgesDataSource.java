@@ -27,12 +27,13 @@ public class BridgesDataSource {
 		dbHelper.close();
 	}
 
-	public void insertBridge(String name, String fullConfig, String user) {
+	public void insertBridge(String name, String fullConfig, String user, String ip) {
 		ContentValues values = new ContentValues();
 		values.put("name", name);
 		values.put("fullConfig", fullConfig);
 		values.put("user", user);
 		values.put("lastUsed", System.currentTimeMillis());
+		values.put("ip", ip);
 		// long insertId = database.insert("bridges", null, values);
 		db.insert("bridges", null, values);
 	}
@@ -59,6 +60,7 @@ public class BridgesDataSource {
 		  bridge.setFullConfig(cursor.getString(2));
 		  bridge.setUser(cursor.getString(3));
 		  bridge.setLastUsed(cursor.getLong(4));
+		  bridge.setIp(cursor.getString(5));
 		  return bridge;
 	  }
 }

@@ -1,0 +1,35 @@
+package nl.q42.hue2.adapters;
+
+import nl.q42.hue2.R;
+import nl.q42.hue2.models.Bridge;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
+
+public class BridgeAdapter extends ArrayAdapter<Bridge> {
+	private Context context;
+
+	public BridgeAdapter(Context context) {
+		super(context, R.layout.link_bridge);
+		this.context = context;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View view = convertView;
+		if (convertView == null) {
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			view = inflater.inflate(R.layout.link_bridge, parent, false);
+		}
+		
+		Bridge b = getItem(position);
+		
+		TextView textView = (TextView) view.findViewById(R.id.link_bridge_name);
+		textView.setText(b.getName());
+		return view;
+	}
+}
