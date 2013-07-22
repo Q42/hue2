@@ -3,16 +3,27 @@ package nl.q42.hue2.activities;
 import java.util.ArrayList;
 import java.util.List;
 
-import nl.q42.hue2.BridgesDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.adapters.BridgeAdapter;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.SimpleConfig;
+
+import org.teleal.cling.android.AndroidUpnpService;
+import org.teleal.cling.android.AndroidUpnpServiceImpl;
+import org.teleal.cling.model.meta.LocalDevice;
+import org.teleal.cling.model.meta.RemoteDevice;
+import org.teleal.cling.registry.Registry;
+import org.teleal.cling.registry.RegistryListener;
+
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -25,6 +36,61 @@ public class LinkActivity extends Activity {
 	
 	private int bridgeCount;
 	private BridgeAdapter adapter;
+	
+	// TODO: upnp test
+	// TODO: Hue bridge gives invalid service id, which prevents it from being reported! (see http://hue-ip/description.xml)
+	private AndroidUpnpService upnpService;
+	
+	private ServiceConnection serviceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			upnpService = (AndroidUpnpService) service;
+			upnpService.getRegistry().addListener(registryListener);
+			upnpService.getControlPoint().search();
+		}
+		
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			upnpService = null;
+		}
+	};
+	
+	private RegistryListener registryListener = new RegistryListener() {
+		@Override
+		public void remoteDeviceDiscoveryStarted(Registry register, RemoteDevice device) {
+			Log.d("hue2", "Discovery started (" + device.getDisplayString() + ")");
+		}
+		
+		@Override
+		public void remoteDeviceDiscoveryFailed(Registry register, RemoteDevice device, Exception exc) {
+			Log.d("hue2", "Discovery failed (" + device.getDisplayString() + ")");
+		}
+		
+		@Override
+		public void remoteDeviceAdded(Registry register, RemoteDevice device) {
+			Log.d("hue2", "Device added (" + device.getDisplayString() + ")");
+		}
+		
+		@Override
+		public void remoteDeviceRemoved(Registry register, RemoteDevice device) {}
+		
+		@Override
+		public void remoteDeviceUpdated(Registry register, RemoteDevice device) {
+			Log.d("hue2", "Device updated (" + device.getDisplayString() + ")");
+		}
+
+		@Override
+		public void localDeviceAdded(Registry arg0, LocalDevice arg1) {}
+
+		@Override
+		public void localDeviceRemoved(Registry arg0, LocalDevice arg1) {}
+		
+		@Override
+		public void beforeShutdown(Registry arg0) {}
+
+		@Override
+		public void afterShutdown() {}
+	};
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,16 +106,30 @@ public class LinkActivity extends Activity {
 					int position, long id) {
 				Bridge b = adapter.getItem(position);
 				Log.d("hue2", b.getIp());
+				
+				// TODO: Allow user to select bridge and view its lights
 			}
 		});
 		
-		getBridgeIps();
-		// TODO look at upnp
-		// TODO handle rotates of the screen
+		// TODO: upnp test
+		getApplicationContext().bindService(
+	            new Intent(this, AndroidUpnpServiceImpl.class),
+	            serviceConnection,
+	            Context.BIND_AUTO_CREATE
+	        );
 		
-		// TODO: do something with bridge list instead of hardcoding
-		startActivity(new Intent(LinkActivity.this, MainActivity.class));
+		getBridgeIps();
+		// TODO handle rotates of the screen
 	}
+	
+	@Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (upnpService != null) {
+            upnpService.getRegistry().removeListener(registryListener);
+        }
+        getApplicationContext().unbindService(serviceConnection);
+    }
 	
 	private void getBridgeIps() {
 		setProgressBarIndeterminateVisibility(true); 
