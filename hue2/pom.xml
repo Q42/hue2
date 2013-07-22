@@ -13,6 +13,16 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
+	<repositories>
+	    <repository>
+	        <id>teleal-repo</id>
+	        <url>http://teleal.org/m2</url>
+	        <snapshots>
+	            <enabled>false</enabled>
+	        </snapshots>
+	    </repository>
+	</repositories>
+	
 	<dependencies>
 	    
 		<dependency>
@@ -35,11 +45,30 @@
 			<scope>provided</scope>
 		</dependency>
 		-->
+		<!--
+			The small amount of code only relevant to Android should either
+			be in special packages in javahueapi. It's not worth making
+			an entire separate library out of it. For example, asynchronous
+			requests are an application detail, not something the library
+			should be concerned with.
 		<dependency>
 			<groupId>info.chees</groupId>
 			<artifactId>androidhueapi</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		-->
+		
+		<dependency>
+		    <groupId>nl.q42</groupId>
+		    <artifactId>javahueapi</artifactId>
+		    <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+	        <groupId>org.teleal.cling</groupId>
+	        <artifactId>cling-core</artifactId>
+	        <version>1.0.5</version>
+	    </dependency>
 	</dependencies>
 	
 	<build>

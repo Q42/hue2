@@ -1,7 +1,5 @@
 package nl.q42.hue2.activities;
 
-import info.chees.androidhueapi.AndroidHueService;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +90,7 @@ public class MainActivity extends Activity {
 		on.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				AndroidHueService.turnLightOn(id, true);
+				turnLightOn(id, true);
 			}
 		});
 
@@ -100,10 +98,26 @@ public class MainActivity extends Activity {
 		off.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				AndroidHueService.turnLightOn(id, false);
+				turnLightOn(id, false);
 			}
 		});
 		return view;
+	}
+	
+	private static void turnLightOn(final String id, final boolean on) {
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				HueService hueService = new HueService(); // TODO
+				try {
+					hueService.turnLightOn(id, on);
+				} catch (Exception e) {
+					e.printStackTrace();
+					// TODO
+				}
+				return null;
+			}
+		}.execute();
 	}
 
 	@Override

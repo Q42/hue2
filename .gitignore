@@ -1,6 +1,8 @@
-/ActionBarSherlock/bin
-/ActionBarSherlock/gen
-/hue2/bin
-/hue2/gen
-.settings/
+# Binaries
+hue2/bin
+hue2/gen
 hue2/target
+
+# Local files
+hue2/.classpath
+hue2/.settings/
