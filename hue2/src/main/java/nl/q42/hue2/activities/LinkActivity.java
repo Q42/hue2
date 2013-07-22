@@ -1,5 +1,6 @@
 package nl.q42.hue2.activities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import nl.q42.hue2.R;
@@ -51,7 +52,13 @@ public class LinkActivity extends Activity {
 			@Override
 			protected List<String> doInBackground(Void... params) {
 				Log.d("hue2", "Looking for bridges:");
-				return HueService.getBridgeIps();
+				try {
+					return HueService.getBridgeIps();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				// TODO show a toast?
+				return new ArrayList<String>();
 			}
 			
 			@Override
@@ -73,7 +80,12 @@ public class LinkActivity extends Activity {
 		new AsyncTask<Void, Void, SimpleConfig>() {
 			@Override
 			protected SimpleConfig doInBackground(Void... params) {
-				return HueService.getSimpleConfig(ip);
+				try {
+					return HueService.getSimpleConfig(ip);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
 			}
 			
 			@Override
@@ -92,6 +104,7 @@ public class LinkActivity extends Activity {
 			TextView status = (TextView) findViewById(R.id.link_status);
 			status.setText(R.string.link_status_select);
 			setProgressBarIndeterminateVisibility(false);
+			// TODO show a refresh button
 		}
 	}
 }

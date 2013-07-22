@@ -65,7 +65,13 @@ public class MainActivity extends Activity {
 		new AsyncTask<Void, Void, Void>() {
 			@Override
 			protected Void doInBackground(Void... params) {
-				lights = HueService.getLights();
+				HueService hueService = new HueService(); // TODO
+				try {
+					lights = hueService.getLights();
+				} catch (Exception e) {
+					e.printStackTrace();
+					// TODO 
+				}
 				return null;
 			}
 
