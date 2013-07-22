@@ -38,18 +38,19 @@ public class MainActivity extends Activity {
 		datasource = new BridgesDataSource(this);
 	    datasource.open();
 
-	    List<Bridge> bridges = datasource.getAllBridges();
+	    // TODO: get ip from configuration/saved things instead of hardcoding
+	    /*List<Bridge> bridges = datasource.getAllBridges();
 	    if (bridges.size() == 0) {
 	    	Intent i = new Intent(this, LinkActivity.class);
 	    	startActivity(i);
-	    } else {
+	    } else {*/
 			if (savedInstanceState != null) {
 				lights = (Map<String, Light>) savedInstanceState.getSerializable(STATE_LIGHTS);
 				createViews();
 			} else {
 				getLights();
 			}
-	    }
+	    //}
 	}
 	
 	private void createViews() {

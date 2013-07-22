@@ -3,12 +3,14 @@ package nl.q42.hue2.activities;
 import java.util.ArrayList;
 import java.util.List;
 
+import nl.q42.hue2.BridgesDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.adapters.BridgeAdapter;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.SimpleConfig;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,6 +46,9 @@ public class LinkActivity extends Activity {
 		getBridgeIps();
 		// TODO look at upnp
 		// TODO handle rotates of the screen
+		
+		// TODO: do something with bridge list instead of hardcoding
+		startActivity(new Intent(LinkActivity.this, MainActivity.class));
 	}
 	
 	private void getBridgeIps() {
