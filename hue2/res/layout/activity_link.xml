@@ -35,5 +35,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </ListView>
+    
+    <TextView
+        android:id="@+id/link_empty"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:textColor="#bebebe"
+        android:text="@string/link_empty" />
 
 </LinearLayout>

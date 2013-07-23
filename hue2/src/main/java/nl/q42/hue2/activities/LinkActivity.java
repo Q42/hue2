@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,8 @@ import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.adapters.BridgeAdapter;
 import nl.q42.hue2.models.Bridge;
+import nl.q42.javahueapi.HueService;
+import nl.q42.javahueapi.HueService.ApiException;
 import nl.q42.javahueapi.Networker;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -47,6 +50,8 @@ public class LinkActivity extends Activity {
 		bridgesList = (ListView) findViewById(R.id.link_bridges);
 		bridgesAdapter = new BridgeAdapter(this);
 		bridgesList.setAdapter(bridgesAdapter);
+		
+		bridgesList.setEmptyView(findViewById(R.id.link_empty));
 		
 		// Set up loading UI elements		
 		ActionBar ab = getActionBar();
@@ -158,19 +163,21 @@ public class LinkActivity extends Activity {
 							
 							// Parsing with RegEx allowed here because the output format is fairly strict
 							final String modelName = Util.quickMatch("<modelName>(.*?)</modelName>", description);
-							final String friendlyName = Util.quickMatch("<friendlyName>(.*?)</friendlyName>", description);
 															
 							// Check from description if we're dealing with a hue bridge or some other device
-							if (modelName.toLowerCase().contains("philips hue bridge")) {
-								// Get bridge name this way, because you need a valid username to get it through the config API
-								final String bridgeName = Util.quickMatch("(.*) \\([^)]+\\)$", friendlyName);
-								
-								bridgesList.post(new Runnable() {
-									@Override
-									public void run() {
-										bridgesAdapter.add(new Bridge(ip, bridgeName));
-									}
-								});
+							if (modelName.toLowerCase(Locale.getDefault()).contains("philips hue bridge")) {
+								try {
+									final String bridgeName = HueService.getSimpleConfig(ip).name;
+									
+									bridgesList.post(new Runnable() {
+										@Override
+										public void run() {
+											bridgesAdapter.add(new Bridge(ip, bridgeName));
+										}
+									});
+								} catch (ApiException e) {
+									// Do nothing, this basically serves as an extra check to see if it's really a hue bridge
+								}
 							}
 						}
 						
