@@ -5,7 +5,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,19 +17,31 @@ import nl.q42.hue2.Util;
 import nl.q42.hue2.adapters.BridgeAdapter;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.Networker;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Window;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 public class LinkActivity extends Activity {
+	private static final int SEARCH_TIMEOUT = 5000;
+	
 	private BridgeAdapter bridgesAdapter;
 	private ListView bridgesList;
 	
+	private ImageButton refreshButton;
+	private ProgressBar loadingSpinner;
+	
+	private BridgeSearchTask bridgeSearchTask;
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_link);
 		
 		// Set up layout
@@ -34,27 +49,84 @@ public class LinkActivity extends Activity {
 		bridgesAdapter = new BridgeAdapter(this);
 		bridgesList.setAdapter(bridgesAdapter);
 		
+		// Set up loading UI elements		
+		ActionBar ab = getActionBar();
+		ab.setCustomView(R.layout.link_loader);
+		ab.setDisplayShowCustomEnabled(true);
+		
+		RelativeLayout loadingLayout = (RelativeLayout) ab.getCustomView();
+
+		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.link_loading_spinner);
+		
+		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.link_refresh_button);
+		refreshButton.setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startSearching();
+			}
+		});
+		
 		// Start searching for bridges and add them to the results
-		bridgeSearchTask.execute();
-		setProgressBarIndeterminateVisibility(true);
+		startSearching();
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		
-		// Stop searching for bridges
-		bridgeSearchTask.cancel(true);
+		stopSearching();
 	}
 	
-	private AsyncTask<Void, Void, Void> bridgeSearchTask = new AsyncTask<Void, Void, Void>() {
+	private void stopSearching() {		
+		if (bridgeSearchTask != null) {
+			bridgeSearchTask.cancel(true);
+			bridgeSearchTask = null;
+			
+			bridgesList.post(new Runnable() {
+				@Override
+				public void run() {
+					setSearchIndicator(false);
+				}
+			});
+		}
+	}
+	
+	private void startSearching() {		
+		stopSearching();
+		
+		bridgesAdapter.clear();
+		
+		bridgeSearchTask = new BridgeSearchTask();
+		bridgeSearchTask.execute();
+		
+		setSearchIndicator(true);
+	}
+	
+	private void setSearchIndicator(boolean searching) {
+		if (searching) {
+			refreshButton.setVisibility(View.GONE);
+			loadingSpinner.setVisibility(View.VISIBLE);
+		} else {
+			refreshButton.setVisibility(View.VISIBLE);
+			loadingSpinner.setVisibility(View.GONE);
+		}
+	}
+	
+	private class BridgeSearchTask extends AsyncTask<Void, Void, Void> {
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected void onPostExecute(Void result) {
+			bridgeSearchTask = null;
+			setSearchIndicator(false);
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {			
 			// Search bridges on local network using UPnP
-			try {					
+			try {				
 				String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 8\nST:SsdpSearch:all";
-				DatagramSocket upnpSender = new DatagramSocket();
-				upnpSender.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
+				DatagramSocket upnpSock = new DatagramSocket();
+				upnpSock.setSoTimeout(SEARCH_TIMEOUT);
+				upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
 				
 				HashMap<String, Boolean> ipsDiscovered = new HashMap<String, Boolean>();
 				
@@ -62,7 +134,7 @@ public class LinkActivity extends Activity {
 					byte[] responseBuffer = new byte[1024];
 					
 					DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
-					upnpSender.receive(responsePacket);
+					upnpSock.receive(responsePacket);
 					
 					final String ip = responsePacket.getAddress().getHostAddress();
 					final String response = new String(responsePacket.getData());
@@ -95,6 +167,8 @@ public class LinkActivity extends Activity {
 						ipsDiscovered.put(ip, true);
 					}
 				}
+			} catch (SocketTimeoutException e) {
+				// Gracefully stop
 			} catch (SocketException e) {
 				// TODO: Handle network errors
 				e.printStackTrace();
@@ -104,5 +178,5 @@ public class LinkActivity extends Activity {
 			
 			return null;
 		}
-	};
+	}
 }
