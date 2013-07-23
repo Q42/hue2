@@ -57,27 +57,24 @@ public class LinkActivity extends Activity {
 	
 	private RegistryListener registryListener = new RegistryListener() {
 		@Override
-		public void remoteDeviceDiscoveryStarted(Registry register, RemoteDevice device) {
-			Log.d("hue2", "Discovery started (" + device.getDisplayString() + ")");
-		}
+		public void remoteDeviceDiscoveryStarted(Registry register, RemoteDevice device) {}
 		
 		@Override
-		public void remoteDeviceDiscoveryFailed(Registry register, RemoteDevice device, Exception exc) {
-			Log.d("hue2", "Discovery failed (" + device.getDisplayString() + ")");
-		}
+		public void remoteDeviceDiscoveryFailed(Registry register, RemoteDevice device, Exception exc) {}
 		
 		@Override
 		public void remoteDeviceAdded(Registry register, RemoteDevice device) {
-			Log.d("hue2", "Device added (" + device.getDisplayString() + ")");
+			Log.d("hue2", "Friendly name: " + device.getDetails().getFriendlyName());
+			Log.d("hue2", "Man: " + device.getDetails().getManufacturerDetails().getManufacturer());
+			Log.d("hue2", "Desc: " + device.getDetails().getModelDetails().getModelDescription());
+			Log.d("hue2", "Name: " + device.getDetails().getModelDetails().getModelName());
 		}
 		
 		@Override
 		public void remoteDeviceRemoved(Registry register, RemoteDevice device) {}
 		
 		@Override
-		public void remoteDeviceUpdated(Registry register, RemoteDevice device) {
-			Log.d("hue2", "Device updated (" + device.getDisplayString() + ")");
-		}
+		public void remoteDeviceUpdated(Registry register, RemoteDevice device) {}
 
 		@Override
 		public void localDeviceAdded(Registry arg0, LocalDevice arg1) {}
