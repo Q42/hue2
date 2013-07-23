@@ -1,29 +1,25 @@
 package nl.q42.hue2.activities;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import nl.q42.hue2.R;
 import nl.q42.hue2.adapters.BridgeAdapter;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
+import nl.q42.javahueapi.Networker;
 import nl.q42.javahueapi.models.SimpleConfig;
-
-import org.teleal.cling.android.AndroidUpnpService;
-import org.teleal.cling.android.AndroidUpnpServiceImpl;
-import org.teleal.cling.model.meta.LocalDevice;
-import org.teleal.cling.model.meta.RemoteDevice;
-import org.teleal.cling.registry.Registry;
-import org.teleal.cling.registry.RegistryListener;
-
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -36,58 +32,6 @@ public class LinkActivity extends Activity {
 	
 	private int bridgeCount;
 	private BridgeAdapter adapter;
-	
-	// TODO: upnp test
-	// TODO: Hue bridge gives invalid service id, which prevents it from being reported! (see http://hue-ip/description.xml)
-	private AndroidUpnpService upnpService;
-	
-	private ServiceConnection serviceConnection = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			upnpService = (AndroidUpnpService) service;
-			upnpService.getRegistry().addListener(registryListener);
-			upnpService.getControlPoint().search();
-		}
-		
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			upnpService = null;
-		}
-	};
-	
-	private RegistryListener registryListener = new RegistryListener() {
-		@Override
-		public void remoteDeviceDiscoveryStarted(Registry register, RemoteDevice device) {}
-		
-		@Override
-		public void remoteDeviceDiscoveryFailed(Registry register, RemoteDevice device, Exception exc) {}
-		
-		@Override
-		public void remoteDeviceAdded(Registry register, RemoteDevice device) {
-			Log.d("hue2", "Friendly name: " + device.getDetails().getFriendlyName());
-			Log.d("hue2", "Man: " + device.getDetails().getManufacturerDetails().getManufacturer());
-			Log.d("hue2", "Desc: " + device.getDetails().getModelDetails().getModelDescription());
-			Log.d("hue2", "Name: " + device.getDetails().getModelDetails().getModelName());
-		}
-		
-		@Override
-		public void remoteDeviceRemoved(Registry register, RemoteDevice device) {}
-		
-		@Override
-		public void remoteDeviceUpdated(Registry register, RemoteDevice device) {}
-
-		@Override
-		public void localDeviceAdded(Registry arg0, LocalDevice arg1) {}
-
-		@Override
-		public void localDeviceRemoved(Registry arg0, LocalDevice arg1) {}
-		
-		@Override
-		public void beforeShutdown(Registry arg0) {}
-
-		@Override
-		public void afterShutdown() {}
-	};
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -109,24 +53,52 @@ public class LinkActivity extends Activity {
 		});
 		
 		// TODO: upnp test
-		getApplicationContext().bindService(
-	            new Intent(this, AndroidUpnpServiceImpl.class),
-	            serviceConnection,
-	            Context.BIND_AUTO_CREATE
-	        );
+		new AsyncTask<Void , Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 10\nST: ssdp:all";
+					DatagramSocket upnpSender = new DatagramSocket();
+					upnpSender.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
+					
+					HashMap<String, Boolean> ipsDiscovered = new HashMap<String, Boolean>();
+					
+					while (true) {
+						byte[] responseBuffer = new byte[1024];
+						
+						DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+						upnpSender.receive(responsePacket);
+						
+						String ip = responsePacket.getAddress().getHostAddress();
+						String response = new String(responsePacket.getData());
+						
+						if (ipsDiscovered.containsKey(ip)) {
+							// See if response contains description location
+							Matcher m = Pattern.compile("LOCATION: (.*)", Pattern.CASE_INSENSITIVE).matcher(response);
+							if (m.find()) {
+								String description = Networker.get(m.group(1)).getBody().toLowerCase();
+								if (description.contains("<modeldescription>philips hue")) {
+									Log.d("hue2", "Found hue device at " + ip);
+								}
+							}
+							
+							// Ignore subsequent packets
+							ipsDiscovered.put(ip, true);
+						}
+					}
+				} catch (SocketException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				return null;
+			}
+		}.execute();	
 		
 		getBridgeIps();
 		// TODO handle rotates of the screen
 	}
-	
-	@Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (upnpService != null) {
-            upnpService.getRegistry().removeListener(registryListener);
-        }
-        getApplicationContext().unbindService(serviceConnection);
-    }
 	
 	private void getBridgeIps() {
 		setProgressBarIndeterminateVisibility(true); 
