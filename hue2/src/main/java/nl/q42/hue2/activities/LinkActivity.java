@@ -56,8 +56,8 @@ public class LinkActivity extends Activity {
 		new AsyncTask<Void , Void, Void>() {
 			@Override
 			protected Void doInBackground(Void... params) {
-				try {
-					String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 10\nST: ssdp:all";
+				try {					
+					String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 8\nST:SsdpSearch:all";
 					DatagramSocket upnpSender = new DatagramSocket();
 					upnpSender.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
 					
@@ -72,12 +72,12 @@ public class LinkActivity extends Activity {
 						String ip = responsePacket.getAddress().getHostAddress();
 						String response = new String(responsePacket.getData());
 						
-						if (ipsDiscovered.containsKey(ip)) {
+						if (!ipsDiscovered.containsKey(ip)) {
 							// See if response contains description location
 							Matcher m = Pattern.compile("LOCATION: (.*)", Pattern.CASE_INSENSITIVE).matcher(response);
 							if (m.find()) {
 								String description = Networker.get(m.group(1)).getBody().toLowerCase();
-								if (description.contains("<modeldescription>philips hue")) {
+								if (description.contains("<modelname>philips hue bridge")) {
 									Log.d("hue2", "Found hue device at " + ip);
 								}
 							}
