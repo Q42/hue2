@@ -7,8 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,9 +17,10 @@ import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.Networker;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -112,15 +111,27 @@ public class LinkActivity extends Activity {
 		}
 	}
 	
-	private class BridgeSearchTask extends AsyncTask<Void, Void, Void> {
+	private class BridgeSearchTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(Boolean result) {
 			bridgeSearchTask = null;
 			setSearchIndicator(false);
+			
+			if (!result) {
+				new AlertDialog.Builder(LinkActivity.this)
+					.setTitle(R.string.dialog_bridge_search_title)
+					.setMessage(R.string.dialog_bridge_search)
+					.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					}).create().show();
+			}
 		}
 		
 		@Override
-		protected Void doInBackground(Void... params) {			
+		protected Boolean doInBackground(Void... params) {			
 			// Search bridges on local network using UPnP
 			try {				
 				String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 8\nST:SsdpSearch:all";
@@ -170,13 +181,13 @@ public class LinkActivity extends Activity {
 			} catch (SocketTimeoutException e) {
 				// Gracefully stop
 			} catch (SocketException e) {
-				// TODO: Handle network errors
-				e.printStackTrace();
+				return false;
 			} catch (IOException e) {
+				// Not sure what would cause this to happen
 				e.printStackTrace();
 			}
 			
-			return null;
+			return true;
 		}
 	}
 }
