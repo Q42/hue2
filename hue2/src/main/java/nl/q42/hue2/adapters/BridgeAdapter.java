@@ -21,15 +21,17 @@ public class BridgeAdapter extends ArrayAdapter<Bridge> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		if (convertView == null) {
-			LayoutInflater inflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view = inflater.inflate(R.layout.link_bridge, parent, false);
 		}
 		
 		Bridge b = getItem(position);
 		
-		TextView textView = (TextView) view.findViewById(R.id.link_bridge_name);
-		textView.setText(b.getName());
+		((TextView) view.findViewById(R.id.link_bridge_name)).setText(b.getName());
+		
+		// Set description based on bridge connectivity
+		((TextView) view.findViewById(R.id.link_bridge_description)).setText("New bridge");
+		
 		return view;
 	}
 }

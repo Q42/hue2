@@ -2,10 +2,9 @@
 <resources>
     <string name="app_name">Hue2</string>
     
+    <string name="link_local">Local bridges</string>
+    
     <string name="entity_lamp">lamp</string>
     <string name="entity_on">ON</string>
     <string name="entity_off">OFF</string>
-    
-    <string name="link_status_looking">Looking for your bridge&#8230;</string>
-    <string name="link_status_select">Select your bridge:</string>
 </resources>

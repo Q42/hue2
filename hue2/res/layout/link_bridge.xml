@@ -1,14 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
-
-    <TextView
-        android:id="@+id/link_bridge_name"
+    android:layout_height="wrap_content">
+    
+    <ImageView
+        android:src="@drawable/lamps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_centerInParent="true" />
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="vertical">
+    	
+	    <TextView
+	        android:id="@+id/link_bridge_name"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="10dp"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginBottom="1dp"
+	        android:textSize="20sp" />
+	    
+	    <TextView
+	        android:id="@+id/link_bridge_description"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="10dp"
+	        android:textColor="#bebebe"
+	        android:textAppearance="?android:attr/textAppearanceSmall" />
+	    
+	    <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:layout_marginTop="10dp"
+	        android:background="#2f2f31" />
+    </LinearLayout>
+
+</RelativeLayout>
