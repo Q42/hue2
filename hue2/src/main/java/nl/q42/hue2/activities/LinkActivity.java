@@ -8,6 +8,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,11 +23,16 @@ import nl.q42.javahueapi.Networker;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -33,6 +40,7 @@ import android.widget.RelativeLayout;
 
 public class LinkActivity extends Activity {
 	private static final int SEARCH_TIMEOUT = 5000;
+	private static final int LINK_INTERVAL = 1000;
 	
 	private BridgeAdapter bridgesAdapter;
 	private ListView bridgesList;
@@ -41,6 +49,7 @@ public class LinkActivity extends Activity {
 	private ProgressBar loadingSpinner;
 	
 	private BridgeSearchTask bridgeSearchTask;
+	private Timer linkChecker;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,7 +59,6 @@ public class LinkActivity extends Activity {
 		bridgesList = (ListView) findViewById(R.id.link_bridges);
 		bridgesAdapter = new BridgeAdapter(this);
 		bridgesList.setAdapter(bridgesAdapter);
-		
 		bridgesList.setEmptyView(findViewById(R.id.link_empty));
 		
 		// Set up loading UI elements		
@@ -70,6 +78,20 @@ public class LinkActivity extends Activity {
 			}
 		});
 		
+		// Add connect event
+		bridgesList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+				Bridge b = bridgesAdapter.getItem(pos);
+				
+				if (b.hasAccess()) {
+					// TODO: Instant connection
+				} else {
+					showLinkDialog(b);					
+				}
+			}
+		});
+		
 		// Start searching for bridges and add them to the results
 		startSearching();
 	}
@@ -78,7 +100,9 @@ public class LinkActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		
+		// Stop any search or link operations
 		stopSearching();
+		linkChecker.cancel();
 	}
 	
 	private void stopSearching() {		
@@ -197,5 +221,63 @@ public class LinkActivity extends Activity {
 			
 			return true;
 		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	private void showLinkDialog(final Bridge b) {
+		stopSearching();
+		
+		// Tell user to press link button
+		final ProgressDialog pd = new ProgressDialog(LinkActivity.this);
+		pd.setTitle(b.getName());
+		pd.setMessage(getString(R.string.dialog_link));
+		pd.setCancelable(true);
+		pd.setIndeterminate(true);
+		pd.setButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});
+		pd.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				linkChecker.cancel();
+				linkChecker = null;
+			}
+		});
+		pd.show();
+		
+		// Periodically check if the button has been pressed yet
+		final String username = Util.getDeviceIdentifier(LinkActivity.this);
+		
+		linkChecker = new Timer();
+		linkChecker.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					boolean pressed = HueService.createUser(b.getIp(), "hue2", username);
+					
+					if (pressed) {
+						Log.d("hue2", "Device linked!");
+						
+						// User created!
+						// TODO: Connect and view light activity
+						bridgesList.post(new Runnable() {
+							@Override
+							public void run() {
+								pd.dismiss();
+								startSearching();
+							}
+						});
+						linkChecker.cancel();
+					}
+				} catch (ApiException e) {
+					// Ignore, it's because link button hasn't been pressed yet
+				} catch (IOException e) {
+					// TODO: Handle network errors
+				}
+			}
+		}, LINK_INTERVAL, LINK_INTERVAL);
 	}
 }
