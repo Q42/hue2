@@ -168,11 +168,12 @@ public class LinkActivity extends Activity {
 							if (modelName.toLowerCase(Locale.getDefault()).contains("philips hue bridge")) {
 								try {
 									final String bridgeName = HueService.getSimpleConfig(ip).name;
+									final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
 									
 									bridgesList.post(new Runnable() {
 										@Override
 										public void run() {
-											bridgesAdapter.add(new Bridge(ip, bridgeName));
+											bridgesAdapter.add(new Bridge(ip, bridgeName, access));
 										}
 									});
 								} catch (ApiException e) {

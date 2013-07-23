@@ -30,7 +30,7 @@ public class BridgeAdapter extends ArrayAdapter<Bridge> {
 		((TextView) view.findViewById(R.id.link_bridge_name)).setText(b.getName());
 		
 		// Set description based on bridge connectivity
-		((TextView) view.findViewById(R.id.link_bridge_description)).setText("New bridge");
+		((TextView) view.findViewById(R.id.link_bridge_description)).setText(b.hasAccess() ? "Ready to connect" : "New bridge");
 		
 		return view;
 	}

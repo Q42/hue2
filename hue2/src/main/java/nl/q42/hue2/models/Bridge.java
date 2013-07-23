@@ -8,12 +8,23 @@ public class Bridge {
 	private String user;
 	private long lastUsed;
 	private String ip;
+	private boolean access;
 	
 	public Bridge() {}
 	
 	public Bridge(String ip, String name) {
 		this.ip = ip;
 		this.name = name;
+	}
+	
+	public Bridge(String ip, String name, boolean access) {
+		this.ip = ip;
+		this.name = name;
+		this.access = access;
+	}
+	
+	public boolean hasAccess() {
+		return access;
 	}
 	
 	public void setId(long id) {
