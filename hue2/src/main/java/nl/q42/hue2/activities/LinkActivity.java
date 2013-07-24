@@ -93,6 +93,9 @@ public class LinkActivity extends Activity {
 		
 		// Start searching for bridges and add them to the results
 		startSearching();
+		
+		// TODO: debugging code
+		bridgesAdapter.add(new Bridge("192.168.1.101", "aapje", true));
 	}
 	
 	@Override
@@ -162,16 +165,26 @@ public class LinkActivity extends Activity {
 			try {				
 				String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 8\nST:SsdpSearch:all";
 				DatagramSocket upnpSock = new DatagramSocket();
-				upnpSock.setSoTimeout(SEARCH_TIMEOUT);
+				upnpSock.setSoTimeout(100);
 				upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
 				
 				HashMap<String, Boolean> ipsDiscovered = new HashMap<String, Boolean>();
+				long start = System.currentTimeMillis();
 				
 				while (true) {
 					byte[] responseBuffer = new byte[1024];
 					
 					DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
-					upnpSock.receive(responsePacket);
+					
+					try {
+						upnpSock.receive(responsePacket);
+					} catch (SocketTimeoutException e) {
+						if (System.currentTimeMillis() - start > SEARCH_TIMEOUT || isCancelled()) {
+							break;
+						} else {
+							continue;
+						}
+					}
 					
 					final String ip = responsePacket.getAddress().getHostAddress();
 					final String response = new String(responsePacket.getData());
@@ -207,8 +220,6 @@ public class LinkActivity extends Activity {
 						ipsDiscovered.put(ip, true);
 					}
 				}
-			} catch (SocketTimeoutException e) {
-				// Gracefully stop
 			} catch (SocketException e) {
 				return false;
 			} catch (IOException e) {
