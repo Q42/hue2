@@ -28,7 +28,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -258,18 +257,10 @@ public class LinkActivity extends Activity {
 				try {
 					boolean pressed = HueService.createUser(b.getIp(), "hue2", username);
 					
-					if (pressed) {
-						Log.d("hue2", "Device linked!");
-						
+					if (pressed) {						
 						// User created!
 						// TODO: Connect and view light activity
-						bridgesList.post(new Runnable() {
-							@Override
-							public void run() {
-								pd.dismiss();
-								startSearching();
-							}
-						});
+						pd.dismiss();
 						linkChecker.cancel();
 					}
 				} catch (ApiException e) {
