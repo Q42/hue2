@@ -35,11 +35,7 @@
         </activity>
         
         <!-- Main light control activity -->
-        <activity android:name=".activities.MainActivity"></activity>
-        
-        <!-- Service listening for Upnp devices -->
-        <service android:name="org.teleal.cling.android.AndroidUpnpServiceImpl"/>
-        
+        <activity android:name=".activities.MainActivity"></activity>        
     </application>
 
 </manifest>

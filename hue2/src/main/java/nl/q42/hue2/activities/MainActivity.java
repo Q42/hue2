@@ -8,8 +8,10 @@ import nl.q42.hue2.R;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -30,6 +32,8 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
 		datasource = new BridgesDataSource(this);
 	    datasource.open();
 
@@ -46,6 +50,18 @@ public class MainActivity extends Activity {
 				getLights();
 			}
 	    //}
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == android.R.id.home) {
+			Intent searchIntent = new Intent(this, LinkActivity.class);
+			searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(searchIntent);
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
+		}
 	}
 	
 	private void createViews() {

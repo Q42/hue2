@@ -25,9 +25,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -48,7 +48,7 @@ public class LinkActivity extends Activity {
 	private ProgressBar loadingSpinner;
 	
 	private BridgeSearchTask bridgeSearchTask;
-	private Timer linkChecker;
+	private Timer linkChecker = new Timer();
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -84,7 +84,7 @@ public class LinkActivity extends Activity {
 				Bridge b = bridgesAdapter.getItem(pos);
 				
 				if (b.hasAccess()) {
-					// TODO: Instant connection
+					connectToBridge(b);
 				} else {
 					showLinkDialog(b);					
 				}
@@ -93,17 +93,21 @@ public class LinkActivity extends Activity {
 		
 		// Start searching for bridges and add them to the results
 		startSearching();
-		
-		Log.w("hue2", "UUID = " + Util.getDeviceIdentifier(this));
 	}
 	
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onPause() {
+		super.onPause();
 		
 		// Stop any search or link operations
 		stopSearching();
 		linkChecker.cancel();
+	}
+	
+	private void connectToBridge(Bridge b) {
+		Intent connectIntent = new Intent(LinkActivity.this, MainActivity.class);
+		connectIntent.putExtra("ip", b.getIp());
+		startActivity(connectIntent);
 	}
 	
 	private void stopSearching() {		
@@ -253,9 +257,9 @@ public class LinkActivity extends Activity {
 					
 					if (pressed) {						
 						// User created!
-						// TODO: Connect and view light activity
 						pd.dismiss();
 						linkChecker.cancel();
+						connectToBridge(b);
 					}
 				} catch (ApiException e) {
 					// Ignore, it's because link button hasn't been pressed yet
