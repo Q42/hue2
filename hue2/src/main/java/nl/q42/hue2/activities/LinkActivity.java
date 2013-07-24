@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -37,7 +38,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 public class LinkActivity extends Activity {
-	private static final int SEARCH_TIMEOUT = 5000;
+	private static final int SEARCH_TIMEOUT = 30000;
 	private static final int LINK_INTERVAL = 1000;
 	
 	private BridgeAdapter bridgesAdapter;
@@ -92,6 +93,8 @@ public class LinkActivity extends Activity {
 		
 		// Start searching for bridges and add them to the results
 		startSearching();
+		
+		Log.w("hue2", "UUID = " + Util.getDeviceIdentifier(this));
 	}
 	
 	@Override

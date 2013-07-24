@@ -1,12 +1,14 @@
 package nl.q42.hue2;
 
+import java.security.SecureRandom;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.provider.Settings;
+import android.content.SharedPreferences;
 
 public class Util {
 	public static String quickMatch(String pattern, String target) {
@@ -18,9 +20,29 @@ public class Util {
 		}
 	}
 	
+	/**
+	 * Returns unique app installation identifier, used to identify this device
+	 */
 	public static String getDeviceIdentifier(Context ctx) {
-		// TODO: This may return null, so add a fallback like generating a random key and storing it
-		return Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.ANDROID_ID);
+		SharedPreferences prefs = ctx.getApplicationContext().getSharedPreferences("app_prefs", 0);
+		
+		if (prefs.contains("uuid")) {
+			return prefs.getString("uuid", null);
+		} else {
+			String uuid = generateUUID();
+			
+			SharedPreferences.Editor ed = prefs.edit();
+			ed.putString("uuid", uuid);
+			ed.commit();
+			
+			return uuid;
+		}
+	}
+	
+	private static String generateUUID() {
+		SecureRandom rand = new SecureRandom();
+		UUID uuid = new UUID(rand.nextLong(), rand.nextLong());
+		return uuid.toString();
 	}
 	
 	public static void showErrorDialog(Context ctx, int title, int message) {
