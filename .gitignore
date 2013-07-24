@@ -1,8 +1,8 @@
 # Binaries
-hue2/bin
-hue2/gen
-hue2/target
+*/bin
+*/gen
+*/target
 
 # Local files
-hue2/.classpath
-hue2/.settings/
+*/.classpath
+*/.settings/
