@@ -32,6 +32,8 @@ public class LightsActivity extends Activity {
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
 	
+	private boolean switchingAll = false; // TODO: Remove monkey patching
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,10 +79,11 @@ public class LightsActivity extends Activity {
 						if (result) {
 							ViewGroup lightViews = (ViewGroup) findViewById(R.id.lights_list);
 							
-							// TODO: This sends requests for EVERY light, replace this with state updating code
+							switchingAll = true;
 							for (int i = 0; i < lightViews.getChildCount(); i++) {
 								((Switch) lightViews.getChildAt(i).findViewById(R.id.lights_light_switch)).setChecked(checked);
 							}
+							switchingAll = false;
 						} else {
 							// Revert switch
 							switchAll.setChecked(!checked);
@@ -134,7 +137,7 @@ public class LightsActivity extends Activity {
 			final float[] components = new float[] {
 				(float) light.state.hue / (float) 65535.0f * 360.0f,
 				(float) light.state.sat / 255.0f,
-				(float) light.state.bri / 255.0f
+				255.0f // Ignore brightness for more clear color view, hue is most important anyway
 			};
 			int color = Color.HSVToColor(components);
 			
@@ -154,6 +157,11 @@ public class LightsActivity extends Activity {
 			switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 				@Override
 				public void onCheckedChanged(CompoundButton view, final boolean checked) {
+					if (switchingAll) {
+						colorView.setBackgroundColor(checked ? Color.HSVToColor(components) : Color.BLACK);
+						return;
+					}
+					
 					new AsyncTask<Void, Void, Boolean>() {
 						@Override
 						protected void onPreExecute() {
