@@ -35,7 +35,7 @@
         </activity>
         
         <!-- Main light control activity -->
-        <activity android:name=".activities.MainActivity"></activity>        
+        <activity android:name=".activities.LightsActivity"></activity>        
     </application>
 
 </manifest>

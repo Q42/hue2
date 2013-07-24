@@ -25,10 +25,9 @@ public class HueService {
 	
 	private static Gson gson = new Gson();
 	
-	public HueService() {
-		// TODO Hardcoded defaults for now:
-		bridgeIp = "192.168.1.101";
-		username = "aValidUser";
+	public HueService(String ip, String username) {
+		this.bridgeIp = ip;
+		this.username = username;
 	}
 	
 	public static List<String> getBridgeIps() throws IOException, ApiException {

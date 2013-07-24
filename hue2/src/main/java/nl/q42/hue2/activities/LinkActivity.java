@@ -62,14 +62,14 @@ public class LinkActivity extends Activity {
 		
 		// Set up loading UI elements		
 		ActionBar ab = getActionBar();
-		ab.setCustomView(R.layout.link_loader);
+		ab.setCustomView(R.layout.loader);
 		ab.setDisplayShowCustomEnabled(true);
 		
 		RelativeLayout loadingLayout = (RelativeLayout) ab.getCustomView();
 
-		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.link_loading_spinner);
+		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.loader_spinner);
 		
-		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.link_refresh_button);
+		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
 		refreshButton.setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
@@ -92,10 +92,12 @@ public class LinkActivity extends Activity {
 		});
 		
 		// Start searching for bridges and add them to the results
+		// TODO: Save instance state (also continue search operations)
+		// TODO: Connect to last connected bridge if available (verify MAC address too)
 		startSearching();
 		
 		// TODO: debugging code
-		bridgesAdapter.add(new Bridge("192.168.1.101", "aapje", true));
+		bridgesAdapter.add(new Bridge("192.168.1.101", "aapje [HARDCODE]", true));
 	}
 	
 	@Override
@@ -108,8 +110,8 @@ public class LinkActivity extends Activity {
 	}
 	
 	private void connectToBridge(Bridge b) {
-		Intent connectIntent = new Intent(LinkActivity.this, MainActivity.class);
-		connectIntent.putExtra("ip", b.getIp());
+		Intent connectIntent = new Intent(LinkActivity.this, LightsActivity.class);
+		connectIntent.putExtra("bridge", b);
 		startActivity(connectIntent);
 	}
 	

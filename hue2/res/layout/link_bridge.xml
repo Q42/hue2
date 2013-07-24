@@ -7,12 +7,12 @@
     android:paddingRight="15dp">
     
     <ImageView
-        android:src="@drawable/lamps"
+        android:src="@drawable/lights"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginRight="10dp"
-        android:layout_centerInParent="true" />
+        android:layout_centerVertical="true" />
 
     <LinearLayout
         android:layout_width="match_parent"

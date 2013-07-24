@@ -1,7 +1,10 @@
 package nl.q42.hue2.models;
 
-public class Bridge {
+import java.io.Serializable;
 
+@SuppressWarnings("serial")
+public class Bridge implements Serializable {
+	
 	private long id;
 	private String name;
 	private String fullConfig;
@@ -15,6 +18,7 @@ public class Bridge {
 	public Bridge(String ip, String name) {
 		this.ip = ip;
 		this.name = name;
+		this.access = true;
 	}
 	
 	public Bridge(String ip, String name, boolean access) {
