@@ -50,6 +50,23 @@ public class LightsActivity extends Activity {
 		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.loader_spinner);
 		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
 		
+		setEventHandlers();
+		
+		// Set up from bridge info
+		// TODO: Save instance state
+		bridge = (Bridge) getIntent().getSerializableExtra("bridge");
+		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
+		
+		// Save bridge to reconnect later
+		Util.setLastBridge(this, bridge);
+		
+		setTitle(bridge.getName());
+		
+		// Loading lights
+		getLights();
+	}
+	
+	private void setEventHandlers() {
 		// All lights pseudo group
 		final Switch switchAll = (Switch) findViewById(R.id.lights_all_switch);
 		switchAll.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -92,16 +109,6 @@ public class LightsActivity extends Activity {
 				}.execute();
 			}
 		});
-		
-		// Set up from bridge info
-		// TODO: Save instance state
-		bridge = (Bridge) getIntent().getSerializableExtra("bridge");
-		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
-		
-		setTitle(bridge.getName());
-		
-		// Loading lights
-		getLights();
 	}
 	
 	private void getLights() {
