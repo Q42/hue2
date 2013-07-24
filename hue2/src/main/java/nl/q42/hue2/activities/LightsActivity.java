@@ -10,16 +10,16 @@ import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 public class LightsActivity extends Activity {
@@ -62,7 +62,8 @@ public class LightsActivity extends Activity {
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					lights = service.getLights();
+					// getLights() returns no state info
+					lights = service.getFullConfig().lights;
 				} catch (Exception e) {
 					// TODO: Handle network errors
 				}
@@ -82,9 +83,26 @@ public class LightsActivity extends Activity {
 		
 		for (final String id : lights.keySet()) {
 			lastView = getLayoutInflater().inflate(R.layout.lights_light, container, false);
+			
 			Light light = lights.get(id);
 			
+			// Convert HSV color to RGB
+			float[] components = new float[] {
+				(float) light.state.hue / (float) 65535.0f * 360.0f,
+				(float) light.state.sat / 255.0f,
+				(float) light.state.bri / 255.0f
+			};
+			int color = Color.HSVToColor(components);
+			
+			// If a light is off, display the color as black (state seems to be unreliable then anyway)
+			if (!light.state.on) {
+				color = 0;
+			}
+			
+			// Display info in UI
+			lastView.findViewById(R.id.lights_light_color).setBackgroundColor(color);
 			((TextView) lastView.findViewById(R.id.lights_light_name)).setText(light.name);
+			((Switch) lastView.findViewById(R.id.lights_light_switch)).setChecked(light.state.on);
 			
 			container.addView(lastView);
 		}
