@@ -6,7 +6,6 @@ import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
-import nl.q42.javahueapi.HueService.ApiException;
 import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -28,7 +27,7 @@ import android.widget.TextView;
 public class LightsActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
-	private Map<String, Light> lights;
+	private Map<String, Light> lights; // TODO: Update this state instead of manipulating switches directly
 	
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
@@ -48,6 +47,48 @@ public class LightsActivity extends Activity {
 
 		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.loader_spinner);
 		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
+		
+		// All lights pseudo group
+		final Switch switchAll = (Switch) findViewById(R.id.lights_all_switch);
+		switchAll.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton view, final boolean checked) {
+				new AsyncTask<Void, Void, Boolean>() {
+					@Override
+					protected void onPreExecute() {
+						switchAll.setEnabled(false);
+					}
+					
+					@Override
+					protected Boolean doInBackground(Void... params) {
+						try {
+							service.turnAllOn(checked);
+							return true;
+						} catch (Exception e) {
+							// TODO: Handle network error
+							return false;
+						}
+					}
+					
+					@Override
+					protected void onPostExecute(Boolean result) {
+						switchAll.setEnabled(true);
+						
+						if (result) {
+							ViewGroup lightViews = (ViewGroup) findViewById(R.id.lights_list);
+							
+							// TODO: This sends requests for EVERY light, replace this with state updating code
+							for (int i = 0; i < lightViews.getChildCount(); i++) {
+								((Switch) lightViews.getChildAt(i).findViewById(R.id.lights_light_switch)).setChecked(checked);
+							}
+						} else {
+							// Revert switch
+							switchAll.setChecked(!checked);
+						}
+					}
+				}.execute();
+			}
+		});
 		
 		// Set up from bridge info
 		// TODO: Save instance state
@@ -134,13 +175,16 @@ public class LightsActivity extends Activity {
 						protected void onPostExecute(Boolean result) {
 							switchView.setEnabled(true);
 							
-							if (!result) return;
-							
-							if (checked) {
-								// TODO: Refresh color?
-								colorView.setBackgroundColor(Color.HSVToColor(components));
+							if (result) {
+								if (checked) {
+									// TODO: Refresh color?
+									colorView.setBackgroundColor(Color.HSVToColor(components));
+								} else {
+									colorView.setBackgroundColor(Color.BLACK);
+								}
 							} else {
-								colorView.setBackgroundColor(Color.BLACK);
+								// Revert switch
+								switchView.setChecked(!checked);
 							}
 						}
 					}.execute();
