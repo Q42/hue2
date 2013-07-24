@@ -14,10 +14,8 @@ import nl.q42.javahueapi.models.Light;
 import nl.q42.javahueapi.models.NupnpEntry;
 import nl.q42.javahueapi.models.SimpleConfig;
 import nl.q42.javahueapi.models.UserCreateRequest;
-import nl.q42.javahueapi.models.UserSuccess;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 public class HueService {
@@ -65,7 +63,7 @@ public class HueService {
 	public static boolean userExists(String ip, String username) throws IOException {
 		if (username.length() < 10) return false;
 		
-		Result result = Networker.get("http://" + ip + "/api/" + URLEncoder.encode(username));
+		Result result = Networker.get("http://" + ip + "/api/" + URLEncoder.encode(username, "utf-8"));
 		
 		if (result.getResponseCode() == 200) {
 			try {

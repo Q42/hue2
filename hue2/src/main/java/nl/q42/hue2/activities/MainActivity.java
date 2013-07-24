@@ -1,16 +1,13 @@
 package nl.q42.hue2.activities;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 import nl.q42.hue2.BridgesDataSource;
 import nl.q42.hue2.R;
-import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;

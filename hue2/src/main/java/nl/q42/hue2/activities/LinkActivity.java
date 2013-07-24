@@ -22,7 +22,6 @@ import nl.q42.javahueapi.HueService.ApiException;
 import nl.q42.javahueapi.Networker;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -146,15 +145,7 @@ public class LinkActivity extends Activity {
 			setSearchIndicator(false);
 			
 			if (!result) {
-				new AlertDialog.Builder(LinkActivity.this)
-					.setTitle(R.string.dialog_bridge_search_title)
-					.setMessage(R.string.dialog_bridge_search)
-					.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					}).create().show();
+				Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_search_title, R.string.dialog_bridge_search);
 			}
 		}
 		
@@ -266,7 +257,7 @@ public class LinkActivity extends Activity {
 				} catch (ApiException e) {
 					// Ignore, it's because link button hasn't been pressed yet
 				} catch (IOException e) {
-					// TODO: Handle network errors
+					Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_lost_title, R.string.dialog_bridge_lost);
 				}
 			}
 		}, LINK_INTERVAL, LINK_INTERVAL);
