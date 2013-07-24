@@ -6,6 +6,7 @@ import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
+import nl.q42.javahueapi.HueService.ApiException;
 import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -16,6 +17,8 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -87,7 +90,7 @@ public class LightsActivity extends Activity {
 			Light light = lights.get(id);
 			
 			// Convert HSV color to RGB
-			float[] components = new float[] {
+			final float[] components = new float[] {
 				(float) light.state.hue / (float) 65535.0f * 360.0f,
 				(float) light.state.sat / 255.0f,
 				(float) light.state.bri / 255.0f
@@ -99,10 +102,50 @@ public class LightsActivity extends Activity {
 				color = 0;
 			}
 			
-			// Display info in UI
-			lastView.findViewById(R.id.lights_light_color).setBackgroundColor(color);
+			// Set up UI
 			((TextView) lastView.findViewById(R.id.lights_light_name)).setText(light.name);
-			((Switch) lastView.findViewById(R.id.lights_light_switch)).setChecked(light.state.on);
+			
+			final View colorView = lastView.findViewById(R.id.lights_light_color);
+			colorView.setBackgroundColor(color);
+			
+			final Switch switchView = (Switch) lastView.findViewById(R.id.lights_light_switch);
+			switchView.setChecked(light.state.on);
+			switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				@Override
+				public void onCheckedChanged(CompoundButton view, final boolean checked) {
+					new AsyncTask<Void, Void, Boolean>() {
+						@Override
+						protected void onPreExecute() {
+							switchView.setEnabled(false);
+						}
+						
+						@Override
+						protected Boolean doInBackground(Void... params) {
+							try {
+								service.turnLightOn(id, checked);
+								return true;
+							} catch (Exception e) {
+								// TODO: Handle network error
+								return false;
+							}
+						}
+						
+						@Override
+						protected void onPostExecute(Boolean result) {
+							switchView.setEnabled(true);
+							
+							if (!result) return;
+							
+							if (checked) {
+								// TODO: Refresh color?
+								colorView.setBackgroundColor(Color.HSVToColor(components));
+							} else {
+								colorView.setBackgroundColor(Color.BLACK);
+							}
+						}
+					}.execute();
+				}
+			});
 			
 			container.addView(lastView);
 		}
