@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -20,6 +19,7 @@ import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.HueService.ApiException;
 import nl.q42.javahueapi.Networker;
+import nl.q42.javahueapi.Networker.Result;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -28,7 +28,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -92,13 +91,19 @@ public class LinkActivity extends Activity {
 			}
 		});
 		
-		// Start searching for bridges and add them to the results
-		// TODO: Save instance state (also continue search operations)
-		// TODO: Connect to last connected bridge if available (verify MAC address too)
-		startSearching();
+		Bridge lastBridge = Util.getLastBridge(this);
+		if (lastBridge != null) {
+			// This will be set again after a successful connection, connection failure leaves the last bridge null
+			Util.setLastBridge(this, null);
+			
+			// Try connecting to last bridge
+			connectToLastBridge(lastBridge);
+		} else {
+			// Start searching for bridges and add them to the results
+			startSearching();
+		}
 		
-		// TODO: debugging code
-		bridgesAdapter.add(new Bridge("192.168.1.101", "aapje [HARDCODE]", true));
+		// TODO: Save instance state (also continue search operations)
 	}
 	
 	@Override
@@ -108,6 +113,30 @@ public class LinkActivity extends Activity {
 		// Stop any search or link operations
 		stopSearching();
 		linkChecker.cancel();
+	}
+	
+	// Performs checks to make sure the last bridge is available
+	private void connectToLastBridge(final Bridge b) {		
+		new AsyncTask<Void, Void, Void>() {			
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					Result res = Networker.get("http://" + b.getIp() + "/description.xml");
+					
+					if (res.getResponseCode() == 200 && res.getBody().toLowerCase().contains("philips hue bridge")) {
+						// Make sure that the device on this IP is actually the same bridge device
+						String serial = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", res.getBody());
+						if (serial.equals(b.getSerial())) {
+							connectToBridge(b);
+						}
+					}
+				} catch (IOException e) {
+					// Last bridge unavailable, ignore
+				}
+				
+				return null;
+			}
+		}.execute();
 	}
 	
 	private void connectToBridge(Bridge b) {
@@ -202,15 +231,16 @@ public class LinkActivity extends Activity {
 							final String modelName = Util.quickMatch("<modelName>(.*?)</modelName>", description);
 															
 							// Check from description if we're dealing with a hue bridge or some other device
-							if (modelName.toLowerCase(Locale.getDefault()).contains("philips hue bridge")) {
+							if (modelName.toLowerCase().contains("philips hue bridge")) {
 								try {
-									final String bridgeName = HueService.getSimpleConfig(ip).name;
+									final String name = HueService.getSimpleConfig(ip).name;
 									final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
+									final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
 									
 									bridgesList.post(new Runnable() {
 										@Override
 										public void run() {
-											bridgesAdapter.add(new Bridge(ip, bridgeName, access));
+											bridgesAdapter.add(new Bridge(ip, mac, name, access));
 										}
 									});
 								} catch (ApiException e) {

@@ -11,24 +11,31 @@ public class Bridge implements Serializable {
 	private String user;
 	private long lastUsed;
 	private String ip;
+	private String serial;
 	private boolean access;
 	
 	public Bridge() {}
 	
-	public Bridge(String ip, String name) {
+	public Bridge(String ip, String serial, String name) {
 		this.ip = ip;
+		this.serial = serial;
 		this.name = name;
 		this.access = true;
 	}
 	
-	public Bridge(String ip, String name, boolean access) {
+	public Bridge(String ip, String serial, String name, boolean access) {
 		this.ip = ip;
+		this.serial = serial;
 		this.name = name;
 		this.access = access;
 	}
 	
 	public boolean hasAccess() {
 		return access;
+	}
+	
+	public String getSerial() {
+		return serial;
 	}
 	
 	public void setId(long id) {

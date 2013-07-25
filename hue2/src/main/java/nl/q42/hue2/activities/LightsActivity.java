@@ -217,6 +217,8 @@ public class LightsActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
+			Util.setLastBridge(this, null);
+			
 			Intent searchIntent = new Intent(this, LinkActivity.class);
 			searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(searchIntent);

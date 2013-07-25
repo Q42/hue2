@@ -47,6 +47,13 @@ public class Util {
 	}
 	
 	public static void setLastBridge(Context ctx, Bridge b) {
+		if (b == null) {
+			SharedPreferences.Editor prefs = ctx.getApplicationContext().getSharedPreferences("app_prefs", 0).edit();
+			prefs.remove("lastBridge");
+			prefs.commit();
+			return;
+		}
+		
 		// Serialize bridge object and store it
 		try {
 			ByteArrayOutputStream binStr = new ByteArrayOutputStream();

@@ -11,17 +11,13 @@
     <string name="lights_lights">Lights</string>
     <string name="lights_all">All lights</string>
     
-    <string name="entity_lamp">lamp</string>
-    <string name="entity_on">ON</string>
-    <string name="entity_off">OFF</string>
-    
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
     <string name="dialog_bridge_search">Unable to search for bridges, because there is no active network connection.</string>
     
     <string name="dialog_bridge_lost_title">Link failed</string>
     <string name="dialog_bridge_lost">The connection to the bridge was lost. Please make sure you have an active network connection and try again.</string>
-    
+        
     <string name="dialog_link">Press the link button on the bridge to connect.</string>
     
     <string name="dialog_ok">OK</string>
