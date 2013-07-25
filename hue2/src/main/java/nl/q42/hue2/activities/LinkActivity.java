@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import nl.q42.hue.dialogs.BridgeInfoDialog;
 import nl.q42.hue.dialogs.BridgeLinkDialog;
+import nl.q42.hue.dialogs.ErrorDialog;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.adapters.BridgeAdapter;
@@ -245,7 +246,8 @@ public class LinkActivity extends Activity {
 			setSearchIndicator(false);
 			
 			if (!result) {
-				Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_search_title, R.string.dialog_network_error);
+				ErrorDialog dialog = ErrorDialog.newInstance(R.string.dialog_bridge_search_title, R.string.dialog_network_error);
+				dialog.show(getFragmentManager(), "dialog_error");
 			}
 		}
 		
@@ -359,7 +361,8 @@ public class LinkActivity extends Activity {
 					bridgesList.post(new Runnable() {
 						@Override
 						public void run() {
-							Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_lost_title, R.string.dialog_network_error);
+							ErrorDialog dialog = ErrorDialog.newInstance(R.string.dialog_bridge_lost_title, R.string.dialog_network_error);
+							dialog.show(getFragmentManager(), "dialog_error");
 						}
 					});
 				}

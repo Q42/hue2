@@ -2,9 +2,10 @@ package nl.q42.hue2.activities;
 
 import java.util.Map;
 
+import nl.q42.hue.dialogs.ErrorDialog;
+import nl.q42.hue.dialogs.ErrorDialog.ErrorDialogCallback;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
-import nl.q42.hue2.Util.ErrorDialogCallback;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
@@ -141,7 +142,7 @@ public class LightsActivity extends Activity {
 					resultContainer.setVisibility(View.VISIBLE);
 				} else {
 					// Being able to retrieve the light list is critical, so if this fails we go back to the bridge selection activity
-					Util.showErrorDialog(LightsActivity.this, R.string.dialog_connection_title, R.string.dialog_network_error, new ErrorDialogCallback() {
+					ErrorDialog dialog = ErrorDialog.newInstance(R.string.dialog_connection_title, R.string.dialog_network_error, new ErrorDialogCallback() {
 						@Override
 						public void onClose() {
 							Util.setLastBridge(LightsActivity.this, null);
@@ -151,6 +152,7 @@ public class LightsActivity extends Activity {
 							startActivity(searchIntent);
 						}
 					});
+					dialog.show(getFragmentManager(), "dialog_error");
 				}
 			}
 		}.execute();
