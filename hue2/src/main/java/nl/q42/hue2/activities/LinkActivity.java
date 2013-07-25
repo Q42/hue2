@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.q42.hue.dialogs.BridgeInfoDialog;
+import nl.q42.hue.dialogs.BridgeLinkDialog;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.adapters.BridgeAdapter;
@@ -25,9 +26,6 @@ import nl.q42.javahueapi.Networker.Result;
 import nl.q42.javahueapi.models.SimpleConfig;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -165,7 +163,7 @@ public class LinkActivity extends Activity {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id) {
 				Bridge b = bridgesAdapter.getItem(pos);
 				BridgeInfoDialog dialog = BridgeInfoDialog.newInstance(b);
-				dialog.show(getFragmentManager(), "info_dialog");
+				dialog.show(getFragmentManager(), "dialog_info");
 				
 				return true;
 			}
@@ -247,7 +245,7 @@ public class LinkActivity extends Activity {
 			setSearchIndicator(false);
 			
 			if (!result) {
-				Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_search_title, R.string.dialog_bridge_search);
+				Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_search_title, R.string.dialog_network_error);
 			}
 		}
 		
@@ -332,33 +330,12 @@ public class LinkActivity extends Activity {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
-	public void showLinkDialog(final Bridge b) {
-		stopSearching();
-		
-		// Tell user to press link button
-		final ProgressDialog pd = new ProgressDialog(LinkActivity.this);
-		pd.setTitle(b.getName());
-		pd.setMessage(getString(R.string.dialog_link));
-		pd.setCancelable(true);
-		pd.setIndeterminate(true);
-		pd.setButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();
-			}
-		});
-		pd.setOnCancelListener(new OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				linkChecker.cancel();
-				linkChecker = null;
-			}
-		});
-		pd.show();
-		
-		// Periodically check if the button has been pressed yet
-		final String username = Util.getDeviceIdentifier(LinkActivity.this);
+	public void stopLinkChecker() {
+		linkChecker.cancel();
+	}
+	
+	public void startLinkChecker(final Bridge b, final BridgeLinkDialog dialog) {
+		final String username = Util.getDeviceIdentifier(this);
 		
 		linkChecker = new Timer();
 		linkChecker.scheduleAtFixedRate(new TimerTask() {
@@ -369,16 +346,31 @@ public class LinkActivity extends Activity {
 					
 					if (pressed) {						
 						// User created!
-						pd.dismiss();
+						dialog.dismiss();
 						linkChecker.cancel();
 						connectToBridge(b);
 					}
 				} catch (ApiException e) {
 					// Ignore, it's because link button hasn't been pressed yet
 				} catch (IOException e) {
-					Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_lost_title, R.string.dialog_bridge_lost);
+					dialog.dismiss();
+					linkChecker.cancel();
+					
+					bridgesList.post(new Runnable() {
+						@Override
+						public void run() {
+							Util.showErrorDialog(LinkActivity.this, R.string.dialog_bridge_lost_title, R.string.dialog_network_error);
+						}
+					});
 				}
 			}
-		}, LINK_INTERVAL, LINK_INTERVAL);
+		}, 0, LINK_INTERVAL);
+	}
+	
+	public void showLinkDialog(Bridge b) {
+		stopSearching();
+		
+		BridgeLinkDialog dialog = BridgeLinkDialog.newInstance(b);
+		dialog.show(getFragmentManager(), "dialog_link");
 	}
 }

@@ -109,14 +109,22 @@ public class Util {
 		}
 	
 	public static void showErrorDialog(Context ctx, int title, int message) {
+		showErrorDialog(ctx, title, message, null);
+	}
+	
+	public static void showErrorDialog(Context ctx, int title, int message, final ErrorDialogCallback callback) {
 		new AlertDialog.Builder(ctx)
 			.setTitle(title)
 			.setMessage(message)
 			.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
+					if (callback != null) callback.onClose();
 				}
 			}).create().show();
+	}
+	
+	public interface ErrorDialogCallback {
+		public void onClose();
 	}
 }

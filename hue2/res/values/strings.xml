@@ -13,17 +13,20 @@
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
-    <string name="dialog_bridge_search">Unable to search for bridges, because there is no active network connection.</string>
     
     <string name="dialog_bridge_lost_title">Link failed</string>
-    <string name="dialog_bridge_lost">The connection to the bridge was lost. Please make sure you have an active network connection and try again.</string>
-        
+    
     <string name="dialog_link">Press the link button on the bridge to connect.</string>
+    
+    <string name="dialog_connection_title">Connection failed</string>
     
     <string name="dialog_bridge_ip">IP address</string>
     <string name="dialog_bridge_mac">MAC address</string>
     <string name="dialog_bridge_software">Software version</string>
     <string name="dialog_bridge_connect">Connect</string>
+    
+    <string name="dialog_network_error_title">Network error</string>
+    <string name="dialog_network_error">Make sure you have an active network connection and try again.</string>
     
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>

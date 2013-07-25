@@ -4,6 +4,7 @@ import java.util.Map;
 
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
+import nl.q42.hue2.Util.ErrorDialogCallback;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
@@ -116,27 +117,41 @@ public class LightsActivity extends Activity {
 	}
 	
 	private void getLights() {
-		new AsyncTask<Void, Void, Void>() {
+		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected void onPreExecute() {
 				resultContainer.setVisibility(View.INVISIBLE);
 			}
 			
 			@Override
-			protected Void doInBackground(Void... params) {
+			protected Boolean doInBackground(Void... params) {
 				try {
 					// getLights() returns no state info
 					lights = service.getFullConfig().lights;
+					return true;
 				} catch (Exception e) {
-					// TODO: Handle network errors
+					return false;
 				}
-				return null;
 			}
 
 			@Override
-			protected void onPostExecute(Void params) {
-				populateList();
-				resultContainer.setVisibility(View.VISIBLE);
+			protected void onPostExecute(Boolean success) {
+				if (success) {
+					populateList();
+					resultContainer.setVisibility(View.VISIBLE);
+				} else {
+					// Being able to retrieve the light list is critical, so if this fails we go back to the bridge selection activity
+					Util.showErrorDialog(LightsActivity.this, R.string.dialog_connection_title, R.string.dialog_network_error, new ErrorDialogCallback() {
+						@Override
+						public void onClose() {
+							Util.setLastBridge(LightsActivity.this, null);
+							
+							Intent searchIntent = new Intent(LightsActivity.this, LinkActivity.class);
+							searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+							startActivity(searchIntent);
+						}
+					});
+				}
 			}
 		}.execute();
 	}
