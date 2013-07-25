@@ -1,6 +1,9 @@
 package nl.q42.hue2.activities;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import nl.q42.hue.dialogs.ErrorDialog;
 import nl.q42.hue.dialogs.ErrorDialog.ErrorDialogCallback;
@@ -18,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -27,12 +31,22 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+// TODO: State system
+// 1. User clicks switch
+// 2. UI is disabled
+// 3. Request is sent
+// 4a. If successful, the state is updated and the UI is updated and enabled
+// 4b. If failed, show network error and re-enable UI
+
 public class LightsActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
-	private Map<String, Light> lights; // TODO: Update this state instead of manipulating switches directly
+	
+	private Map<String, Light> lights = new HashMap<String, Light>();
+	private Map<String, View> lightViews = new HashMap<String, View>();
 	
 	private LinearLayout resultContainer;
+	private LinearLayout resultList;
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
 	
@@ -53,6 +67,7 @@ public class LightsActivity extends Activity {
 		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
 		
 		resultContainer = (LinearLayout) findViewById(R.id.lights_result_container);
+		resultList = (LinearLayout) findViewById(R.id.lights_list);
 		
 		setEventHandlers();
 		
@@ -67,10 +82,17 @@ public class LightsActivity extends Activity {
 		setTitle(bridge.getName());
 		
 		// Loading lights
-		getLights();
+		refreshState();
 	}
 	
 	private void setEventHandlers() {
+		refreshButton.setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				refreshState();
+			}
+		});
+		
 		// All lights pseudo group
 		final FeedbackSwitch switchAll = (FeedbackSwitch) findViewById(R.id.lights_all_switch);
 		switchAll.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -114,11 +136,68 @@ public class LightsActivity extends Activity {
 		});
 	}
 	
-	private void getLights() {
+	/**
+	 * Enable/disable all switches (use while executing actions or refreshing state)
+	 */
+	private Timer indicatorTimer = new Timer();
+	private void setActivityIndicator(boolean enabled, boolean forced) {		
+		if (enabled) {
+			// Tasks shorter than 300 ms don't warrant a visual loading indicator
+			indicatorTimer = new Timer();
+			indicatorTimer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					refreshButton.post(new Runnable() {
+						@Override
+						public void run() {
+							refreshButton.setVisibility(View.GONE);
+							loadingSpinner.setVisibility(View.VISIBLE);
+						}
+					});
+				}
+			}, forced ? 0 : 300);
+		} else {
+			indicatorTimer.cancel();
+			
+			refreshButton.setVisibility(View.VISIBLE);
+			loadingSpinner.setVisibility(View.GONE);
+		}
+	}
+	
+	/**
+	 * Reflect local lights state in UI
+	 */
+	private void refreshViews() {
+		for (String key : lightViews.keySet()) {
+			View view = lightViews.get(key);
+			Light light = lights.get(key);
+			
+			((TextView) view.findViewById(R.id.lights_light_name)).setText(light.name);
+			
+			// Set background of light icon to light color
+			final View colorView = view.findViewById(R.id.lights_light_color);
+			colorView.setBackgroundColor(getRGBColor(light));
+			
+			// Set switch
+			((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setChecked(light.state.on, true);
+		}
+	}
+	
+	/**
+	 * Download fresh copy of light state from bridge
+	 */
+	private void refreshState() {		
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected void onPreExecute() {
+				// Empty state
+				lights.clear();
+				lightViews.clear();
+				resultList.removeAllViews();
+				
 				resultContainer.setVisibility(View.INVISIBLE);
+				
+				setActivityIndicator(true, true);
 			}
 			
 			@Override
@@ -150,6 +229,8 @@ public class LightsActivity extends Activity {
 						}
 					});
 				}
+				
+				setActivityIndicator(false, true);
 			}
 		}.execute();
 	}
@@ -159,78 +240,84 @@ public class LightsActivity extends Activity {
 		View lastView = null;
 		
 		for (final String id : lights.keySet()) {
-			lastView = getLayoutInflater().inflate(R.layout.lights_light, container, false);
-			
 			Light light = lights.get(id);
 			
-			// Convert HSV color to RGB
-			final float[] components = new float[] {
-				(float) light.state.hue / (float) 65535.0f * 360.0f,
-				(float) light.state.sat / 255.0f,
-				255.0f // Ignore brightness for more clear color view, hue is most important anyway
-			};
-			int color = Color.HSVToColor(components);
+			// Create view
+			lastView = addLightView(container, id, light);
 			
-			// If a light is off, display the color as black (state seems to be unreliable then anyway)
-			if (!light.state.on) {
-				color = 0;
-			}
-			
-			// Set up UI
-			((TextView) lastView.findViewById(R.id.lights_light_name)).setText(light.name);
-			
-			final View colorView = lastView.findViewById(R.id.lights_light_color);
-			colorView.setBackgroundColor(color);
-			
-			final FeedbackSwitch switchView = (FeedbackSwitch) lastView.findViewById(R.id.lights_light_switch);
-			switchView.setChecked(light.state.on, true);
-			switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-				@Override
-				public void onCheckedChanged(CompoundButton view, final boolean checked) {					
-					new AsyncTask<Void, Void, Boolean>() {
-						@Override
-						protected void onPreExecute() {
-							switchView.setEnabled(false);
-						}
-						
-						@Override
-						protected Boolean doInBackground(Void... params) {
-							try {
-								service.turnLightOn(id, checked);
-								return true;
-							} catch (Exception e) {
-								return false;
-							}
-						}
-						
-						@Override
-						protected void onPostExecute(Boolean result) {
-							switchView.setEnabled(true);
-							
-							if (result) {
-								if (checked) {
-									// TODO: Refresh color?
-									colorView.setBackgroundColor(Color.HSVToColor(components));
-								} else {
-									colorView.setBackgroundColor(Color.BLACK);
-								}
-							} else {
-								// Revert switch
-								switchView.setChecked(!checked, true);
-								
-								ErrorDialog.showNetworkError(getFragmentManager());
-							}
-						}
-					}.execute();
-				}
-			});
-			
-			container.addView(lastView);
+			// Associate view with light
+			lightViews.put(id, lastView);
 		}
 		
 		if (lastView != null) {
 			lastView.findViewById(R.id.lights_light_divider).setVisibility(View.INVISIBLE);
 		}
+		
+		// Populate UI with state
+		refreshViews();
+	}
+	
+	private int getRGBColor(Light light) {
+		// Convert HSV color to RGB
+		final float[] components = new float[] {
+			(float) light.state.hue / (float) 65535.0f * 360.0f,
+			(float) light.state.sat / 255.0f,
+			1.0f // Ignore brightness for more clear color view, hue is most important anyway
+		};
+		
+		int color = light.state.on ? Color.HSVToColor(components) : Color.BLACK;
+		
+		return color;
+	}
+	
+	private View addLightView(ViewGroup container, final String id, final Light light) {
+		View view = getLayoutInflater().inflate(R.layout.lights_light, container, false);
+		
+		// Set switch event handler
+		final FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
+		switchView.setChecked(light.state.on, true);
+		switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton view, final boolean checked) {					
+				new AsyncTask<Void, Void, Boolean>() {
+					@Override
+					protected void onPreExecute() {
+						setActivityIndicator(true, false);
+						switchView.setEnabled(false);
+					}
+					
+					@Override
+					protected Boolean doInBackground(Void... params) {
+						try {
+							service.turnLightOn(id, checked);
+							return true;
+						} catch (Exception e) {
+							return false;
+						}
+					}
+					
+					@Override
+					protected void onPostExecute(Boolean result) {
+						setActivityIndicator(false, false);
+						switchView.setEnabled(true);
+						
+						// Toggle successful
+						// TODO: Refresh color state when turned on
+						if (result) {
+							lights.get(id).state.on = !lights.get(id).state.on;
+						} else {
+							ErrorDialog.showNetworkError(getFragmentManager());
+						}
+						
+						refreshViews();
+					}
+				}.execute();
+			}
+		});
+		
+		container.addView(view);
+		
+		return view;
 	}
 	
 	@Override
