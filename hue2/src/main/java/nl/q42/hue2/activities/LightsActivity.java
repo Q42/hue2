@@ -31,14 +31,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-// TODO: State system
-// 1. User clicks switch
-// 2. UI is disabled
-// 3. Request is sent
-// 4a. If successful, the state is updated and the UI is updated and enabled
-// 4b. If failed, show network error and re-enable UI
-
 public class LightsActivity extends Activity {
+	// It takes extremely long for the server to update its data, so this interval is reasonable
+	private final static long REFRESH_INTERVAL = 5000;
+	
 	private Bridge bridge;
 	private HueService service;
 	
@@ -49,6 +45,8 @@ public class LightsActivity extends Activity {
 	private LinearLayout resultList;
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
+	
+	private Timer refreshTimer = new Timer();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,14 +80,41 @@ public class LightsActivity extends Activity {
 		setTitle(bridge.getName());
 		
 		// Loading lights
-		refreshState();
+		refreshState(true);
+		startRefreshTimer();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		refreshTimer.cancel();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		startRefreshTimer();
+	}
+	
+	private void startRefreshTimer() {
+		refreshTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				resultContainer.post(new Runnable() {
+					@Override
+					public void run() {
+						refreshState(false);
+					}
+				});
+			}
+		}, REFRESH_INTERVAL, REFRESH_INTERVAL);
 	}
 	
 	private void setEventHandlers() {
 		refreshButton.setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
-				refreshState();
+				refreshState(true);
 			}
 		});
 		
@@ -186,18 +211,20 @@ public class LightsActivity extends Activity {
 	/**
 	 * Download fresh copy of light state from bridge
 	 */
-	private void refreshState() {		
+	private void refreshState(final boolean flush) {		
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected void onPreExecute() {
 				// Empty state
-				lights.clear();
-				lightViews.clear();
-				resultList.removeAllViews();
-				
-				resultContainer.setVisibility(View.INVISIBLE);
-				
-				setActivityIndicator(true, true);
+				if (flush) {
+					lights.clear();
+					lightViews.clear();
+					resultList.removeAllViews();
+					
+					resultContainer.setVisibility(View.INVISIBLE);
+					
+					setActivityIndicator(true, true);
+				}
 			}
 			
 			@Override
@@ -214,9 +241,13 @@ public class LightsActivity extends Activity {
 			@Override
 			protected void onPostExecute(Boolean success) {
 				if (success) {
-					populateList();
-					resultContainer.setVisibility(View.VISIBLE);
-				} else {
+					if (flush) {
+						populateList();
+						resultContainer.setVisibility(View.VISIBLE);
+					} else {
+						refreshViews();
+					}
+				} else if (flush) {
 					// Being able to retrieve the light list is critical, so if this fails we go back to the bridge selection activity
 					ErrorDialog.show(getFragmentManager(), R.string.dialog_connection_title, R.string.dialog_network_error, new ErrorDialogCallback() {
 						@Override
