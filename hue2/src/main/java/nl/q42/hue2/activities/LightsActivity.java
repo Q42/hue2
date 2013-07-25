@@ -1,7 +1,6 @@
 package nl.q42.hue2.activities;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -38,8 +37,8 @@ public class LightsActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
 	
-	private Map<String, Light> lights = new HashMap<String, Light>();
-	private Map<String, View> lightViews = new HashMap<String, View>();
+	private HashMap<String, Light> lights = new HashMap<String, Light>();
+	private HashMap<String, View> lightViews = new HashMap<String, View>();
 	
 	private LinearLayout resultContainer;
 	private LinearLayout resultList;
@@ -48,6 +47,11 @@ public class LightsActivity extends Activity {
 	
 	private Timer refreshTimer = new Timer();
 	
+	// TODO: Fix state preservation/switch bug
+	// Reproduce: Turn a light on, rotate the screen and notice that it's off again
+	// Looks like setChecked is still intervening
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,7 +74,6 @@ public class LightsActivity extends Activity {
 		setEventHandlers();
 		
 		// Set up from bridge info
-		// TODO: Save instance state
 		bridge = (Bridge) getIntent().getSerializableExtra("bridge");
 		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
 		
@@ -80,8 +83,19 @@ public class LightsActivity extends Activity {
 		setTitle(bridge.getName());
 		
 		// Loading lights
-		refreshState(true);
-		startRefreshTimer();
+		if (savedInstanceState == null) {
+			refreshState(true);
+		} else {
+			lights = (HashMap<String, Light>) savedInstanceState.getSerializable("lights");
+			populateList();
+		}
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle state) {
+		super.onSaveInstanceState(state);
+		
+		state.putSerializable("lights", lights);
 	}
 	
 	@Override
@@ -97,6 +111,7 @@ public class LightsActivity extends Activity {
 	}
 	
 	private void startRefreshTimer() {
+		refreshTimer = new Timer();
 		refreshTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
@@ -231,7 +246,7 @@ public class LightsActivity extends Activity {
 			protected Boolean doInBackground(Void... params) {
 				try {
 					// getLights() returns no state info
-					lights = service.getFullConfig().lights;
+					lights = new HashMap<String, Light>(service.getFullConfig().lights);
 					return true;
 				} catch (Exception e) {
 					return false;
@@ -335,7 +350,7 @@ public class LightsActivity extends Activity {
 						// Toggle successful
 						// TODO: Refresh color state when turned on
 						if (result) {
-							lights.get(id).state.on = !lights.get(id).state.on;
+							lights.get(id).state.on = checked;
 						} else {
 							ErrorDialog.showNetworkError(getFragmentManager());
 						}
