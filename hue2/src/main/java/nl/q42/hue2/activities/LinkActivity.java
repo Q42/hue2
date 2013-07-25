@@ -246,8 +246,7 @@ public class LinkActivity extends Activity {
 			setSearchIndicator(false);
 			
 			if (!result) {
-				ErrorDialog dialog = ErrorDialog.newInstance(R.string.dialog_bridge_search_title, R.string.dialog_network_error);
-				dialog.show(getFragmentManager(), "dialog_error");
+				ErrorDialog.show(getFragmentManager(), R.string.dialog_bridge_search_title, R.string.dialog_network_error);
 			}
 		}
 		
@@ -269,7 +268,7 @@ public class LinkActivity extends Activity {
 				
 				long start = System.currentTimeMillis();
 				
-				while (true) {
+				while (true) {					
 					byte[] responseBuffer = new byte[1024];
 					
 					DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
@@ -361,8 +360,7 @@ public class LinkActivity extends Activity {
 					bridgesList.post(new Runnable() {
 						@Override
 						public void run() {
-							ErrorDialog dialog = ErrorDialog.newInstance(R.string.dialog_bridge_lost_title, R.string.dialog_network_error);
-							dialog.show(getFragmentManager(), "dialog_error");
+							ErrorDialog.show(getFragmentManager(), R.string.dialog_bridge_lost_title, R.string.dialog_network_error);
 						}
 					});
 				}

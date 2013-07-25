@@ -7,6 +7,7 @@ import nl.q42.hue.dialogs.ErrorDialog.ErrorDialogCallback;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.models.Bridge;
+import nl.q42.hue2.views.FeedbackSwitch;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
@@ -24,7 +25,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
 public class LightsActivity extends Activity {
@@ -35,8 +35,6 @@ public class LightsActivity extends Activity {
 	private LinearLayout resultContainer;
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
-	
-	private boolean switchingAll = false; // TODO: Remove monkey patching
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +72,7 @@ public class LightsActivity extends Activity {
 	
 	private void setEventHandlers() {
 		// All lights pseudo group
-		final Switch switchAll = (Switch) findViewById(R.id.lights_all_switch);
+		final FeedbackSwitch switchAll = (FeedbackSwitch) findViewById(R.id.lights_all_switch);
 		switchAll.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton view, final boolean checked) {
@@ -90,7 +88,6 @@ public class LightsActivity extends Activity {
 							service.turnAllOn(checked);
 							return true;
 						} catch (Exception e) {
-							// TODO: Handle network error
 							return false;
 						}
 					}
@@ -102,14 +99,14 @@ public class LightsActivity extends Activity {
 						if (result) {
 							ViewGroup lightViews = (ViewGroup) findViewById(R.id.lights_list);
 							
-							switchingAll = true;
 							for (int i = 0; i < lightViews.getChildCount(); i++) {
-								((Switch) lightViews.getChildAt(i).findViewById(R.id.lights_light_switch)).setChecked(checked);
+								((FeedbackSwitch) lightViews.getChildAt(i).findViewById(R.id.lights_light_switch)).setChecked(checked, true);
 							}
-							switchingAll = false;
 						} else {
 							// Revert switch
-							switchAll.setChecked(!checked);
+							switchAll.setChecked(!checked, true);
+							
+							ErrorDialog.showNetworkError(getFragmentManager());
 						}
 					}
 				}.execute();
@@ -142,7 +139,7 @@ public class LightsActivity extends Activity {
 					resultContainer.setVisibility(View.VISIBLE);
 				} else {
 					// Being able to retrieve the light list is critical, so if this fails we go back to the bridge selection activity
-					ErrorDialog dialog = ErrorDialog.newInstance(R.string.dialog_connection_title, R.string.dialog_network_error, new ErrorDialogCallback() {
+					ErrorDialog.show(getFragmentManager(), R.string.dialog_connection_title, R.string.dialog_network_error, new ErrorDialogCallback() {
 						@Override
 						public void onClose() {
 							Util.setLastBridge(LightsActivity.this, null);
@@ -152,7 +149,6 @@ public class LightsActivity extends Activity {
 							startActivity(searchIntent);
 						}
 					});
-					dialog.show(getFragmentManager(), "dialog_error");
 				}
 			}
 		}.execute();
@@ -186,16 +182,11 @@ public class LightsActivity extends Activity {
 			final View colorView = lastView.findViewById(R.id.lights_light_color);
 			colorView.setBackgroundColor(color);
 			
-			final Switch switchView = (Switch) lastView.findViewById(R.id.lights_light_switch);
-			switchView.setChecked(light.state.on);
+			final FeedbackSwitch switchView = (FeedbackSwitch) lastView.findViewById(R.id.lights_light_switch);
+			switchView.setChecked(light.state.on, true);
 			switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 				@Override
-				public void onCheckedChanged(CompoundButton view, final boolean checked) {
-					if (switchingAll) {
-						colorView.setBackgroundColor(checked ? Color.HSVToColor(components) : Color.BLACK);
-						return;
-					}
-					
+				public void onCheckedChanged(CompoundButton view, final boolean checked) {					
 					new AsyncTask<Void, Void, Boolean>() {
 						@Override
 						protected void onPreExecute() {
@@ -208,7 +199,6 @@ public class LightsActivity extends Activity {
 								service.turnLightOn(id, checked);
 								return true;
 							} catch (Exception e) {
-								// TODO: Handle network error
 								return false;
 							}
 						}
@@ -226,7 +216,9 @@ public class LightsActivity extends Activity {
 								}
 							} else {
 								// Revert switch
-								switchView.setChecked(!checked);
+								switchView.setChecked(!checked, true);
+								
+								ErrorDialog.showNetworkError(getFragmentManager());
 							}
 						}
 					}.execute();

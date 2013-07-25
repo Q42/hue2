@@ -4,12 +4,25 @@ import nl.q42.hue2.R;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
 public class ErrorDialog extends DialogFragment {
 	private ErrorDialogCallback callback;
+	
+	public static void showNetworkError(FragmentManager frag) {
+		show(frag, R.string.dialog_network_error_title, R.string.dialog_network_error);
+	}
+	
+	public static void show(FragmentManager frag, int title, int message) {
+		show(frag, title, message, null);
+	}
+	
+	public static void show(FragmentManager frag, int title, int message, ErrorDialogCallback callback) {
+		newInstance(title, message, callback).show(frag, "dialog_error");
+	}
 	
 	public static ErrorDialog newInstance(int title, int message) {
 		return newInstance(title, message, null);
