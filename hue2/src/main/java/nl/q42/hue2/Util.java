@@ -15,6 +15,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Base64;
 
 public class Util {
@@ -95,6 +96,17 @@ public class Util {
 		UUID uuid = new UUID(rand.nextLong(), rand.nextLong());
 		return uuid.toString();
 	}
+	
+	public static String getDeviceName() {
+		  String manufacturer = Build.MANUFACTURER;
+		  String model = Build.MODEL;
+		  
+		  if (model.startsWith(manufacturer)) {
+			  return model.substring(0, 1).toUpperCase() + model.substring(1);
+		  } else {
+			  return manufacturer.substring(0, 1).toUpperCase() + manufacturer.substring(1) + " " + model;
+		  }
+		}
 	
 	public static void showErrorDialog(Context ctx, int title, int message) {
 		new AlertDialog.Builder(ctx)

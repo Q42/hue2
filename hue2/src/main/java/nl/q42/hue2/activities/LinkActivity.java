@@ -6,12 +6,14 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import nl.q42.hue.dialogs.BridgeInfoDialog;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.adapters.BridgeAdapter;
@@ -23,8 +25,6 @@ import nl.q42.javahueapi.Networker.Result;
 import nl.q42.javahueapi.models.SimpleConfig;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -40,7 +40,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 public class LinkActivity extends Activity {
 	private static final int SEARCH_TIMEOUT = 30000;
@@ -54,7 +53,11 @@ public class LinkActivity extends Activity {
 	
 	private BridgeSearchTask bridgeSearchTask;
 	private Timer linkChecker = new Timer();
+	private boolean searchingPaused = false;
 	
+	private ArrayList<Bridge> bridges = new ArrayList<Bridge>();
+	
+	@SuppressWarnings("unchecked")
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_link);
@@ -77,35 +80,68 @@ public class LinkActivity extends Activity {
 		
 		setEventHandlers();
 		
-		Bridge lastBridge = Util.getLastBridge(this);
-		if (lastBridge != null) {
-			// This will be set again after a successful connection, connection failure leaves the last bridge null
-			Util.setLastBridge(this, null);
-			
-			// Try connecting to last bridge
-			connectToLastBridge(lastBridge);
+		// Restore state or start over
+		if (savedInstanceState == null) {
+			Bridge lastBridge = Util.getLastBridge(this);
+			if (lastBridge != null) {
+				// This will be set again after a successful connection, connection failure leaves the last bridge null
+				Util.setLastBridge(this, null);
+				
+				// Try connecting to last bridge
+				connectToLastBridge(lastBridge);
+			} else {
+				// Start searching for bridges and add them to the results
+				startSearching(true);
+			}
 		} else {
-			// Start searching for bridges and add them to the results
-			startSearching();
+			bridges = (ArrayList<Bridge>) savedInstanceState.getSerializable("bridges");
+			
+			for (Bridge b : bridges) {
+				bridgesAdapter.add(b);
+			}
+			
+			// If a search was running, continue without removing existing results
+			if (savedInstanceState.getBoolean("searching")) {				
+				startSearching(false);
+			}
 		}
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle bundle) {
+		super.onSaveInstanceState(bundle);
 		
-		// TODO: Save instance state (also continue search operations)
+		bundle.putBoolean("searching", searchingPaused);
+		bundle.putSerializable("bridges", bridges);
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
 		
+		// If the search task was stopped, it should be resumed later
+		searchingPaused = bridgeSearchTask != null;
+		
 		// Stop any search or link operations
 		stopSearching();
 		linkChecker.cancel();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (searchingPaused) {
+			startSearching(false);
+			searchingPaused = false;
+		}
 	}
 	
 	private void setEventHandlers() {
 		refreshButton.setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
-				startSearching();
+				startSearching(true);
 			}
 		});
 		
@@ -127,48 +163,13 @@ public class LinkActivity extends Activity {
 		bridgesList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id) {
-				final Bridge b = bridgesAdapter.getItem(pos);
-				
-				View layout = getLayoutInflater().inflate(R.layout.dialog_bridge, null);
-				((TextView) layout.findViewById(R.id.dialog_bridge_ip)).setText(b.getIp());
-				((TextView) layout.findViewById(R.id.dialog_bridge_mac)).setText(serialToMAC(b.getSerial()));
-				((TextView) layout.findViewById(R.id.dialog_bridge_software)).setText(b.getSoftware());
-				
-				AlertDialog.Builder builder = new AlertDialog.Builder(LinkActivity.this);
-				builder.setTitle(b.getName());
-				builder.setView(layout);
-				builder.setPositiveButton(R.string.dialog_bridge_connect, new Dialog.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (b.hasAccess()) {
-							connectToBridge(b);
-						} else {
-							showLinkDialog(b);					
-						}
-					}
-				});
-				builder.setNegativeButton(R.string.dialog_cancel, new Dialog.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-				builder.create().show();
+				Bridge b = bridgesAdapter.getItem(pos);
+				BridgeInfoDialog dialog = BridgeInfoDialog.newInstance(b);
+				dialog.show(getFragmentManager(), "info_dialog");
 				
 				return true;
 			}
 		});
-	}
-	
-	private String serialToMAC(String serial) {
-		String mac = "";
-		
-		for (int i = 0; i < serial.length(); i += 2) {
-			mac += serial.substring(i, i + 2);
-			if (i < serial.length() - 2) mac += ":";
-		}
-		
-		return mac.toUpperCase();
 	}
 	
 	// Performs checks to make sure the last bridge is available
@@ -195,7 +196,7 @@ public class LinkActivity extends Activity {
 		}.execute();
 	}
 	
-	private void connectToBridge(Bridge b) {
+	public void connectToBridge(Bridge b) {
 		Intent connectIntent = new Intent(LinkActivity.this, LightsActivity.class);
 		connectIntent.putExtra("bridge", b);
 		startActivity(connectIntent);
@@ -215,10 +216,13 @@ public class LinkActivity extends Activity {
 		}
 	}
 	
-	private void startSearching() {		
+	private void startSearching(boolean clearResults) {		
 		stopSearching();
 		
-		bridgesAdapter.clear();
+		if (clearResults) {
+			bridges.clear();
+			bridgesAdapter.clear();
+		}
 		
 		bridgeSearchTask = new BridgeSearchTask();
 		bridgeSearchTask.execute();
@@ -257,6 +261,12 @@ public class LinkActivity extends Activity {
 				upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
 				
 				HashMap<String, Boolean> ipsDiscovered = new HashMap<String, Boolean>();
+				
+				// Add any existing results if continuing from an existing search
+				for (Bridge b : bridges) {
+					ipsDiscovered.put(b.getIp(), true);
+				}
+				
 				long start = System.currentTimeMillis();
 				
 				while (true) {
@@ -296,7 +306,9 @@ public class LinkActivity extends Activity {
 									bridgesList.post(new Runnable() {
 										@Override
 										public void run() {
-											bridgesAdapter.add(new Bridge(ip, mac, cfg.swversion, cfg.name, access));
+											Bridge b = new Bridge(ip, mac, cfg.swversion, cfg.name, access);
+											bridges.add(b);
+											bridgesAdapter.add(b);
 										}
 									});
 								} catch (ApiException e) {
@@ -321,7 +333,7 @@ public class LinkActivity extends Activity {
 	}
 	
 	@SuppressWarnings("deprecation")
-	private void showLinkDialog(final Bridge b) {
+	public void showLinkDialog(final Bridge b) {
 		stopSearching();
 		
 		// Tell user to press link button
@@ -353,7 +365,7 @@ public class LinkActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					boolean pressed = HueService.createUser(b.getIp(), "hue2", username);
+					boolean pressed = HueService.createUser(b.getIp(), "hue2 (" + Util.getDeviceName() + ")", username);
 					
 					if (pressed) {						
 						// User created!
