@@ -12,20 +12,23 @@ public class Bridge implements Serializable {
 	private long lastUsed;
 	private String ip;
 	private String serial;
+	private String swversion;
 	private boolean access;
 	
 	public Bridge() {}
 	
-	public Bridge(String ip, String serial, String name) {
+	public Bridge(String ip, String serial, String swversion, String name) {
 		this.ip = ip;
 		this.serial = serial;
+		this.swversion = swversion;
 		this.name = name;
 		this.access = true;
 	}
 	
-	public Bridge(String ip, String serial, String name, boolean access) {
+	public Bridge(String ip, String serial, String swversion, String name, boolean access) {
 		this.ip = ip;
 		this.serial = serial;
+		this.swversion = swversion;
 		this.name = name;
 		this.access = access;
 	}
@@ -36,6 +39,10 @@ public class Bridge implements Serializable {
 	
 	public String getSerial() {
 		return serial;
+	}
+	
+	public String getSoftware() {
+		return swversion;
 	}
 	
 	public void setId(long id) {

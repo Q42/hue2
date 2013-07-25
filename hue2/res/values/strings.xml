@@ -20,6 +20,11 @@
         
     <string name="dialog_link">Press the link button on the bridge to connect.</string>
     
+    <string name="dialog_bridge_ip">IP address</string>
+    <string name="dialog_bridge_mac">MAC address</string>
+    <string name="dialog_bridge_software">Software version</string>
+    <string name="dialog_bridge_connect">Connect</string>
+    
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
 </resources>

@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -29,6 +30,7 @@ public class LightsActivity extends Activity {
 	private HueService service;
 	private Map<String, Light> lights; // TODO: Update this state instead of manipulating switches directly
 	
+	private LinearLayout resultContainer;
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
 	
@@ -46,9 +48,11 @@ public class LightsActivity extends Activity {
 		ab.setDisplayShowCustomEnabled(true);
 		
 		RelativeLayout loadingLayout = (RelativeLayout) ab.getCustomView();
-
+		
 		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.loader_spinner);
 		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
+		
+		resultContainer = (LinearLayout) findViewById(R.id.lights_result_container);
 		
 		setEventHandlers();
 		
@@ -114,6 +118,11 @@ public class LightsActivity extends Activity {
 	private void getLights() {
 		new AsyncTask<Void, Void, Void>() {
 			@Override
+			protected void onPreExecute() {
+				resultContainer.setVisibility(View.INVISIBLE);
+			}
+			
+			@Override
 			protected Void doInBackground(Void... params) {
 				try {
 					// getLights() returns no state info
@@ -127,6 +136,7 @@ public class LightsActivity extends Activity {
 			@Override
 			protected void onPostExecute(Void params) {
 				populateList();
+				resultContainer.setVisibility(View.VISIBLE);
 			}
 		}.execute();
 	}

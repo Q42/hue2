@@ -20,8 +20,11 @@ import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.HueService.ApiException;
 import nl.q42.javahueapi.Networker;
 import nl.q42.javahueapi.Networker.Result;
+import nl.q42.javahueapi.models.SimpleConfig;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -32,10 +35,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class LinkActivity extends Activity {
 	private static final int SEARCH_TIMEOUT = 30000;
@@ -67,29 +72,10 @@ public class LinkActivity extends Activity {
 		
 		RelativeLayout loadingLayout = (RelativeLayout) ab.getCustomView();
 
-		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.loader_spinner);
-		
+		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.loader_spinner);		
 		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
-		refreshButton.setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startSearching();
-			}
-		});
 		
-		// Add connect event
-		bridgesList.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-				Bridge b = bridgesAdapter.getItem(pos);
-				
-				if (b.hasAccess()) {
-					connectToBridge(b);
-				} else {
-					showLinkDialog(b);					
-				}
-			}
-		});
+		setEventHandlers();
 		
 		Bridge lastBridge = Util.getLastBridge(this);
 		if (lastBridge != null) {
@@ -113,6 +99,76 @@ public class LinkActivity extends Activity {
 		// Stop any search or link operations
 		stopSearching();
 		linkChecker.cancel();
+	}
+	
+	private void setEventHandlers() {
+		refreshButton.setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startSearching();
+			}
+		});
+		
+		// Add connect event
+		bridgesList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+				Bridge b = bridgesAdapter.getItem(pos);
+				
+				if (b.hasAccess()) {
+					connectToBridge(b);
+				} else {
+					showLinkDialog(b);					
+				}
+			}
+		});
+		
+		// Add bridge info event
+		bridgesList.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id) {
+				final Bridge b = bridgesAdapter.getItem(pos);
+				
+				View layout = getLayoutInflater().inflate(R.layout.dialog_bridge, null);
+				((TextView) layout.findViewById(R.id.dialog_bridge_ip)).setText(b.getIp());
+				((TextView) layout.findViewById(R.id.dialog_bridge_mac)).setText(serialToMAC(b.getSerial()));
+				((TextView) layout.findViewById(R.id.dialog_bridge_software)).setText(b.getSoftware());
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(LinkActivity.this);
+				builder.setTitle(b.getName());
+				builder.setView(layout);
+				builder.setPositiveButton(R.string.dialog_bridge_connect, new Dialog.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (b.hasAccess()) {
+							connectToBridge(b);
+						} else {
+							showLinkDialog(b);					
+						}
+					}
+				});
+				builder.setNegativeButton(R.string.dialog_cancel, new Dialog.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+				builder.create().show();
+				
+				return true;
+			}
+		});
+	}
+	
+	private String serialToMAC(String serial) {
+		String mac = "";
+		
+		for (int i = 0; i < serial.length(); i += 2) {
+			mac += serial.substring(i, i + 2);
+			if (i < serial.length() - 2) mac += ":";
+		}
+		
+		return mac.toUpperCase();
 	}
 	
 	// Performs checks to make sure the last bridge is available
@@ -233,14 +289,14 @@ public class LinkActivity extends Activity {
 							// Check from description if we're dealing with a hue bridge or some other device
 							if (modelName.toLowerCase().contains("philips hue bridge")) {
 								try {
-									final String name = HueService.getSimpleConfig(ip).name;
+									final SimpleConfig cfg = HueService.getSimpleConfig(ip);
 									final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
 									final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
 									
 									bridgesList.post(new Runnable() {
 										@Override
 										public void run() {
-											bridgesAdapter.add(new Bridge(ip, mac, name, access));
+											bridgesAdapter.add(new Bridge(ip, mac, cfg.swversion, cfg.name, access));
 										}
 									});
 								} catch (ApiException e) {
