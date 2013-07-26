@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -165,11 +166,11 @@ public class LightsActivity extends Activity {
 							ViewGroup lightViews = (ViewGroup) findViewById(R.id.lights_list);
 							
 							for (int i = 0; i < lightViews.getChildCount(); i++) {
-								((FeedbackSwitch) lightViews.getChildAt(i).findViewById(R.id.lights_light_switch)).setChecked(checked, true);
+								((FeedbackSwitch) lightViews.getChildAt(i).findViewById(R.id.lights_light_switch)).setCheckedCode(checked);
 							}
 						} else {
 							// Revert switch
-							switchAll.setChecked(!checked, true);
+							switchAll.setCheckedCode(!checked);
 							
 							ErrorDialog.showNetworkError(getFragmentManager());
 						}
@@ -222,7 +223,7 @@ public class LightsActivity extends Activity {
 			colorView.setBackgroundColor(getRGBColor(light));
 			
 			// Set switch
-			((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setChecked(light.state.on, true);
+			((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setCheckedCode(light.state.on);
 		}
 	}
 	
@@ -397,10 +398,10 @@ public class LightsActivity extends Activity {
 		
 		// Set switch event handler
 		final FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
-		switchView.setChecked(light.state.on, true);
+		switchView.setCheckedCode(light.state.on);
 		switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
-			public void onCheckedChanged(CompoundButton view, final boolean checked) {					
+			public void onCheckedChanged(CompoundButton view, final boolean checked) {				
 				new AsyncTask<Void, Void, Boolean>() {
 					@Override
 					protected void onPreExecute() {
