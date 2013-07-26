@@ -214,19 +214,24 @@ public class LightsActivity extends Activity {
 	private void setActivityIndicator(boolean enabled, boolean forced) {		
 		if (enabled) {
 			// Tasks shorter than 300 ms don't warrant a visual loading indicator
-			indicatorTimer = new Timer();
-			indicatorTimer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					refreshButton.post(new Runnable() {
-						@Override
-						public void run() {
-							refreshButton.setVisibility(View.GONE);
-							loadingSpinner.setVisibility(View.VISIBLE);
-						}
-					});
-				}
-			}, forced ? 0 : 300);
+			if (!forced) {
+				indicatorTimer = new Timer();
+				indicatorTimer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						refreshButton.post(new Runnable() {
+							@Override
+							public void run() {
+								refreshButton.setVisibility(View.GONE);
+								loadingSpinner.setVisibility(View.VISIBLE);
+							}
+						});
+					}
+				}, 300);
+			} else {
+				refreshButton.setVisibility(View.GONE);
+				loadingSpinner.setVisibility(View.VISIBLE);
+			}
 		} else {
 			indicatorTimer.cancel();
 			

@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 
 import nl.q42.hue.dialogs.BridgeInfoDialog;
 import nl.q42.hue.dialogs.BridgeLinkDialog;
-import nl.q42.hue.dialogs.ColorDialog;
 import nl.q42.hue.dialogs.ErrorDialog;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
@@ -105,9 +104,6 @@ public class LinkActivity extends Activity {
 				startSearching(false);
 			}
 		}
-		
-		// TODO: DEBUG CODE
-		bridgesAdapter.add(new Bridge("192.168.1.101", "0017880ae688", "01006390", "aapje3 [HC]", true));
 	}
 	
 	@Override
