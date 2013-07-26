@@ -1,5 +1,7 @@
 package nl.q42.hue2.activities;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -286,7 +288,14 @@ public class LightsActivity extends Activity {
 		ViewGroup container = (ViewGroup) findViewById(R.id.lights_list);
 		View lastView = null;
 		
-		for (final String id : lights.keySet()) {
+		// Sort lights by id
+		ArrayList<String> lightIds = new ArrayList<String>();
+		for (String id : lights.keySet()) {
+			lightIds.add(id);
+		}
+		Collections.sort(lightIds);
+		
+		for (final String id : lightIds) {
 			Light light = lights.get(id);
 			
 			// Create view
