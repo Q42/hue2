@@ -6,6 +6,7 @@ import java.util.TimerTask;
 
 import nl.q42.hue.dialogs.ErrorDialog;
 import nl.q42.hue.dialogs.ErrorDialog.ErrorDialogCallback;
+import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.models.Bridge;
@@ -304,16 +305,82 @@ public class LightsActivity extends Activity {
 	}
 	
 	private int getRGBColor(Light light) {
+		if (!light.state.on) {
+			return Color.BLACK;
+		}
+		
 		// Convert HSV color to RGB
-		final float[] components = new float[] {
-			(float) light.state.hue / (float) 65535.0f * 360.0f,
-			(float) light.state.sat / 255.0f,
-			1.0f // Ignore brightness for more clear color view, hue is most important anyway
-		};
+		if (light.state.colormode.equals("hs")) {
+			float[] components = new float[] {
+				(float) light.state.hue / 65535.0f * 360.0f,
+				(float) light.state.sat / 255.0f,
+				1.0f // Ignore brightness for more clear color view, hue is most important anyway
+			};
+			
+			return Color.HSVToColor(components);
+		} else if (light.state.colormode.equals("xy")) {
+			float[] points = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
+			return PHUtilitiesImpl.colorFromXY(points, light.modelid);
+		} else if (light.state.colormode.equals("ct")) {
+			return temperatureToColor(1000000 / light.state.ct);
+		} else {
+			return Color.WHITE;
+		}
+	}
+	
+	// Adapted from: http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
+	private int temperatureToColor(long tmpKelvin) {
+		double tmpCalc;
+		int r, g, b;
 		
-		int color = light.state.on ? Color.HSVToColor(components) : Color.BLACK;
+		// Temperature must fall between 1000 and 40000 degrees
+		tmpKelvin = Math.min(40000, Math.max(tmpKelvin, 1000));
 		
-		return color;
+		// All calculations require tmpKelvin / 100, so only do the conversion once
+		tmpKelvin /= 100;
+		
+		// Calculate each color in turn
+		
+		// First: red
+		if (tmpKelvin <= 66) {
+			r = 255;
+		} else {
+			// Note: the R-squared value for this approximation is .988
+			tmpCalc = tmpKelvin - 60;
+			tmpCalc = 329.698727446 * Math.pow(tmpCalc, -0.1332047592);
+			r = (int) tmpCalc;
+			r = Math.min(255, Math.max(r, 0));
+		}
+		
+		// Second: green
+		if (tmpKelvin <= 66) {
+			// Note: the R-squared value for this approximation is .996
+			tmpCalc = tmpKelvin;
+			tmpCalc = 99.4708025861 * Math.log(tmpCalc) - 161.1195681661;
+			g = (int) tmpCalc;
+			g = Math.min(255, Math.max(g, 0));
+		} else {
+			// Note: the R-squared value for this approximation is .987
+			tmpCalc = tmpKelvin - 60;
+			tmpCalc = 288.1221695283 * Math.pow(tmpCalc, -0.0755148492);
+			g = (int) tmpCalc;
+			g = Math.min(255, Math.max(g, 0));
+		}
+		
+		// Third: blue
+		if (tmpKelvin >= 66) {
+			b = 255;
+		} else if (tmpKelvin <= 19) {
+			b = 0;
+		} else {
+			// Note: the R-squared value for this approximation is .998
+			tmpCalc = tmpKelvin - 10;
+			tmpCalc = 138.5177312231 * Math.log(tmpCalc) - 305.0447927307;
+			b = (int) tmpCalc;
+			b = Math.min(255, Math.max(b, 0));
+		}
+		
+		return Color.rgb(r, g, b);
 	}
 	
 	private View addLightView(ViewGroup container, final String id, final Light light) {

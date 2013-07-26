@@ -15,6 +15,7 @@ public class FeedbackSwitch extends Switch {
 		super(context, attrs);
 	}
 	
+	// TODO: This doesn't seem to work well at all
 	public void setChecked(boolean checked, boolean ignoreCallback) {
 		this.ignoreCallback = ignoreCallback;
 		setChecked(checked);
