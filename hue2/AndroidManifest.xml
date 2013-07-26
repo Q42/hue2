@@ -21,9 +21,9 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         
-        <!-- Activity for selecting bridge -->
+        <!-- Main light control activity -->
         <activity
-            android:name=".activities.LinkActivity"
+            android:name=".activities.LightsActivity"
             android:label="@string/app_name">
             
             <intent-filter>
@@ -32,8 +32,8 @@
             </intent-filter>
         </activity>
         
-        <!-- Main light control activity -->
-        <activity android:name=".activities.LightsActivity"></activity>        
+        <!-- Activity for selecting bridge -->
+        <activity android:name=".activities.LinkActivity"></activity>        
     </application>
 
 </manifest>

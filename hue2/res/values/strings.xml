@@ -33,4 +33,7 @@
     
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
+    
+    <!-- Menus -->
+    <string name="menu_bridges">Search bridges</string>
 </resources>

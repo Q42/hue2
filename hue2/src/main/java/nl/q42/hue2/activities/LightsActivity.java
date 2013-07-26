@@ -21,7 +21,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,16 +52,11 @@ public class LightsActivity extends Activity {
 	
 	private Timer refreshTimer = new Timer();
 	
-	// TODO: Fix state preservation/switch bug
-	// Reproduce: Turn a light on, rotate the screen and notice that it's off again
-	// Looks like setChecked is still intervening
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_lights);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		// Set up loading UI elements		
 		ActionBar ab = getActionBar();
@@ -77,13 +73,22 @@ public class LightsActivity extends Activity {
 		
 		setEventHandlers();
 		
-		// Set up from bridge info
-		bridge = (Bridge) getIntent().getSerializableExtra("bridge");
+		// Check if bridge info was passed
+		if (getIntent().hasExtra("bridge")) {
+			bridge = (Bridge) getIntent().getSerializableExtra("bridge");
+			Util.setLastBridge(this, bridge);
+		} else if (Util.getLastBridge(this) != null) {
+			bridge = Util.getLastBridge(this);
+		} else {
+			// No last bridge saved and no passed bridge, return to bridge search activity
+			Intent searchIntent = new Intent(this, LinkActivity.class);
+			searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(searchIntent);
+			return;
+		}
+		
+		// Set up bridge info
 		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
-		
-		// Save bridge to reconnect later
-		Util.setLastBridge(this, bridge);
-		
 		setTitle(bridge.getName());
 		
 		// Loading lights
@@ -92,6 +97,27 @@ public class LightsActivity extends Activity {
 		} else {
 			lights = (HashMap<String, Light>) savedInstanceState.getSerializable("lights");
 			populateList();
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.lights, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_bridges) {
+			Util.setLastBridge(this, null);
+			
+			Intent searchIntent = new Intent(this, LinkActivity.class);
+			searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(searchIntent);
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
 		}
 	}
 	
@@ -442,19 +468,5 @@ public class LightsActivity extends Activity {
 		container.addView(view);
 		
 		return view;
-	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == android.R.id.home) {
-			Util.setLastBridge(this, null);
-			
-			Intent searchIntent = new Intent(this, LinkActivity.class);
-			searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(searchIntent);
-			return true;
-		} else {
-			return super.onOptionsItemSelected(item);
-		}
 	}
 }
