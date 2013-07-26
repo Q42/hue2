@@ -31,7 +31,10 @@
     <string name="dialog_network_error_title">Network error</string>
     <string name="dialog_network_error">Make sure you have an active network connection and try again.</string>
     
+    <string name="dialog_color_picker_title">Color picker</string>
+    
     <string name="dialog_ok">OK</string>
+    <string name="dialog_apply">Apply</string>
     <string name="dialog_cancel">Cancel</string>
     
     <!-- Menus -->

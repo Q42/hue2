@@ -23,13 +23,22 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="50dp"
         android:textSize="16sp" />
+    
+    <Button
+        android:id="@+id/lights_light_color_picker"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginRight="15dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="C"/>
 
     <nl.q42.hue2.views.FeedbackSwitch
         android:id="@+id/lights_light_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="15dp"
-        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@id/lights_light_color_picker"
         android:layout_centerVertical="true" />
 
     <View
@@ -38,4 +47,5 @@
         android:layout_height="1dp"
         android:background="@color/divider"
         android:layout_alignParentBottom="true" />
+
 </RelativeLayout>
