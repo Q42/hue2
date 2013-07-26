@@ -35,6 +35,7 @@ public class ErrorDialog extends DialogFragment {
 		args.putInt("title", title);
 		args.putInt("message", message);
 		dialog.setArguments(args);
+		dialog.setCallback(callback);
 		
 		return dialog;
 	}

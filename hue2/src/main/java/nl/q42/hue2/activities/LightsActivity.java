@@ -7,7 +7,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import nl.q42.hue.dialogs.ErrorDialog;
-import nl.q42.hue.dialogs.ErrorDialog.ErrorDialogCallback;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
@@ -296,16 +295,7 @@ public class LightsActivity extends Activity {
 					}
 				} else if (flush) {
 					// Being able to retrieve the light list is critical, so if this fails we go back to the bridge selection activity
-					ErrorDialog.show(getFragmentManager(), R.string.dialog_connection_title, R.string.dialog_network_error, new ErrorDialogCallback() {
-						@Override
-						public void onClose() {
-							Util.setLastBridge(LightsActivity.this, null);
-							
-							Intent searchIntent = new Intent(LightsActivity.this, LinkActivity.class);
-							searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-							startActivity(searchIntent);
-						}
-					});
+					ErrorDialog.show(getFragmentManager(), R.string.dialog_connection_title, R.string.dialog_network_error);
 				}
 				
 				setActivityIndicator(false, true);
