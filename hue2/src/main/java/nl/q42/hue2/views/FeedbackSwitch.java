@@ -13,7 +13,7 @@ import android.widget.Switch;
  * in a semi-non-hacky way.
  */
 public class FeedbackSwitch extends Switch {
-	private boolean ignoreCallback = true;
+	private boolean ignoreCallback = false;
 	
 	public FeedbackSwitch(Context context, AttributeSet attrs) {
 		super(context, attrs);

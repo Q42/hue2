@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -138,12 +139,13 @@ public class LightsActivity extends Activity {
 		
 		// All lights pseudo group
 		final FeedbackSwitch switchAll = (FeedbackSwitch) findViewById(R.id.lights_all_switch);
-		switchAll.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		switchAll.setOnCheckedChangeListener(new OnCheckedChangeListener() { // TODO: Not being called??
 			@Override
 			public void onCheckedChanged(CompoundButton view, final boolean checked) {
 				new AsyncTask<Void, Void, Boolean>() {
 					@Override
 					protected void onPreExecute() {
+						setActivityIndicator(true, false);
 						switchAll.setEnabled(false);
 					}
 					
@@ -158,21 +160,20 @@ public class LightsActivity extends Activity {
 					}
 					
 					@Override
-					protected void onPostExecute(Boolean result) {
+					protected void onPostExecute(Boolean result) {						
+						setActivityIndicator(false, false);
 						switchAll.setEnabled(true);
 						
+						// Toggle successful
 						if (result) {
-							ViewGroup lightViews = (ViewGroup) findViewById(R.id.lights_list);
-							
-							for (int i = 0; i < lightViews.getChildCount(); i++) {
-								((FeedbackSwitch) lightViews.getChildAt(i).findViewById(R.id.lights_light_switch)).setCheckedCode(checked);
+							for (String id : lights.keySet()) {
+								lights.get(id).state.on = checked;
 							}
 						} else {
-							// Revert switch
-							switchAll.setCheckedCode(!checked);
-							
 							ErrorDialog.showNetworkError(getFragmentManager());
 						}
+						
+						refreshViews();
 					}
 				}.execute();
 			}
@@ -424,7 +425,6 @@ public class LightsActivity extends Activity {
 						switchView.setEnabled(true);
 						
 						// Toggle successful
-						// TODO: Refresh color state when turned on
 						if (result) {
 							lights.get(id).state.on = checked;
 						} else {
