@@ -137,16 +137,16 @@ public class LightsActivity extends Activity {
 			}
 		});
 		
-		// All lights pseudo group
-		final FeedbackSwitch switchAll = (FeedbackSwitch) findViewById(R.id.lights_all_switch);
-		switchAll.setOnCheckedChangeListener(new OnCheckedChangeListener() { // TODO: Not being called??
+		// All lights pseudo group buttons
+		OnClickListener listener = new OnClickListener() {
 			@Override
-			public void onCheckedChanged(CompoundButton view, final boolean checked) {
+			public void onClick(final View v) {
+				final boolean checked = v.getId() == R.id.lights_all_on;
+				
 				new AsyncTask<Void, Void, Boolean>() {
 					@Override
 					protected void onPreExecute() {
 						setActivityIndicator(true, false);
-						switchAll.setEnabled(false);
 					}
 					
 					@Override
@@ -162,7 +162,6 @@ public class LightsActivity extends Activity {
 					@Override
 					protected void onPostExecute(Boolean result) {						
 						setActivityIndicator(false, false);
-						switchAll.setEnabled(true);
 						
 						// Toggle successful
 						if (result) {
@@ -177,7 +176,10 @@ public class LightsActivity extends Activity {
 					}
 				}.execute();
 			}
-		});
+		};
+		
+		findViewById(R.id.lights_all_on).setOnClickListener(listener);
+		findViewById(R.id.lights_all_off).setOnClickListener(listener);
 	}
 	
 	/**

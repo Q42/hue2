@@ -11,6 +11,9 @@
     <string name="lights_lights">Lights</string>
     <string name="lights_all">All lights</string>
     
+    <string name="lights_on">ON</string>
+    <string name="lights_off">OFF</string>
+    
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
     
