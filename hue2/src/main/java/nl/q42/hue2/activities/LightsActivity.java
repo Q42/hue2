@@ -281,7 +281,7 @@ public class LightsActivity extends Activity {
 			// Set switch
 			((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setCheckedCode(light.state.on);
 			
-			// Add preset buttons - if there are any presets		
+			// Add preset buttons - if there are any presets	
 			if (presets.containsKey(id)) {
 				LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
 				presetsView.removeAllViews();
@@ -308,6 +308,12 @@ public class LightsActivity extends Activity {
 					
 					presetsView.addView(presetBut);
 				}
+			}
+			
+			if (presets.containsKey(id) && presets.get(id).size() > 0) {
+				view.findViewById(R.id.lights_light_scroller).setVisibility(View.VISIBLE);
+			} else {
+				view.findViewById(R.id.lights_light_scroller).setVisibility(View.GONE);
 			}
 		}
 	}

@@ -54,10 +54,11 @@
         
         <!-- Scrollable presets -->
         <HorizontalScrollView
+            android:id="@+id/lights_light_scroller"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="5dp">
+            android:paddingTop="5dp">
            	
 	        <LinearLayout
 	            android:id="@+id/lights_light_presets"
