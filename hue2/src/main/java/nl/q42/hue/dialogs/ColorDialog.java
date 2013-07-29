@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -47,24 +48,39 @@ public class ColorDialog extends DialogFragment {
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.dialog_color_picker_title)
 			.setView(layout)
-			.setPositiveButton(R.string.dialog_color_add, new Dialog.OnClickListener() {
+			
+			// Positive - Add a preset
+			.setPositiveButton(R.string.dialog_color_add, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					String model = light.modelid;
 					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), model);
 					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
 					
-					/*((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);*/
-					
 					((LightsActivity) getActivity()).addColorPreset(getArguments().getString("id"), xy, bri);
 				}
 			})
-			.setNegativeButton(R.string.dialog_cancel, new Dialog.OnClickListener() {
+			
+			// Neutral - Set color instantly
+			.setNeutralButton(R.string.dialog_color_set, new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					String model = light.modelid;
+					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), model);
+					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+					
+					((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);
+				}
+			})
+			
+			// Negative - Cancel
+			.setNegativeButton(R.string.dialog_cancel, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.cancel();
 				}
 			})
+			
 			.create();
 	}
 }

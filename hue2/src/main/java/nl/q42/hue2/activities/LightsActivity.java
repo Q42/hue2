@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
@@ -45,9 +44,6 @@ import android.widget.TextView;
 public class LightsActivity extends Activity {
 	// It takes extremely long for the server to update its data, so this interval is reasonable
 	private final static long REFRESH_INTERVAL = 5000;
-	
-	// Add preset button will be hidden after this many have been added
-	private final static int PRESET_LIMIT = 4;
 	
 	private Bridge bridge;
 	private HueService service;
@@ -313,10 +309,6 @@ public class LightsActivity extends Activity {
 					presetsView.addView(presetBut);
 				}
 			}
-			
-			// Hide the add preset button if the preset threshold has been reached
-			int presetCount = presets.containsKey(id) ? presets.get(id).size() : 0;
-			view.findViewById(R.id.lights_light_color_picker).setVisibility(presetCount < PRESET_LIMIT ? View.VISIBLE : View.GONE);
 		}
 	}
 	
@@ -401,6 +393,15 @@ public class LightsActivity extends Activity {
 	private View addLightView(ViewGroup container, final String id, final Light light) {
 		View view = getLayoutInflater().inflate(R.layout.lights_light, container, false);
 		
+		// Set color picker event handler
+		view.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ColorDialog dialog = ColorDialog.newInstance(id, lights.get(id)); // Make sure to get the latest data
+				dialog.show(getFragmentManager(), "dialog_color");
+			}
+		});
+		
 		// Set switch event handler
 		final FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
 		switchView.setCheckedCode(light.state.on);
@@ -439,16 +440,6 @@ public class LightsActivity extends Activity {
 						refreshViews();
 					}
 				}.execute();
-			}
-		});
-		
-		// Set color picker event handler	
-		Button colorPicker = (Button) view.findViewById(R.id.lights_light_color_picker);
-		colorPicker.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ColorDialog dialog = ColorDialog.newInstance(id, lights.get(id)); // Make sure to get the latest data
-				dialog.show(getFragmentManager(), "dialog_color");
 			}
 		});
 		

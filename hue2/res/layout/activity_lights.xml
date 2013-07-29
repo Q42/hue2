@@ -42,7 +42,7 @@
 			    
 			    <RelativeLayout
 			        android:layout_width="match_parent"
-			        android:layout_height="60dp"
+			        android:layout_height="wrap_content"
 			        android:layout_marginLeft="15dp"
 			        android:layout_marginRight="15dp" >
 
@@ -52,17 +52,28 @@
 			            android:layout_alignParentLeft="true"
 			            android:layout_centerVertical="true"
 			            android:layout_marginLeft="10dp"
+			            android:layout_marginTop="20dp"
+			            android:layout_marginBottom="20dp"
 			            android:src="@drawable/lights" />
-
-			        <TextView
-			            android:id="@+id/lights_all_text"
-			            android:layout_width="wrap_content"
-			            android:layout_height="wrap_content"
-			            android:layout_alignParentLeft="true"
-			            android:layout_centerVertical="true"
-			            android:layout_marginLeft="50dp"
-			            android:text="@string/lights_all"
-			            android:textSize="16sp" />
+			        
+			        <LinearLayout
+				        android:layout_width="wrap_content"
+				        android:layout_height="wrap_content"
+				        android:layout_alignParentLeft="true"
+				        android:layout_centerVertical="true"
+				        android:layout_marginLeft="46dp"
+				        android:layout_marginTop="15dp"
+				        android:layout_marginBottom="15dp"
+				        android:orientation="vertical">
+				
+				        <TextView
+				            android:id="@+id/lights_all_text"
+				            android:layout_width="wrap_content"
+				            android:layout_height="wrap_content"
+				            android:layout_marginLeft="4dp"
+				            android:textSize="16sp"
+				            android:text="@string/lights_all" />
+				    </LinearLayout>
 
 			        <Button
 			            android:id="@+id/lights_all_on"
@@ -70,7 +81,7 @@
 			            android:background="@drawable/blue_button_background"
 			            android:layout_width="51dp"
 			            android:layout_height="40dp"
-			            android:layout_alignBaseline="@id/lights_all_text"
+			            android:layout_centerVertical="true"
 			            android:layout_alignParentRight="true"
 			            android:layout_marginRight="15dp"
 			            android:text="@string/lights_on" />
@@ -80,7 +91,7 @@
 			            style="?android:attr/buttonStyleSmall"
 			            android:layout_width="51dp"
 			            android:layout_height="40dp"
-			            android:layout_alignBaseline="@id/lights_all_text"
+			            android:layout_centerVertical="true"
 			            android:layout_toLeftOf="@id/lights_all_on"
 			            android:text="@string/lights_off" />
 			        
