@@ -301,7 +301,7 @@ public class LightsActivity extends Activity {
 					presetBut.setOnLongClickListener(new OnLongClickListener() {
 						@Override
 						public boolean onLongClick(View v) {
-							PresetRemoveDialog.newInstance(preset).show(getFragmentManager(), "dialog_remove_preset");
+							PresetRemoveDialog.newInstance(preset, lights.get(id)).show(getFragmentManager(), "dialog_remove_preset");
 							return true;
 						}
 					});
