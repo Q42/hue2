@@ -5,11 +5,11 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class Bridge implements Serializable {
 	
-	private long id;
+	//private long id;
 	private String name;
-	private String fullConfig;
+	/*private String fullConfig;
 	private String user;
-	private long lastUsed;
+	private long lastUsed;*/
 	private String ip;
 	private String serial;
 	private String swversion;
@@ -45,9 +45,9 @@ public class Bridge implements Serializable {
 		return swversion;
 	}
 	
-	public void setId(long id) {
+	/*public void setId(long id) {
 		this.id = id;
-	}
+	}*/
 
 	public String getName() {
 		return name;
@@ -57,7 +57,7 @@ public class Bridge implements Serializable {
 		this.name = name;
 	}
 	
-	public void setFullConfig(String fullConfig) {
+	/*public void setFullConfig(String fullConfig) {
 		this.fullConfig = fullConfig;
 	}
 
@@ -67,7 +67,7 @@ public class Bridge implements Serializable {
 
 	public void setLastUsed(long lastUsed) {
 		this.lastUsed = lastUsed;
-	}
+	}*/
 
 	public String getIp() {
 		return ip;
