@@ -16,6 +16,7 @@ public class HueSlider extends View {
 	private Paint paint;
 	
 	private Rect backgroundRect, viewRect, contentRect;
+	private int w, h;
 	
 	private float hue = 180.0f;
 	
@@ -30,12 +31,19 @@ public class HueSlider extends View {
 	
 	public void setSatBriSlider(SatBriSlider slider) {
 		satBri = slider;
-		satBri.setColor(getRGBColor());
+		satBri.setHueColor(getRGBColor());
 	}
 	
 	private int getRGBColor() {
 		return background.getPixel(0, (int) (hue / 360.0f * 512.0f));	
 	}
+	
+	@Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+        this.w = w;
+        this.h = h;
+    }
 	
 	@Override
 	public void onDraw(Canvas canvas) {
@@ -45,8 +53,8 @@ public class HueSlider extends View {
 			paint.setStrokeWidth(4);
 			
 			backgroundRect = new Rect(0, 0, background.getWidth(), background.getHeight());
-			viewRect = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
-			contentRect = new Rect(2, 2, canvas.getWidth() - 2, canvas.getHeight() - 2);
+			viewRect = new Rect(0, 0, w, h);
+			contentRect = new Rect(2, 2, w - 2, h - 2);
 		}
 		
 		// Draw border
@@ -56,8 +64,8 @@ public class HueSlider extends View {
 		canvas.drawBitmap(background, backgroundRect, contentRect, paint);
 		
 		// Draw selector
-		int hueY = (int) ((float) canvas.getHeight() / 360.0f * hue);
-		canvas.drawLine(0, hueY, canvas.getWidth(), hueY, paint);
+		int hueY = (int) ((float) h / 360.0f * hue);
+		canvas.drawLine(0, hueY, w, hueY, paint);
 	}
 	
 	@Override
@@ -66,7 +74,7 @@ public class HueSlider extends View {
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_MOVE:
 				hue = Math.max(0.0f, Math.min(event.getY() / viewRect.bottom * 360.0f, 359.0f));
-				if (satBri != null) satBri.setColor(getRGBColor());
+				if (satBri != null) satBri.setHueColor(getRGBColor());
 				invalidate();
 				break;
 		}

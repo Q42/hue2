@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import nl.q42.hue.dialogs.ColorDialog;
 import nl.q42.hue.dialogs.ErrorDialog;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
@@ -26,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
@@ -460,8 +462,53 @@ public class LightsActivity extends Activity {
 			}
 		});
 		
+		// Set color picker event handler
+		Button colorPicker = (Button) view.findViewById(R.id.lights_light_color_picker);
+		colorPicker.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ColorDialog dialog = ColorDialog.newInstance(id, light);
+				dialog.show(getFragmentManager(), "dialog_color");
+			}
+		});
+		
 		container.addView(view);
 		
 		return view;
+	}
+	
+	public void setLightColor(final String id, final float[] xy) {		
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, false);
+			}
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				try {					
+					service.setLightXY(id, xy);
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Boolean result) {
+				setActivityIndicator(false, false);
+				
+				// Toggle successful
+				if (result) {
+					Light light = lights.get(id);
+					light.state.colormode = "xy";
+					light.state.xy = new double[] { xy[0], xy[1] };
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
+				
+				refreshViews();
+			}
+		}.execute();
 	}
 }

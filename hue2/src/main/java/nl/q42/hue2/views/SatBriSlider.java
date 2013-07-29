@@ -17,9 +17,10 @@ public class SatBriSlider extends View {
 	private Paint paint;
 	
 	private Rect foregroundRect, viewRect, contentRect;
+	private int w, h;
 	
-	private float saturation = 1.0f;
-	private float brightness = 1.0f;
+	private float saturation = 0.95f;
+	private float brightness = 0.95f;
 	
 	private int color = Color.BLACK;
 	
@@ -30,10 +31,28 @@ public class SatBriSlider extends View {
 		foreground = BitmapFactory.decodeResource(context.getResources(), R.drawable.sat_bri_foreground);
 	}
 	
-	public void setColor(int color) {
+	public void setHueColor(int color) {
 		this.color = color;
 		invalidate();
 	}
+	
+	public int getResultColor() {
+		// Calculate final color with hue, saturation and brightness sliders
+		float[] hsv = new float[3];
+		Color.colorToHSV(color, hsv);
+		
+		hsv[1] = saturation;
+		hsv[2] = brightness;
+		
+		return Color.HSVToColor(hsv);
+	}
+	
+	@Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+        this.w = w;
+        this.h = h;
+    }
 	
 	@Override
 	public void onDraw(Canvas canvas) {
@@ -42,8 +61,8 @@ public class SatBriSlider extends View {
 			paint.setStrokeWidth(2);
 			
 			foregroundRect = new Rect(0, 0, foreground.getWidth(), foreground.getHeight());
-			viewRect = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
-			contentRect = new Rect(2, 2, canvas.getWidth() - 2, canvas.getHeight() - 2);
+			viewRect = new Rect(0, 0, w, h);
+			contentRect = new Rect(2, 2, w - 2, h - 2);
 		}
 		
 		// Draw border
