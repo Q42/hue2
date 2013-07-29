@@ -2,6 +2,7 @@ package nl.q42.hue.dialogs;
 
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
+import nl.q42.hue2.Util;
 import nl.q42.hue2.activities.LightsActivity;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
@@ -10,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
@@ -33,7 +35,14 @@ public class ColorDialog extends DialogFragment {
 		final SatBriSlider satBriSlider = (SatBriSlider) layout.findViewById(R.id.color_sat_bri);
 		hueSlider.setSatBriSlider(satBriSlider);
 		
-		//hueSlider.setC
+		final Light light = (Light) getArguments().getSerializable("light");
+		
+		// Fill in current color
+		float hsv[] = new float[3];
+		Color.colorToHSV(Util.getRGBColor(light), hsv);
+		hueSlider.setHue(hsv[0]);
+		satBriSlider.setSaturation(hsv[1]);
+		satBriSlider.setBrightness(light.state.bri / 255.0f);
 		
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.dialog_color_picker_title)
@@ -41,10 +50,11 @@ public class ColorDialog extends DialogFragment {
 			.setPositiveButton(R.string.dialog_apply, new Dialog.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					String model = ((Light) getArguments().getSerializable("light")).modelid;
+					String model = light.modelid;
 					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), model);
+					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
 					
-					((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy);
+					((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);
 				}
 			})
 			.setNegativeButton(R.string.dialog_cancel, new Dialog.OnClickListener() {

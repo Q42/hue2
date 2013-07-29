@@ -19,10 +19,9 @@ public class SatBriSlider extends View {
 	private Rect foregroundRect, viewRect, contentRect;
 	private int w, h;
 	
-	private float saturation = 0.95f;
-	private float brightness = 0.95f;
-	
-	private int color = Color.BLACK;
+	private float hue = 0.0f;
+	private float sat = 0.95f;
+	private float bri = 0.95f;
 	
 	public SatBriSlider(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -31,20 +30,33 @@ public class SatBriSlider extends View {
 		foreground = BitmapFactory.decodeResource(context.getResources(), R.drawable.sat_bri_foreground);
 	}
 	
-	public void setHueColor(int color) {
-		this.color = color;
+	public void setHue(float hue) {
+		this.hue = hue;
+		invalidate();
+	}
+	
+	public void setSaturation(float sat) {
+		this.sat = sat;
+		invalidate();
+	}
+	
+	public void setBrightness(float bri) {
+		this.bri = bri;
 		invalidate();
 	}
 	
 	public int getResultColor() {
 		// Calculate final color with hue, saturation and brightness sliders
 		float[] hsv = new float[3];
-		Color.colorToHSV(color, hsv);
-		
-		hsv[1] = saturation;
-		hsv[2] = brightness;
+		hsv[0] = hue;
+		hsv[1] = sat;
+		hsv[2] = bri;
 		
 		return Color.HSVToColor(hsv);
+	}
+	
+	public float getBrightness() {
+		return bri;
 	}
 	
 	@Override
@@ -70,6 +82,7 @@ public class SatBriSlider extends View {
 		canvas.drawRect(viewRect, paint);
 		
 		// Draw shaded colors
+		int color = Color.HSVToColor(new float[] { hue, 1.0f, 1.0f });
 		paint.setARGB(255, Color.red(color), Color.green(color), Color.blue(color));
 		canvas.drawRect(contentRect, paint);
 		
@@ -77,8 +90,8 @@ public class SatBriSlider extends View {
 		canvas.drawBitmap(foreground, foregroundRect, contentRect, paint);
 		
 		// Draw selection circle
-		int x = (int) (saturation * viewRect.right);
-		int y = (int) ((1.0f - brightness) * viewRect.bottom);
+		int x = (int) (sat * viewRect.right);
+		int y = (int) ((1.0f - bri) * viewRect.bottom);
 		
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setARGB(255, 0, 0, 0);
@@ -95,8 +108,8 @@ public class SatBriSlider extends View {
 		switch (event.getActionMasked()) {
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_MOVE:
-				saturation = Math.max(0.0f, Math.min(event.getX() / viewRect.right, 1.0f));
-				brightness = Math.max(0.0f, Math.min(1.0f - event.getY() / viewRect.bottom, 1.0f));
+				sat = Math.max(0.0f, Math.min(event.getX() / viewRect.right, 1.0f));
+				bri = Math.max(0.0f, Math.min(1.0f - event.getY() / viewRect.bottom, 1.0f));
 				invalidate();
 				break;
 		}

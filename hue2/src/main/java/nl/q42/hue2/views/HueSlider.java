@@ -31,12 +31,19 @@ public class HueSlider extends View {
 	
 	public void setSatBriSlider(SatBriSlider slider) {
 		satBri = slider;
-		satBri.setHueColor(getRGBColor());
+		satBri.setHue(hue);
 	}
 	
-	private int getRGBColor() {
-		return background.getPixel(0, (int) (hue / 360.0f * 512.0f));	
+	public void setHue(float hue) {
+		this.hue = hue;
+		if (satBri != null) {
+			satBri.setHue(hue);
+		}
 	}
+	
+	/*private int getRGBColor() {
+		return background.getPixel(0, (int) (hue / 360.0f * 512.0f));	
+	}*/
 	
 	@Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -64,7 +71,7 @@ public class HueSlider extends View {
 		canvas.drawBitmap(background, backgroundRect, contentRect, paint);
 		
 		// Draw selector
-		int hueY = (int) ((float) h / 360.0f * hue);
+		int hueY = h - (int) ((float) h / 360.0f * hue);
 		canvas.drawLine(0, hueY, w, hueY, paint);
 	}
 	
@@ -73,8 +80,8 @@ public class HueSlider extends View {
 		switch (event.getActionMasked()) {
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_MOVE:
-				hue = Math.max(0.0f, Math.min(event.getY() / viewRect.bottom * 360.0f, 359.0f));
-				if (satBri != null) satBri.setHueColor(getRGBColor());
+				hue = 360.0f - Math.max(0.0f, Math.min(event.getY() / viewRect.bottom * 360.0f, 359.0f));
+				if (satBri != null) satBri.setHue(hue);
 				invalidate();
 				break;
 		}
