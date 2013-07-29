@@ -10,6 +10,7 @@ import java.util.TimerTask;
 
 import nl.q42.hue.dialogs.ColorDialog;
 import nl.q42.hue.dialogs.ErrorDialog;
+import nl.q42.hue.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.PresetsDataSource;
 import nl.q42.hue2.R;
@@ -30,6 +31,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -43,6 +45,9 @@ import android.widget.TextView;
 public class LightsActivity extends Activity {
 	// It takes extremely long for the server to update its data, so this interval is reasonable
 	private final static long REFRESH_INTERVAL = 5000;
+	
+	// Add preset button will be hidden after this many have been added
+	private final static int PRESET_LIMIT = 4;
 	
 	private Bridge bridge;
 	private HueService service;
@@ -267,9 +272,9 @@ public class LightsActivity extends Activity {
 	 * Reflect local lights state in UI
 	 */
 	private void refreshViews() {
-		for (String key : lightViews.keySet()) {
-			View view = lightViews.get(key);
-			Light light = lights.get(key);
+		for (final String id : lightViews.keySet()) {
+			View view = lightViews.get(id);
+			Light light = lights.get(id);
 			
 			((TextView) view.findViewById(R.id.lights_light_name)).setText(light.name);
 			
@@ -279,6 +284,39 @@ public class LightsActivity extends Activity {
 			
 			// Set switch
 			((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setCheckedCode(light.state.on);
+			
+			// Add preset buttons - if there are any presets		
+			if (presets.containsKey(id)) {
+				LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
+				presetsView.removeAllViews();
+				
+				for (final Preset preset : presets.get(id)) {
+					ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
+					
+					presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
+					
+					presetBut.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							setLightColor(id, preset.xy, preset.brightness);
+						}
+					});
+					
+					presetBut.setOnLongClickListener(new OnLongClickListener() {
+						@Override
+						public boolean onLongClick(View v) {
+							PresetRemoveDialog.newInstance(preset).show(getFragmentManager(), "dialog_remove_preset");
+							return true;
+						}
+					});
+					
+					presetsView.addView(presetBut);
+				}
+			}
+			
+			// Hide the add preset button if the preset threshold has been reached
+			int presetCount = presets.containsKey(id) ? presets.get(id).size() : 0;
+			view.findViewById(R.id.lights_light_color_picker).setVisibility(presetCount < PRESET_LIMIT ? View.VISIBLE : View.GONE);
 		}
 	}
 	
@@ -363,25 +401,6 @@ public class LightsActivity extends Activity {
 	private View addLightView(ViewGroup container, final String id, final Light light) {
 		View view = getLayoutInflater().inflate(R.layout.lights_light, container, false);
 		
-		// Add preset buttons - if there are any
-		if (presets.containsKey(id)) {
-			LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
-			
-			for (final Preset p : presets.get(id)) {
-				ColorButton but = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
-				
-				but.setColor(PHUtilitiesImpl.colorFromXY(p.xy, light.modelid));
-				but.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						setLightColor(id, p.xy, p.brightness);
-					}
-				});
-				
-				presetsView.addView(but);
-			}
-		}
-		
 		// Set switch event handler
 		final FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
 		switchView.setCheckedCode(light.state.on);
@@ -423,7 +442,7 @@ public class LightsActivity extends Activity {
 			}
 		});
 		
-		// Set color picker event handler
+		// Set color picker event handler	
 		Button colorPicker = (Button) view.findViewById(R.id.lights_light_color_picker);
 		colorPicker.setOnClickListener(new OnClickListener() {
 			@Override
@@ -439,7 +458,22 @@ public class LightsActivity extends Activity {
 	}
 	
 	public void addColorPreset(final String id, final float[] xy, final int bri) {
-		datasource.insertPreset(bridge.getSerial(), id, xy, bri);
+		int db_id = datasource.insertPreset(bridge.getSerial(), id, xy, bri);
+		
+		if (!presets.containsKey(id)) {
+			presets.put(id, new ArrayList<Preset>());
+		}
+		presets.get(id).add(new Preset(db_id, id, xy, bri));
+		
+		refreshViews();
+	}
+	
+	public void removeColorPreset(Preset preset) {
+		datasource.removePreset(preset);
+		
+		presets.get(preset.light).remove(preset);
+		
+		refreshViews();
 	}
 	
 	public void setLightColor(final String id, final float[] xy, final int bri) {		
@@ -466,6 +500,7 @@ public class LightsActivity extends Activity {
 				// Toggle successful
 				if (result) {
 					Light light = lights.get(id);
+					light.state.on = true;
 					light.state.colormode = "xy";
 					light.state.xy = new double[] { xy[0], xy[1] };
 					light.state.bri = bri;

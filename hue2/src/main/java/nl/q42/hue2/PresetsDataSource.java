@@ -29,7 +29,7 @@ public class PresetsDataSource {
 		dbHelper.close();
 	}
 
-	public void insertPreset(String bridge_serial, String light_id, float[] xy_color, int brightness) {
+	public int insertPreset(String bridge_serial, String light_id, float[] xy_color, int brightness) {
 		ContentValues values = new ContentValues();
 		
 		values.put("bridge_serial", bridge_serial);
@@ -38,7 +38,11 @@ public class PresetsDataSource {
 		values.put("y_color", xy_color[1]);
 		values.put("brightness", brightness);
 		
-		db.insert("light_presets", null, values);
+		return (int) db.insert("light_presets", null, values);
+	}
+	
+	public void removePreset(Preset preset) {
+		db.delete("light_presets", "id=" + preset.id, null);
 	}
 
 	/**
@@ -70,6 +74,7 @@ public class PresetsDataSource {
 	private Preset cursorToPreset(Cursor cursor) {
 		Preset preset = new Preset();
 		
+		preset.id = cursor.getInt(0);
 		preset.light = cursor.getString(2);
 		preset.xy = new float[] { cursor.getFloat(3), cursor.getFloat(4) };
 		preset.brightness = cursor.getInt(5);

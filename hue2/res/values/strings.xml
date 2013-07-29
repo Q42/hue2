@@ -34,7 +34,12 @@
     <string name="dialog_color_picker_title">Color picker</string>
     <string name="dialog_color_add">Add preset</string>
     
+    <string name="dialog_remove_preset_title">Color preset</string>
+    <string name="dialog_remove_preset">Would you like to remove this preset?</string>
+    
     <string name="dialog_ok">OK</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
     <string name="dialog_apply">Apply</string>
     <string name="dialog_cancel">Cancel</string>
     
