@@ -2,20 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="15dp">
-	
-   	<nl.q42.hue2.views.SatBriSlider
-   	    android:id="@+id/color_sat_bri"
-   	    android:layout_width="match_parent"
-   	    android:layout_height="250dp"
-   	    android:layout_weight="1"
-   	    android:layout_marginRight="15dp" />
     
-    <nl.q42.hue2.views.HueSlider
-        android:id="@+id/color_hue"
-        android:layout_width="60dp"
-        android:layout_height="250dp"
-        android:layout_weight="0" />
+    <nl.q42.hue2.views.TempSlider
+        android:id="@+id/color_temp"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="15dp"
+        android:layout_height="60dp" />
+	
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        
+	   	<nl.q42.hue2.views.SatBriSlider
+	   	    android:id="@+id/color_sat_bri"
+	   	    android:layout_width="match_parent"
+	   	    android:layout_height="250dp"
+	   	    android:layout_weight="1"
+	   	    android:layout_marginRight="15dp" />
+	    
+	    <nl.q42.hue2.views.HueSlider
+	        android:id="@+id/color_hue"
+	        android:layout_width="60dp"
+	        android:layout_height="250dp"
+	        android:layout_weight="0" />
+    </LinearLayout>
     
 </LinearLayout>

@@ -6,6 +6,7 @@ import nl.q42.hue2.Util;
 import nl.q42.hue2.activities.LightsActivity;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
+import nl.q42.hue2.views.TempSlider;
 import nl.q42.javahueapi.models.Light;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -32,9 +33,12 @@ public class ColorDialog extends DialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		View layout = getActivity().getLayoutInflater().inflate(R.layout.dialog_color, null);
 		
+		// Link sliders to each other
 		final HueSlider hueSlider = (HueSlider) layout.findViewById(R.id.color_hue);
 		final SatBriSlider satBriSlider = (SatBriSlider) layout.findViewById(R.id.color_sat_bri);
 		hueSlider.setSatBriSlider(satBriSlider);
+		final TempSlider tempSlider = (TempSlider) layout.findViewById(R.id.color_temp);
+		tempSlider.setSliders(hueSlider, satBriSlider);
 		
 		final Light light = (Light) getArguments().getSerializable("light");
 		
