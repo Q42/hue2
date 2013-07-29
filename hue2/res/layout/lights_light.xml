@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="wrap_content"
     android:layout_marginLeft="15dp"
     android:layout_marginRight="15dp" >
 
@@ -12,40 +11,62 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
+        android:layout_marginBottom="20dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
         android:src="@drawable/light" />
 
-    <TextView
-        android:id="@+id/lights_light_name"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="50dp"
-        android:textSize="16sp" />
-    
-    <Button
-        android:id="@+id/lights_light_color_picker"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginRight="15dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:text="C"/>
+        android:layout_marginLeft="46dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/lights_light_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:textSize="16sp" />
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+            
+            <LinearLayout
+                android:id="@+id/lights_light_presets"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+	        
+	        <Button
+		        android:id="@+id/lights_light_color_picker"
+		        style="?android:attr/buttonStyleSmall"
+		        android:layout_width="40dp"
+		        android:layout_height="32dp"
+		        android:text="@string/add_plus" />
+    	</LinearLayout>
+    </LinearLayout>
 
     <nl.q42.hue2.views.FeedbackSwitch
         android:id="@+id/lights_light_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/lights_light_color_picker"
-        android:layout_centerVertical="true" />
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp" />
 
     <View
         android:id="@+id/lights_light_divider"
         android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:background="@color/divider"
-        android:layout_alignParentBottom="true" />
+        android:layout_alignParentBottom="true"
+        android:background="@color/divider" />
 
 </RelativeLayout>

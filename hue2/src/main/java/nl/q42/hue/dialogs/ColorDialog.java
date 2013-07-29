@@ -47,14 +47,16 @@ public class ColorDialog extends DialogFragment {
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.dialog_color_picker_title)
 			.setView(layout)
-			.setPositiveButton(R.string.dialog_apply, new Dialog.OnClickListener() {
+			.setPositiveButton(R.string.dialog_color_add, new Dialog.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					String model = light.modelid;
 					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), model);
 					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
 					
-					((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);
+					/*((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);*/
+					
+					((LightsActivity) getActivity()).addColorPreset(getArguments().getString("id"), xy, bri);
 				}
 			})
 			.setNegativeButton(R.string.dialog_cancel, new Dialog.OnClickListener() {

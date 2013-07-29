@@ -41,10 +41,6 @@ public class HueSlider extends View {
 		}
 	}
 	
-	/*private int getRGBColor() {
-		return background.getPixel(0, (int) (hue / 360.0f * 512.0f));	
-	}*/
-	
 	@Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);

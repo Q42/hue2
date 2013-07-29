@@ -1,0 +1,5 @@
+<nl.q42.hue2.views.ColorButton xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/lights_light_preset"
+	style="?android:attr/buttonStyleSmall"
+	android:layout_width="40dp"
+	android:layout_height="32dp" />

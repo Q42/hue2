@@ -3,14 +3,20 @@ package nl.q42.hue2.activities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import nl.q42.hue.dialogs.ColorDialog;
 import nl.q42.hue.dialogs.ErrorDialog;
+import nl.q42.hue2.PHUtilitiesImpl;
+import nl.q42.hue2.PresetsDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.models.Bridge;
+import nl.q42.hue2.models.Preset;
+import nl.q42.hue2.views.ColorButton;
 import nl.q42.hue2.views.FeedbackSwitch;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
@@ -49,6 +55,10 @@ public class LightsActivity extends Activity {
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
 	
+	// Database operations are simple, so they can be run in UI thread
+	private PresetsDataSource datasource;
+	private Map<String, List<Preset>> presets;
+	
 	private Timer refreshTimer = new Timer();
 	
 	@SuppressWarnings("unchecked")
@@ -72,6 +82,10 @@ public class LightsActivity extends Activity {
 		
 		setEventHandlers();
 		
+		// Open color preset database
+		datasource = new PresetsDataSource(this);
+		datasource.open();
+		
 		// Check if bridge info was passed
 		if (getIntent().hasExtra("bridge")) {
 			bridge = (Bridge) getIntent().getSerializableExtra("bridge");
@@ -85,6 +99,9 @@ public class LightsActivity extends Activity {
 			startActivity(searchIntent);
 			return;
 		}
+		
+		// Load presets (fast enough to do on UI thread for now)
+		presets = datasource.getAllPresets(bridge);
 		
 		// Set up bridge info
 		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
@@ -125,6 +142,12 @@ public class LightsActivity extends Activity {
 		super.onSaveInstanceState(state);
 		
 		state.putSerializable("lights", lights);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		datasource.close();
 	}
 	
 	@Override
@@ -340,6 +363,25 @@ public class LightsActivity extends Activity {
 	private View addLightView(ViewGroup container, final String id, final Light light) {
 		View view = getLayoutInflater().inflate(R.layout.lights_light, container, false);
 		
+		// Add preset buttons - if there are any
+		if (presets.containsKey(id)) {
+			LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
+			
+			for (final Preset p : presets.get(id)) {
+				ColorButton but = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
+				
+				but.setColor(PHUtilitiesImpl.colorFromXY(p.xy, light.modelid));
+				but.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						setLightColor(id, p.xy, p.brightness);
+					}
+				});
+				
+				presetsView.addView(but);
+			}
+		}
+		
 		// Set switch event handler
 		final FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
 		switchView.setCheckedCode(light.state.on);
@@ -394,6 +436,10 @@ public class LightsActivity extends Activity {
 		container.addView(view);
 		
 		return view;
+	}
+	
+	public void addColorPreset(final String id, final float[] xy, final int bri) {
+		datasource.insertPreset(bridge.getSerial(), id, xy, bri);
 	}
 	
 	public void setLightColor(final String id, final float[] xy, final int bri) {		
