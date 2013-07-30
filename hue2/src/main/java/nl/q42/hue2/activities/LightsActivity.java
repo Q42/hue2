@@ -26,6 +26,7 @@ import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -231,8 +232,33 @@ public class LightsActivity extends Activity {
 	 * Reflect local lights and groups state in UI
 	 */
 	private void refreshViews() {
-		refreshGroups();
-		refreshLights();
+		if (configurationChanged()) {
+			lightViews.clear();
+			lightResultList.removeAllViews();
+			
+			groupViews.clear();
+			groupResultList.removeAllViews();
+			
+			populateViews();
+		} else {		
+			refreshGroups();
+			refreshLights();
+		}
+	}
+	
+	/**
+	 * Check if groups were modified externally
+	 */
+	private boolean configurationChanged() {
+		// Cross-check groups
+		for (String id : groups.keySet()) if (!groupViews.containsKey(id)) return true;
+		for (String id : groupViews.keySet()) if (!groups.containsKey(id)) return true;
+		
+		// Cross-check lights
+		for (String id : lights.keySet()) if (!lightViews.containsKey(id)) return true;
+		for (String id : lightViews.keySet()) if (!lights.containsKey(id)) return true;
+		
+		return false;
 	}
 	
 	private void refreshGroups() {
@@ -284,15 +310,21 @@ public class LightsActivity extends Activity {
 			ArrayList<View> views = lightViews.get(id);
 			Light light = lights.get(id);
 			
-			for (View view : views) {			
-				((TextView) view.findViewById(R.id.lights_light_name)).setText(light.name);
+			for (View view : views) {
+				view.setEnabled(light.state.reachable);
+				
+				TextView nameView = (TextView) view.findViewById(R.id.lights_light_name);
+				nameView.setText(light.name);
+				nameView.setTextColor(light.state.reachable ? Color.WHITE : Color.GRAY);
 				
 				// Set background of light icon to light color
 				final View colorView = view.findViewById(R.id.lights_light_color);
-				colorView.setBackgroundColor(Util.getRGBColor(light));
+				colorView.setBackgroundColor(light.state.reachable ? Util.getRGBColor(light) : Color.BLACK);
 				
 				// Set switch
-				((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setCheckedCode(light.state.on);
+				FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
+				switchView.setEnabled(light.state.reachable);
+				switchView.setCheckedCode(light.state.reachable && light.state.on);
 				
 				// Add preset buttons - if there are any presets	
 				if (lightPresets.containsKey(id)) {
@@ -571,8 +603,8 @@ public class LightsActivity extends Activity {
 		// Set color picker event handler
 		view.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View v) {
-				ColorDialog dialog = ColorDialog.newInstance(id, lights.get(id)); // Make sure to get the latest data
+			public void onClick(View v) {				
+				ColorDialog dialog = ColorDialog.newInstance(id, lights.get(id));
 				dialog.show(getFragmentManager(), "dialog_color");
 			}
 		});
