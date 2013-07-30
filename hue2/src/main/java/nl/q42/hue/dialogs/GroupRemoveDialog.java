@@ -10,7 +10,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
-// TODO: Turn this into a GroupEditDialog that is used for creation, modification and removal
+// TODO: Merge these into a GroupEditDialog that is used for creation, modification and removal
 public class GroupRemoveDialog extends DialogFragment {
 	public static GroupRemoveDialog newInstance(String id, Group group) {
 		GroupRemoveDialog dialog = new GroupRemoveDialog();

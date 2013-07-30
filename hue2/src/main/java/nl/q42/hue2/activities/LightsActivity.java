@@ -10,6 +10,7 @@ import java.util.TimerTask;
 
 import nl.q42.hue.dialogs.ColorDialog;
 import nl.q42.hue.dialogs.ErrorDialog;
+import nl.q42.hue.dialogs.GroupCreateDialog;
 import nl.q42.hue.dialogs.GroupRemoveDialog;
 import nl.q42.hue.dialogs.LightEditDialog;
 import nl.q42.hue.dialogs.PresetRemoveDialog;
@@ -150,6 +151,9 @@ public class LightsActivity extends Activity {
 			Intent searchIntent = new Intent(this, LinkActivity.class);
 			searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(searchIntent);
+			return true;
+		} else if (item.getItemId() == R.id.menu_new_group) {
+			GroupCreateDialog.newInstance(lights).show(getFragmentManager(), "dialog_new_group");
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
@@ -822,6 +826,48 @@ public class LightsActivity extends Activity {
 				// Set successful, update state
 				if (result) {
 					lights.get(id).name = name;
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
+				
+				refreshViews();
+			}
+		}.execute();
+	}
+	
+	public void createGroup(final String name, final List<String> lights) {
+		if (lights.size() == 0) {
+			ErrorDialog.show(getFragmentManager(), R.string.dialog_no_lights_title, R.string.dialog_no_lights);
+			return;
+		}
+		
+		new AsyncTask<Void, Void, Integer>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, false);
+			}
+			
+			@Override
+			protected Integer doInBackground(Void... params) {
+				try {					
+					return service.createGroup(name, lights);
+				} catch (Exception e) {
+					return null;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Integer result) {
+				setActivityIndicator(false, false);
+				
+				// Set successful, update state
+				if (result != null) {
+					Group group = new Group();
+					group.name = name;
+					group.lights = new ArrayList<String>(lights);
+					groups.put(String.valueOf(result), group);
+					
+					repopulateViews();
 				} else {
 					ErrorDialog.showNetworkError(getFragmentManager());
 				}

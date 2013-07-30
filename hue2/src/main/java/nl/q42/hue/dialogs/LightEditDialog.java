@@ -40,7 +40,7 @@ public class LightEditDialog extends DialogFragment {
 			.setPositiveButton(R.string.dialog_save, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					((LightsActivity) getActivity()).setLightName(id, nameView.getText().toString());
+					((LightsActivity) getActivity()).setLightName(id, nameView.getText().toString().trim());
 				}
 			})
 			.setNegativeButton(R.string.dialog_cancel, new OnClickListener() {

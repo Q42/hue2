@@ -6,6 +6,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import nl.q42.javahueapi.Networker.Result;
 import nl.q42.javahueapi.models.BridgeError;
@@ -18,6 +20,7 @@ import nl.q42.javahueapi.models.UserCreateRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+// TODO: JSON string escaping
 public class HueService {
 	
 	private String bridgeIp;
@@ -155,6 +158,24 @@ public class HueService {
 		Result result = Networker.delete("http://" + bridgeIp + "/api/" + username + "/groups/" + id);
 		if (result.getResponseCode() != 200)
 			throw new ApiException(result);
+	}
+	
+	public int createGroup(String name, List<String> lights) throws IOException, ApiException {
+		String lightsStr = "";
+		for (int i = 0; i < lights.size(); i++) {
+			lightsStr += "\"" + lights.get(i) + "\"";
+			if (i < lights.size() - 1) lightsStr += ",";
+		}
+		
+		Result result = Networker.post("http://" + bridgeIp + "/api/" + username + "/groups",
+				"{\"name\":\"" + name.replace("\"", "\\\"") + "\",\"lights\":[" + lightsStr + "]}");
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+		
+		// Parse new group id
+		Matcher m = Pattern.compile("[0-9]+").matcher(result.getBody());
+		m.find();
+		return Integer.valueOf(m.group());
 	}
 	
 	public void setBridgeIp(String bridgeIp) {
