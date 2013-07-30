@@ -380,7 +380,9 @@ public class LightsActivity extends Activity {
 	/**
 	 * Download fresh copy of light state from bridge
 	 */
-	private void refreshState(final boolean flush) {		
+	private void refreshState(final boolean flush) {
+		final HashMap<String, Group> oldGroups = groups;
+		
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected void onPreExecute() {
@@ -423,9 +425,21 @@ public class LightsActivity extends Activity {
 			@Override
 			protected void onPostExecute(Boolean success) {
 				if (success) {
+					// Check if groups changed internally
+					boolean groupChanged = false;
+					for (String id : oldGroups.keySet()) {
+						if (groups.get(id).lights.hashCode() != oldGroups.get(id).lights.hashCode() ||
+							!groups.get(id).name.equals(oldGroups.get(id).name)) {
+							groupChanged = true;
+							break;
+						}
+					}
+					
 					if (flush) {
 						populateViews();
 						resultContainer.setVisibility(View.VISIBLE);
+					} else if (groupChanged) {
+						repopulateViews();
 					} else {
 						refreshViews();
 					}
