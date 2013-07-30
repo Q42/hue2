@@ -16,27 +16,23 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 
 public class PresetRemoveDialog extends DialogFragment {
-	private Preset preset;
-	private Light light;
-	
 	public static PresetRemoveDialog newInstance(Preset preset, Light light) {
 		PresetRemoveDialog dialog = new PresetRemoveDialog();
-		dialog.setPreset(preset);
-		dialog.setLight(light);
+		
+		Bundle args = new Bundle();
+		args.putSerializable("preset", preset);
+		args.putSerializable("light", light);
+		dialog.setArguments(args);
+		
 		return dialog;
-	}
-	
-	public void setPreset(Preset preset) {
-		this.preset = preset;
-	}
-	
-	public void setLight(Light light) {
-		this.light = light;
 	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
+		final Preset preset = (Preset) getArguments().getSerializable("preset");
+		final Light light = (Light) getArguments().getSerializable("light");
+		
 		int size = (int) (getResources().getDisplayMetrics().density * 64.0f);
 		Bitmap bm = Bitmap.createBitmap(size, size, Config.ARGB_8888);
 		bm.eraseColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
