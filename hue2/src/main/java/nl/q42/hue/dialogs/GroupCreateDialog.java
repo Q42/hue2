@@ -18,9 +18,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
-// TODO: Re-purpose this as delete and modify dialog as well
-// TODO: Restore code
 public class GroupCreateDialog extends DialogFragment {
+	private HashMap<String, ToggleButton> lightViews = new HashMap<String, ToggleButton>();
+	
 	public static GroupCreateDialog newInstance(HashMap<String, Light> lights) {
 		GroupCreateDialog dialog = new GroupCreateDialog();
 		
@@ -31,11 +31,23 @@ public class GroupCreateDialog extends DialogFragment {
 		return dialog;
 	}
 	
+	public ArrayList<String> getSelectedLights() {
+		ArrayList<String> lightsChecked = new ArrayList<String>();
+		
+		for (String id : lightViews.keySet()) {
+			if (lightViews.get(id).isChecked()) {
+				lightsChecked.add(id);
+			}
+		}
+		
+		return lightsChecked;
+	}
+	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		
-		
+		outState.putSerializable("selection", getSelectedLights());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -56,7 +68,6 @@ public class GroupCreateDialog extends DialogFragment {
 		
 		// Add toggle button for each light
 		LinearLayout lightList = (LinearLayout) layout.findViewById(R.id.dialog_group_create_lights);
-		final HashMap<String, ToggleButton> lightViews = new HashMap<String, ToggleButton>();
 		
 		for (String id : lightIds) {
 			Light light = lights.get(id);
@@ -73,22 +84,22 @@ public class GroupCreateDialog extends DialogFragment {
 			lightList.addView(tb);
 		}
 		
+		// Restore state
+		if (savedInstanceState != null) {
+			ArrayList<String> selection = (ArrayList<String>) savedInstanceState.getSerializable("selection");
+			for (String id : selection) {
+				lightViews.get(id).setChecked(true);
+			}
+		}
+		
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.dialog_group_create_title)
 			.setView(layout)
 			.setPositiveButton(R.string.dialog_create, new OnClickListener() {
 				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					// Build list of lights checked
-					ArrayList<String> lightsChecked = new ArrayList<String>();					
-					for (String id : lightViews.keySet()) {
-						if (lightViews.get(id).isChecked()) {
-							lightsChecked.add(id);
-						}
-					}
-					
+				public void onClick(DialogInterface dialog, int which) {					
 					// Send request to create
-					((LightsActivity) getActivity()).createGroup(nameView.getText().toString().trim(), lightsChecked);
+					((LightsActivity) getActivity()).createGroup(nameView.getText().toString().trim(), getSelectedLights());
 				}
 			})
 			.setNegativeButton(R.string.dialog_cancel, new OnClickListener() {
