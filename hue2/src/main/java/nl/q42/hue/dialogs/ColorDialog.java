@@ -7,6 +7,7 @@ import nl.q42.hue2.activities.LightsActivity;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
+import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,6 +18,9 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
+/**
+ * Dialog for setting colors and creating presets (for both lights and groups)
+ */
 public class ColorDialog extends DialogFragment {
 	public static ColorDialog newInstance(String id, Light light) {
 		ColorDialog dialog = new ColorDialog();
@@ -24,6 +28,16 @@ public class ColorDialog extends DialogFragment {
 		Bundle args = new Bundle();
 		args.putSerializable("id", id);
 		args.putSerializable("light", light);
+		dialog.setArguments(args);
+		
+		return dialog;
+	}
+	
+	public static ColorDialog newInstance(String id, Group group) {
+		ColorDialog dialog = new ColorDialog();
+		
+		Bundle args = new Bundle();
+		args.putSerializable("id", id);
 		dialog.setArguments(args);
 		
 		return dialog;
@@ -42,12 +56,14 @@ public class ColorDialog extends DialogFragment {
 		
 		final Light light = (Light) getArguments().getSerializable("light");
 		
-		// Fill in current color
-		float hsv[] = new float[3];
-		Color.colorToHSV(Util.getRGBColor(light), hsv);
-		hueSlider.setHue(hsv[0]);
-		satBriSlider.setSaturation(hsv[1]);
-		satBriSlider.setBrightness(light.state.bri / 255.0f);
+		// Fill in current color if editing single light
+		if (light != null) {
+			float hsv[] = new float[3];
+			Color.colorToHSV(Util.getRGBColor(light), hsv);
+			hueSlider.setHue(hsv[0]);
+			satBriSlider.setSaturation(hsv[1]);
+			satBriSlider.setBrightness(light.state.bri / 255.0f);
+		}
 		
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.dialog_color_picker_title)
@@ -57,11 +73,15 @@ public class ColorDialog extends DialogFragment {
 			.setPositiveButton(R.string.dialog_color_add, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					String model = light.modelid;
+					String model = light != null ? light.modelid : null;
 					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), model);
 					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
 					
-					((LightsActivity) getActivity()).addColorPreset(getArguments().getString("id"), xy, bri);
+					if (light == null) {
+						((LightsActivity) getActivity()).addGroupPreset(getArguments().getString("id"), xy, bri);
+					} else {
+						((LightsActivity) getActivity()).addLightPreset(getArguments().getString("id"), xy, bri);
+					}
 				}
 			})
 			
@@ -69,11 +89,15 @@ public class ColorDialog extends DialogFragment {
 			.setNeutralButton(R.string.dialog_color_set, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					String model = light.modelid;
+					String model = light != null ? light.modelid : null;
 					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), model);
 					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
 					
-					((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);
+					if (light == null) {
+						((LightsActivity) getActivity()).setGroupColor(getArguments().getString("id"), xy, bri);
+					} else {
+						((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);
+					}
 				}
 			})
 			

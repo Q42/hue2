@@ -65,7 +65,8 @@ public class LightsActivity extends Activity {
 	
 	// Database operations are simple, so they can be run in UI thread
 	private PresetsDataSource datasource;
-	private Map<String, List<Preset>> presets;
+	private Map<String, List<Preset>> lightPresets;
+	private Map<String, List<Preset>> groupPresets;
 	
 	private Timer refreshTimer = new Timer();
 	
@@ -115,7 +116,8 @@ public class LightsActivity extends Activity {
 		}
 		
 		// Load presets (fast enough to do on UI thread for now)
-		presets = datasource.getAllPresets(bridge);
+		lightPresets = datasource.getLightPresets(bridge);
+		groupPresets = datasource.getGroupPresets(bridge);
 		
 		// Set up bridge info
 		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
@@ -240,6 +242,41 @@ public class LightsActivity extends Activity {
 			Group group = groups.get(id);
 			
 			((TextView) view.findViewById(R.id.lights_group_name)).setText(group.name);
+			
+			// Add preset buttons - if there are any presets	
+			if (groupPresets.containsKey(id)) {
+				LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_group_presets);
+				presetsView.removeAllViews();
+				
+				for (final Preset preset : groupPresets.get(id)) {
+					ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
+					
+					presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, null));
+					
+					presetBut.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							setGroupColor(id, preset.xy, preset.brightness);
+						}
+					});
+					
+					presetBut.setOnLongClickListener(new OnLongClickListener() {
+						@Override
+						public boolean onLongClick(View v) {
+							PresetRemoveDialog.newInstance(preset).show(getFragmentManager(), "dialog_remove_preset");
+							return true;
+						}
+					});
+					
+					presetsView.addView(presetBut);
+				}
+			}
+			
+			if (groupPresets.containsKey(id) && groupPresets.get(id).size() > 0) {
+				view.findViewById(R.id.lights_group_scroller).setVisibility(View.VISIBLE);
+			} else {
+				view.findViewById(R.id.lights_group_scroller).setVisibility(View.GONE);
+			}
 		}
 	}
 	
@@ -258,11 +295,11 @@ public class LightsActivity extends Activity {
 			((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setCheckedCode(light.state.on);
 			
 			// Add preset buttons - if there are any presets	
-			if (presets.containsKey(id)) {
+			if (lightPresets.containsKey(id)) {
 				LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
 				presetsView.removeAllViews();
 				
-				for (final Preset preset : presets.get(id)) {
+				for (final Preset preset : lightPresets.get(id)) {
 					ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
 					
 					presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
@@ -286,7 +323,7 @@ public class LightsActivity extends Activity {
 				}
 			}
 			
-			if (presets.containsKey(id) && presets.get(id).size() > 0) {
+			if (lightPresets.containsKey(id) && lightPresets.get(id).size() > 0) {
 				view.findViewById(R.id.lights_light_scroller).setVisibility(View.VISIBLE);
 			} else {
 				view.findViewById(R.id.lights_light_scroller).setVisibility(View.GONE);
@@ -415,6 +452,15 @@ public class LightsActivity extends Activity {
 	private View addGroupView(ViewGroup container, final String id, final Group group) {
 		View view = getLayoutInflater().inflate(R.layout.lights_group, container, false);
 		
+		// Set color picker event handler
+		view.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ColorDialog dialog = ColorDialog.newInstance(id, groups.get(id)); // Make sure to get the latest data
+				dialog.show(getFragmentManager(), "dialog_color");
+			}
+		});
+		
 		// Set on/off button event handlers
 		OnClickListener listener = new OnClickListener() {
 			@Override
@@ -522,13 +568,24 @@ public class LightsActivity extends Activity {
 		return view;
 	}
 	
-	public void addColorPreset(final String id, final float[] xy, final int bri) {
+	public void addLightPreset(final String id, final float[] xy, final int bri) {
 		int db_id = datasource.insertPreset(bridge.getSerial(), id, null, xy, bri);
 		
-		if (!presets.containsKey(id)) {
-			presets.put(id, new ArrayList<Preset>());
+		if (!lightPresets.containsKey(id)) {
+			lightPresets.put(id, new ArrayList<Preset>());
 		}
-		presets.get(id).add(new Preset(db_id, id, null, xy, bri));
+		lightPresets.get(id).add(new Preset(db_id, id, null, xy, bri));
+		
+		refreshViews();
+	}
+	
+	public void addGroupPreset(final String id, final float[] xy, final int bri) {
+		int db_id = datasource.insertPreset(bridge.getSerial(), null, id, xy, bri);
+		
+		if (!groupPresets.containsKey(id)) {
+			groupPresets.put(id, new ArrayList<Preset>());
+		}
+		groupPresets.get(id).add(new Preset(db_id, null, id, xy, bri));
 		
 		refreshViews();
 	}
@@ -536,9 +593,53 @@ public class LightsActivity extends Activity {
 	public void removeColorPreset(Preset preset) {
 		datasource.removePreset(preset);
 		
-		presets.get(preset.light).remove(preset);
+		if (preset.light != null) {
+			lightPresets.get(preset.light).remove(preset);
+		} else {
+			groupPresets.get(preset.group).remove(preset);
+		}
 		
 		refreshViews();
+	}
+	
+	public void setGroupColor(final String id, final float[] xy, final int bri) {
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, false);
+			}
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				try {					
+					service.setGroupXY(id, xy, bri);
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Boolean result) {
+				setActivityIndicator(false, false);
+				
+				// Set successful, update state
+				if (result) {
+					for (String lid : groups.get(id).lights) {
+						Light light = lights.get(lid);
+						
+						light.state.on = true;
+						light.state.colormode = "xy";
+						light.state.xy = new double[] { xy[0], xy[1] };
+						light.state.bri = bri;
+					}
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
+				
+				refreshViews();
+			}
+		}.execute();
 	}
 	
 	public void setLightColor(final String id, final float[] xy, final int bri) {		
@@ -562,7 +663,7 @@ public class LightsActivity extends Activity {
 			protected void onPostExecute(Boolean result) {
 				setActivityIndicator(false, false);
 				
-				// Toggle successful
+				// Set successful, update state
 				if (result) {
 					Light light = lights.get(id);
 					light.state.on = true;

@@ -27,6 +27,16 @@ public class PresetRemoveDialog extends DialogFragment {
 		return dialog;
 	}
 	
+	public static PresetRemoveDialog newInstance(Preset preset) {
+		PresetRemoveDialog dialog = new PresetRemoveDialog();
+		
+		Bundle args = new Bundle();
+		args.putSerializable("preset", preset);
+		dialog.setArguments(args);
+		
+		return dialog;
+	}
+	
 	@SuppressWarnings("deprecation")
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -35,7 +45,7 @@ public class PresetRemoveDialog extends DialogFragment {
 		
 		int size = (int) (getResources().getDisplayMetrics().density * 64.0f);
 		Bitmap bm = Bitmap.createBitmap(size, size, Config.ARGB_8888);
-		bm.eraseColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
+		bm.eraseColor(PHUtilitiesImpl.colorFromXY(preset.xy, light != null ? light.modelid : null));
 		
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.dialog_remove_preset_title)
