@@ -433,16 +433,37 @@ public class LightsActivity extends Activity {
 		}
 		Collections.sort(groupIds);
 		
-		// For each group, add a header and the lights
+		// Build sorted list of all lights 
+		ArrayList<String> otherLights = new ArrayList<String>();
+		for (String id : lights.keySet()) {
+			otherLights.add(id);
+		}
+		Collections.sort(otherLights);
+		
+		// For each group, add a header and the lights		
 		for (final String id : groupIds) {
 			Group group = groups.get(id);
 			if (id.equals("0")) continue;
+			
+			otherLights.removeAll(group.lights);
 			
 			// Create view
 			addGroupView(groupResultList, id, group);
 		}
 		
-		// TODO: Create group with any remaining lights (named "Other" if there are groups and "Lights" if there are none)
+		// Create group with any remaining lights
+		if (otherLights.size() > 0) {
+			Group otherGroup = new Group();
+			otherGroup.lights = otherLights;
+			
+			if (otherLights.size() == lights.size()) {
+				otherGroup.name = getString(R.string.lights_group_other_only);
+			} else {
+				otherGroup.name = getString(R.string.lights_group_other);
+			}
+			
+			addGroupView(groupResultList, null, otherGroup);
+		}
 	}
 	
 	private View addGroupView(ViewGroup container, final String id, final Group group) {
