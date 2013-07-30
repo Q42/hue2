@@ -144,6 +144,12 @@ public class HueService {
 			throw new ApiException(result);
 	}
 	
+	public void removeGroup(String id) throws IOException, ApiException {
+		Result result = Networker.delete("http://" + bridgeIp + "/api/" + username + "/groups/" + id);
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
 	public void setBridgeIp(String bridgeIp) {
 		this.bridgeIp = bridgeIp;
 	}

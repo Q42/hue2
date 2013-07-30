@@ -10,6 +10,7 @@ import java.util.TimerTask;
 
 import nl.q42.hue.dialogs.ColorDialog;
 import nl.q42.hue.dialogs.ErrorDialog;
+import nl.q42.hue.dialogs.GroupRemoveDialog;
 import nl.q42.hue.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.PresetsDataSource;
@@ -233,17 +234,24 @@ public class LightsActivity extends Activity {
 	 */
 	private void refreshViews() {
 		if (configurationChanged()) {
-			lightViews.clear();
-			lightResultList.removeAllViews();
-			
-			groupViews.clear();
-			groupResultList.removeAllViews();
-			
-			populateViews();
-		} else {		
+			repopulateViews();
+		} else {
 			refreshGroups();
 			refreshLights();
 		}
+	}
+	
+	/**
+	 * Force all views to not just be refreshed, but be recreated
+	 */
+	private void repopulateViews() {
+		lightViews.clear();
+		lightResultList.removeAllViews();
+		
+		groupViews.clear();
+		groupResultList.removeAllViews();
+		
+		populateViews();
 	}
 	
 	/**
@@ -548,6 +556,19 @@ public class LightsActivity extends Activity {
 			}
 		});
 		
+		// Set group remove handler
+		if (!id.equals("0")) {
+			view.setOnLongClickListener(new OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					GroupRemoveDialog dialog = GroupRemoveDialog.newInstance(id, groups.get(id));
+					dialog.show(getFragmentManager(), "dialog_remove_group");
+					
+					return true;
+				}
+			});
+		}
+		
 		// Set on/off button event handlers
 		OnClickListener listener = new OnClickListener() {
 			@Override
@@ -725,6 +746,39 @@ public class LightsActivity extends Activity {
 				}
 				
 				refreshViews();
+			}
+		}.execute();
+	}
+	
+	public void removeGroup(final String id) {
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, true);
+			}
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				try {					
+					service.removeGroup(id);
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Boolean result) {
+				setActivityIndicator(false, true);
+				
+				// Set successful, update state
+				if (result) {
+					groups.remove(id);
+					
+					repopulateViews();
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
 			}
 		}.execute();
 	}

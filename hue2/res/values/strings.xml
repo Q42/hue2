@@ -41,6 +41,8 @@
     <string name="dialog_remove_preset_title">Color preset</string>
     <string name="dialog_remove_preset">Would you like to remove this preset?</string>
     
+    <string name="dialog_remove_group">Would you like to remove this group?</string>
+    
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
@@ -49,6 +51,7 @@
     
     <!-- Menus -->
     <string name="menu_bridges">Search bridges</string>
+    <string name="menu_new_group">New group</string>
     
     <!-- UI things -->
     <string name="add_plus">+</string>

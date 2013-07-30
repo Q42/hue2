@@ -23,6 +23,10 @@ public class Networker {
 		return doNetwork(address, "PUT", body);
 	}
 	
+	public static Result delete(String address) throws IOException {
+		return doNetwork(address, "DELETE", "");
+	}
+	
 	private static Result doNetwork(String address, String requestMethod, String body) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(address).openConnection();
 		try {
