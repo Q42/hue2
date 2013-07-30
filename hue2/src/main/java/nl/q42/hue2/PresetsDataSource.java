@@ -45,6 +45,10 @@ public class PresetsDataSource {
 	public void removePreset(Preset preset) {
 		db.delete("presets", "id=" + preset.id, null);
 	}
+	
+	public void removePresetsGroup(String id) {
+		db.delete("presets", "group_id=?", new String[] { id });
+	}
 
 	/**
 	 * Return mapping from light IDs to color presets

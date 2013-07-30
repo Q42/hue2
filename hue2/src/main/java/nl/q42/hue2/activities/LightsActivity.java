@@ -760,7 +760,7 @@ public class LightsActivity extends Activity {
 			@Override
 			protected Boolean doInBackground(Void... params) {
 				try {					
-					service.removeGroup(id);
+					service.removeGroup(id);					
 					return true;
 				} catch (Exception e) {
 					return false;
@@ -774,6 +774,9 @@ public class LightsActivity extends Activity {
 				// Set successful, update state
 				if (result) {
 					groups.remove(id);
+					
+					groupPresets.remove(id);
+					datasource.removePresetsGroup(id);
 					
 					repopulateViews();
 				} else {
