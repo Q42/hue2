@@ -43,21 +43,21 @@
 				android:singleLine="true"
 				android:textSize="16sp" />
             
+            <Button
+	            android:id="@+id/lights_group_off"
+	            style="?android:attr/buttonStyleSmall"
+	            android:layout_width="51dp"
+	            android:layout_height="40dp"
+	            android:text="@string/lights_off" />
+            
            	<Button
 	            android:id="@+id/lights_group_on"
 	            style="?android:attr/buttonStyleSmall"
 	            android:background="@drawable/blue_button_background"
 	            android:layout_width="51dp"
 	            android:layout_height="40dp"
-	            android:text="@string/lights_on" />
-	        
-	        <Button
-	            android:id="@+id/lights_group_off"
-	            style="?android:attr/buttonStyleSmall"
-	            android:layout_width="51dp"
-	            android:layout_height="40dp"
 	            android:layout_marginRight="15dp"
-	            android:text="@string/lights_off" />
+	            android:text="@string/lights_on" />
         </LinearLayout>
         
         <!-- Scrollable presets -->

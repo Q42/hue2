@@ -50,9 +50,8 @@ public class LightsActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
 	
-	// TODO: Embed this in groups to support lights being in multiple groups
 	private HashMap<String, Light> lights = new HashMap<String, Light>();
-	private HashMap<String, View> lightViews = new HashMap<String, View>();
+	private HashMap<String, ArrayList<View>> lightViews = new HashMap<String, ArrayList<View>>();
 	
 	private HashMap<String, Group> groups = new HashMap<String, Group>();
 	private HashMap<String, View> groupViews = new HashMap<String, View>();
@@ -88,7 +87,7 @@ public class LightsActivity extends Activity {
 		
 		resultContainer = (LinearLayout) findViewById(R.id.lights_result_container);
 		groupResultList = (LinearLayout) findViewById(R.id.lights_groups_list);
-		lightResultList = (LinearLayout) findViewById(R.id.lights_list);
+		lightResultList = (LinearLayout) findViewById(R.id.lights_lights_list);
 		
 		refreshButton.setOnClickListener(new OnClickListener() {			
 			@Override
@@ -282,51 +281,53 @@ public class LightsActivity extends Activity {
 	
 	private void refreshLights() {
 		for (final String id : lightViews.keySet()) {
-			View view = lightViews.get(id);
+			ArrayList<View> views = lightViews.get(id);
 			Light light = lights.get(id);
 			
-			((TextView) view.findViewById(R.id.lights_light_name)).setText(light.name);
-			
-			// Set background of light icon to light color
-			final View colorView = view.findViewById(R.id.lights_light_color);
-			colorView.setBackgroundColor(Util.getRGBColor(light));
-			
-			// Set switch
-			((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setCheckedCode(light.state.on);
-			
-			// Add preset buttons - if there are any presets	
-			if (lightPresets.containsKey(id)) {
-				LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
-				presetsView.removeAllViews();
+			for (View view : views) {			
+				((TextView) view.findViewById(R.id.lights_light_name)).setText(light.name);
 				
-				for (final Preset preset : lightPresets.get(id)) {
-					ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
+				// Set background of light icon to light color
+				final View colorView = view.findViewById(R.id.lights_light_color);
+				colorView.setBackgroundColor(Util.getRGBColor(light));
+				
+				// Set switch
+				((FeedbackSwitch) view.findViewById(R.id.lights_light_switch)).setCheckedCode(light.state.on);
+				
+				// Add preset buttons - if there are any presets	
+				if (lightPresets.containsKey(id)) {
+					LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
+					presetsView.removeAllViews();
 					
-					presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
-					
-					presetBut.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							setLightColor(id, preset.xy, preset.brightness);
-						}
-					});
-					
-					presetBut.setOnLongClickListener(new OnLongClickListener() {
-						@Override
-						public boolean onLongClick(View v) {
-							PresetRemoveDialog.newInstance(preset, lights.get(id)).show(getFragmentManager(), "dialog_remove_preset");
-							return true;
-						}
-					});
-					
-					presetsView.addView(presetBut);
+					for (final Preset preset : lightPresets.get(id)) {
+						ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
+						
+						presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
+						
+						presetBut.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								setLightColor(id, preset.xy, preset.brightness);
+							}
+						});
+						
+						presetBut.setOnLongClickListener(new OnLongClickListener() {
+							@Override
+							public boolean onLongClick(View v) {
+								PresetRemoveDialog.newInstance(preset, lights.get(id)).show(getFragmentManager(), "dialog_remove_preset");
+								return true;
+							}
+						});
+						
+						presetsView.addView(presetBut);
+					}
 				}
-			}
-			
-			if (lightPresets.containsKey(id) && lightPresets.get(id).size() > 0) {
-				view.findViewById(R.id.lights_light_scroller).setVisibility(View.VISIBLE);
-			} else {
-				view.findViewById(R.id.lights_light_scroller).setVisibility(View.GONE);
+				
+				if (lightPresets.containsKey(id) && lightPresets.get(id).size() > 0) {
+					view.findViewById(R.id.lights_light_scroller).setVisibility(View.VISIBLE);
+				} else {
+					view.findViewById(R.id.lights_light_scroller).setVisibility(View.GONE);
+				}
 			}
 		}
 	}
@@ -394,12 +395,12 @@ public class LightsActivity extends Activity {
 	}
 	
 	private void populateViews() {
+		populateGroupList();
 		populateGroups();
-		populateLights();
 		refreshViews();
 	}
 	
-	private void populateGroups() {
+	private void populateGroupList() {
 		View lastView = null;
 		
 		// Sort groups by id
@@ -413,7 +414,7 @@ public class LightsActivity extends Activity {
 			Group group = groups.get(id);
 			
 			// Create view
-			lastView = addGroupView(groupResultList, id, group);
+			lastView = addGroupListView(groupResultList, id, group);
 			
 			// Associate view with group
 			groupViews.put(id, lastView);
@@ -424,32 +425,65 @@ public class LightsActivity extends Activity {
 		}
 	}
 	
-	private void populateLights() {
-		View lastView = null;
+	private void populateGroups() {
+		// Sort groups by id
+		ArrayList<String> groupIds = new ArrayList<String>();
+		for (String id : groups.keySet()) {
+			groupIds.add(id);
+		}
+		Collections.sort(groupIds);
 		
-		// Sort lights by id
+		// For each group, add a header and the lights
+		for (final String id : groupIds) {
+			Group group = groups.get(id);
+			if (id.equals("0")) continue;
+			
+			// Create view
+			addGroupView(groupResultList, id, group);
+		}
+		
+		// TODO: Create group with any remaining lights (named "Other" if there are groups and "Lights" if there are none)
+	}
+	
+	private View addGroupView(ViewGroup container, final String id, final Group group) {
+		View view = getLayoutInflater().inflate(R.layout.lights_group_container, container, false);
+		
+		((TextView) view.findViewById(R.id.lights_group_container_title)).setText(group.name);
+		LinearLayout lightList = (LinearLayout) view.findViewById(R.id.lights_group_container_list);
+		
+		// Sort lights in group by id
 		ArrayList<String> lightIds = new ArrayList<String>();
-		for (String id : lights.keySet()) {
-			lightIds.add(id);
+		for (String lid : group.lights) {
+			lightIds.add(lid);
 		}
 		Collections.sort(lightIds);
 		
-		for (final String id : lightIds) {
-			Light light = lights.get(id);
+		// Create and add view for all lights
+		View lastView = null;
+		
+		for (final String lid : lightIds) {
+			Light light = lights.get(lid);
 			
 			// Create view
-			lastView = addLightView(lightResultList, id, light);
+			lastView = addLightView(lightList, lid, light);
 			
 			// Associate view with light
-			lightViews.put(id, lastView);
+			if (!lightViews.containsKey(lid)) {
+				lightViews.put(lid, new ArrayList<View>());
+			}
+			lightViews.get(lid).add(lastView);
 		}
 		
 		if (lastView != null) {
 			lastView.findViewById(R.id.lights_light_divider).setVisibility(View.INVISIBLE);
 		}
+		
+		container.addView(view);
+		
+		return view;
 	}
 	
-	private View addGroupView(ViewGroup container, final String id, final Group group) {
+	private View addGroupListView(ViewGroup container, final String id, final Group group) {
 		View view = getLayoutInflater().inflate(R.layout.lights_group, container, false);
 		
 		// Set color picker event handler
