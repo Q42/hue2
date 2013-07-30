@@ -9,19 +9,20 @@ public class DBHelper extends SQLiteOpenHelper{
 	private static final int DATABASE_VERSION = 1;
 
     public DBHelper(Context context) {
-        super(context, "light_presets", null, DATABASE_VERSION);
+        super(context, "local_settings", null, DATABASE_VERSION);
     }
 
     public String[] allColumns() {
-    	return new String[]{ "id", "bridge_serial", "light_id", "x_color", "y_color", "brightness" };
+    	return new String[]{ "id", "bridge_serial", "light_id", "group_id", "x_color", "y_color", "brightness" };
     }
     
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE light_presets (" +
+        db.execSQL("CREATE TABLE presets (" +
         		"id INTEGER PRIMARY KEY AUTOINCREMENT," +
         		"bridge_serial TEXT," +
         		"light_id TEXT," +
+        		"group_id TEXT," +
         		"x_color REAL," +
         		"y_color REAL," +
         		"brightness INTEGER)");
@@ -31,7 +32,9 @@ public class DBHelper extends SQLiteOpenHelper{
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		Log.w("hue2", "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
-		db.execSQL("DROP TABLE IF EXISTS light_presets");
+		
+		db.execSQL("DROP TABLE IF EXISTS presets");
+		
 		onCreate(db);
 	}
 }

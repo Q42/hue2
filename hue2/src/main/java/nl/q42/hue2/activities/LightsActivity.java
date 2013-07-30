@@ -20,6 +20,8 @@ import nl.q42.hue2.models.Preset;
 import nl.q42.hue2.views.ColorButton;
 import nl.q42.hue2.views.FeedbackSwitch;
 import nl.q42.javahueapi.HueService;
+import nl.q42.javahueapi.models.FullConfig;
+import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -48,11 +50,16 @@ public class LightsActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
 	
+	// TODO: Embed this in groups to support lights being in multiple groups
 	private HashMap<String, Light> lights = new HashMap<String, Light>();
 	private HashMap<String, View> lightViews = new HashMap<String, View>();
 	
+	private HashMap<String, Group> groups = new HashMap<String, Group>();
+	private HashMap<String, View> groupViews = new HashMap<String, View>();
+	
 	private LinearLayout resultContainer;
-	private LinearLayout resultList;
+	private LinearLayout groupResultList;
+	private LinearLayout lightResultList;
 	private ImageButton refreshButton;
 	private ProgressBar loadingSpinner;
 	
@@ -79,9 +86,15 @@ public class LightsActivity extends Activity {
 		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
 		
 		resultContainer = (LinearLayout) findViewById(R.id.lights_result_container);
-		resultList = (LinearLayout) findViewById(R.id.lights_list);
+		groupResultList = (LinearLayout) findViewById(R.id.lights_groups_list);
+		lightResultList = (LinearLayout) findViewById(R.id.lights_list);
 		
-		setEventHandlers();
+		refreshButton.setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				refreshState(true);
+			}
+		});
 		
 		// Open color preset database
 		datasource = new PresetsDataSource(this);
@@ -113,7 +126,8 @@ public class LightsActivity extends Activity {
 			refreshState(true);
 		} else {
 			lights = (HashMap<String, Light>) savedInstanceState.getSerializable("lights");
-			populateList();
+			groups = (HashMap<String, Group>) savedInstanceState.getSerializable("groups");
+			populateViews();
 		}
 	}
 	
@@ -143,6 +157,7 @@ public class LightsActivity extends Activity {
 		super.onSaveInstanceState(state);
 		
 		state.putSerializable("lights", lights);
+		state.putSerializable("groups", groups);
 	}
 	
 	@Override
@@ -176,59 +191,6 @@ public class LightsActivity extends Activity {
 				});
 			}
 		}, REFRESH_INTERVAL, REFRESH_INTERVAL);
-	}
-	
-	private void setEventHandlers() {
-		refreshButton.setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				refreshState(true);
-			}
-		});
-		
-		// All lights pseudo group buttons
-		OnClickListener listener = new OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				final boolean checked = v.getId() == R.id.lights_all_on;
-				
-				new AsyncTask<Void, Void, Boolean>() {
-					@Override
-					protected void onPreExecute() {
-						setActivityIndicator(true, false);
-					}
-					
-					@Override
-					protected Boolean doInBackground(Void... params) {
-						try {
-							service.turnAllOn(checked);
-							return true;
-						} catch (Exception e) {
-							return false;
-						}
-					}
-					
-					@Override
-					protected void onPostExecute(Boolean result) {						
-						setActivityIndicator(false, false);
-						
-						// Toggle successful
-						if (result) {
-							for (String id : lights.keySet()) {
-								lights.get(id).state.on = checked;
-							}
-						} else {
-							ErrorDialog.showNetworkError(getFragmentManager());
-						}
-						
-						refreshViews();
-					}
-				}.execute();
-			}
-		};
-		
-		findViewById(R.id.lights_all_on).setOnClickListener(listener);
-		findViewById(R.id.lights_all_off).setOnClickListener(listener);
 	}
 	
 	/**
@@ -265,9 +227,23 @@ public class LightsActivity extends Activity {
 	}
 	
 	/**
-	 * Reflect local lights state in UI
+	 * Reflect local lights and groups state in UI
 	 */
 	private void refreshViews() {
+		refreshGroups();
+		refreshLights();
+	}
+	
+	private void refreshGroups() {
+		for (final String id : groupViews.keySet()) {
+			View view = groupViews.get(id);
+			Group group = groups.get(id);
+			
+			((TextView) view.findViewById(R.id.lights_group_name)).setText(group.name);
+		}
+	}
+	
+	private void refreshLights() {
 		for (final String id : lightViews.keySet()) {
 			View view = lightViews.get(id);
 			Light light = lights.get(id);
@@ -329,7 +305,11 @@ public class LightsActivity extends Activity {
 				if (flush) {
 					lights.clear();
 					lightViews.clear();
-					resultList.removeAllViews();
+					lightResultList.removeAllViews();
+					
+					groups.clear();
+					groupViews.clear();
+					groupResultList.removeAllViews();
 					
 					resultContainer.setVisibility(View.INVISIBLE);
 					
@@ -340,8 +320,17 @@ public class LightsActivity extends Activity {
 			@Override
 			protected Boolean doInBackground(Void... params) {
 				try {
-					// getLights() returns no state info
-					lights = new HashMap<String, Light>(service.getFullConfig().lights);
+					FullConfig cfg = service.getFullConfig();
+					
+					lights = new HashMap<String, Light>(cfg.lights);
+					groups = new HashMap<String, Group>(cfg.groups);
+					
+					// Add pseudo group with all lights
+					Group allGroup = new Group();
+					allGroup.name = getString(R.string.lights_group_all);
+					allGroup.lights = new ArrayList<String>(lights.keySet());
+					groups.put("0", allGroup);
+					
 					return true;
 				} catch (Exception e) {
 					return false;
@@ -352,7 +341,7 @@ public class LightsActivity extends Activity {
 			protected void onPostExecute(Boolean success) {
 				if (success) {
 					if (flush) {
-						populateList();
+						populateViews();
 						resultContainer.setVisibility(View.VISIBLE);
 					} else {
 						refreshViews();
@@ -367,8 +356,38 @@ public class LightsActivity extends Activity {
 		}.execute();
 	}
 	
-	private void populateList() {
-		ViewGroup container = (ViewGroup) findViewById(R.id.lights_list);
+	private void populateViews() {
+		populateGroups();
+		populateLights();
+		refreshViews();
+	}
+	
+	private void populateGroups() {
+		View lastView = null;
+		
+		// Sort groups by id
+		ArrayList<String> groupIds = new ArrayList<String>();
+		for (String id : groups.keySet()) {
+			groupIds.add(id);
+		}
+		Collections.sort(groupIds);
+		
+		for (final String id : groupIds) {
+			Group group = groups.get(id);
+			
+			// Create view
+			lastView = addGroupView(groupResultList, id, group);
+			
+			// Associate view with group
+			groupViews.put(id, lastView);
+		}
+		
+		if (lastView != null) {
+			lastView.findViewById(R.id.lights_group_divider).setVisibility(View.INVISIBLE);
+		}
+	}
+	
+	private void populateLights() {
 		View lastView = null;
 		
 		// Sort lights by id
@@ -382,7 +401,7 @@ public class LightsActivity extends Activity {
 			Light light = lights.get(id);
 			
 			// Create view
-			lastView = addLightView(container, id, light);
+			lastView = addLightView(lightResultList, id, light);
 			
 			// Associate view with light
 			lightViews.put(id, lastView);
@@ -391,9 +410,58 @@ public class LightsActivity extends Activity {
 		if (lastView != null) {
 			lastView.findViewById(R.id.lights_light_divider).setVisibility(View.INVISIBLE);
 		}
+	}
+	
+	private View addGroupView(ViewGroup container, final String id, final Group group) {
+		View view = getLayoutInflater().inflate(R.layout.lights_group, container, false);
 		
-		// Populate UI with state
-		refreshViews();
+		// Set on/off button event handlers
+		OnClickListener listener = new OnClickListener() {
+			@Override
+			public void onClick(final View v) {
+				final boolean checked = v.getId() == R.id.lights_group_on;
+				
+				new AsyncTask<Void, Void, Boolean>() {
+					@Override
+					protected void onPreExecute() {
+						setActivityIndicator(true, false);
+					}
+					
+					@Override
+					protected Boolean doInBackground(Void... params) {
+						try {
+							service.turnGroupOn(id, checked);
+							return true;
+						} catch (Exception e) {
+							return false;
+						}
+					}
+					
+					@Override
+					protected void onPostExecute(Boolean result) {						
+						setActivityIndicator(false, false);
+						
+						// Toggle successful
+						if (result) {
+							for (String lid : groups.get(id).lights) {
+								lights.get(lid).state.on = checked;
+							}
+						} else {
+							ErrorDialog.showNetworkError(getFragmentManager());
+						}
+						
+						refreshViews();
+					}
+				}.execute();
+			}
+		};
+		
+		view.findViewById(R.id.lights_group_on).setOnClickListener(listener);
+		view.findViewById(R.id.lights_group_off).setOnClickListener(listener);
+		
+		container.addView(view);
+		
+		return view;
 	}
 	
 	private View addLightView(ViewGroup container, final String id, final Light light) {
@@ -455,12 +523,12 @@ public class LightsActivity extends Activity {
 	}
 	
 	public void addColorPreset(final String id, final float[] xy, final int bri) {
-		int db_id = datasource.insertPreset(bridge.getSerial(), id, xy, bri);
+		int db_id = datasource.insertPreset(bridge.getSerial(), id, null, xy, bri);
 		
 		if (!presets.containsKey(id)) {
 			presets.put(id, new ArrayList<Preset>());
 		}
-		presets.get(id).add(new Preset(db_id, id, xy, bri));
+		presets.get(id).add(new Preset(db_id, id, null, xy, bri));
 		
 		refreshViews();
 	}

@@ -5,7 +5,7 @@ import java.util.Map;
 public class FullConfig {
 	public Map<String, Light> lights;
 	
-	// TODO groups
+	public Map<String, Group> groups;
 	
 	public Config config;
 	

@@ -9,7 +9,8 @@
     <!-- Lights view -->
     <string name="lights_groups">Groups</string>
     <string name="lights_lights">Lights</string>
-    <string name="lights_all">All lights</string>
+    
+    <string name="lights_group_all">All lights</string>
     
     <string name="lights_on">ON</string>
     <string name="lights_off">OFF</string>
