@@ -123,6 +123,13 @@ public class HueService {
 			throw new ApiException(result);
 	}
 	
+	public void setLightName(String id, String name) throws IOException, ApiException {
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id,
+				"{\"name\":\"" + name.replace("\"", "\\\"") + "\"}");
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
 	public void setLightXY(String id, float[] xy, int bri) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state",
 				"{\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}");

@@ -11,6 +11,7 @@ import java.util.TimerTask;
 import nl.q42.hue.dialogs.ColorDialog;
 import nl.q42.hue.dialogs.ErrorDialog;
 import nl.q42.hue.dialogs.GroupRemoveDialog;
+import nl.q42.hue.dialogs.LightEditDialog;
 import nl.q42.hue.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.PresetsDataSource;
@@ -630,6 +631,17 @@ public class LightsActivity extends Activity {
 			}
 		});
 		
+		// Set name changing event handler
+		view.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				LightEditDialog dialog = LightEditDialog.newInstance(id, lights.get(id));
+				dialog.show(getFragmentManager(), "dialog_edit_light");
+				
+				return true;
+			}
+		});
+		
 		// Set switch event handler
 		final FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
 		switchView.setCheckedCode(light.state.on);
@@ -782,6 +794,39 @@ public class LightsActivity extends Activity {
 				} else {
 					ErrorDialog.showNetworkError(getFragmentManager());
 				}
+			}
+		}.execute();
+	}
+	
+	public void setLightName(final String id, final String name) {
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, false);
+			}
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				try {					
+					service.setLightName(id, name);
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Boolean result) {
+				setActivityIndicator(false, false);
+				
+				// Set successful, update state
+				if (result) {
+					lights.get(id).name = name;
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
+				
+				refreshViews();
 			}
 		}.execute();
 	}

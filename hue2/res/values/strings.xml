@@ -43,10 +43,14 @@
     
     <string name="dialog_remove_group">Would you like to remove this group?</string>
     
+    <string name="dialog_light_title">Edit light</string>
+    <string name="dialog_light_name">Name:</string>
+    
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
     <string name="dialog_apply">Apply</string>
+    <string name="dialog_save">Save</string>
     <string name="dialog_cancel">Cancel</string>
     
     <!-- Menus -->
