@@ -2,139 +2,107 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:padding="15dp"
+    android:orientation="vertical">
     
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="15dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
+    <!-- TODO: Simplify layout code -->
         
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="7dp"
-            android:text="@string/light_light"
-            android:textAllCaps="true"
-            android:textColor="#33b5e5"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="15dp"
-            android:background="#33b5e5" />
-        
-        <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_marginLeft="15dp"
-	        android:layout_marginRight="15dp"
-	        android:layout_marginBottom="15dp"
-	        android:orientation="horizontal">
-	        
-	        <TextView
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_weight="0"
-	            android:layout_marginRight="5dp"
-	            android:text="@string/light_name"
-	            android:textSize="18sp" />
-	
-	        <EditText
-	            android:id="@+id/light_name"
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:layout_weight="1"
-	            android:inputType="textCapWords"
-	            android:maxLength="32" />
-        </LinearLayout>
-        
-        <!-- Color picker -->
-	    
-	    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="7dp"
-            android:text="@string/light_color"
-            android:textAllCaps="true"
-            android:textColor="#33b5e5"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#33b5e5" />
-	    
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:orientation="vertical">
-	        
-		    <nl.q42.hue2.views.TempSlider
-		        android:id="@+id/light_color_temp"
-		        android:layout_width="match_parent"
-		        android:layout_marginBottom="15dp"
-		        android:layout_height="50dp" />
-			
-		    <LinearLayout
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content">
-		        
-			   	<nl.q42.hue2.views.SatBriSlider
-			   	    android:id="@+id/light_color_sat_bri"
-			   	    android:layout_width="match_parent"
-			   	    android:layout_height="match_parent"
-			   	    android:layout_weight="1"
-			   	    android:layout_marginRight="15dp" />
-			    
-			    <nl.q42.hue2.views.HueSlider
-			        android:id="@+id/light_color_hue"
-			        android:layout_width="50dp"
-			        android:layout_height="match_parent"
-			        android:layout_weight="0" />
-		    </LinearLayout>
-	    </LinearLayout>
-    </LinearLayout>
-    
-	<!-- Bottom buttons -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="7dp"
+        android:text="@string/light_light"
+        android:textAllCaps="true"
+        android:textColor="#33b5e5"
+        android:textStyle="bold" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_weight="0"
-        android:background="#484848" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/light_cancel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/dark_button_background"
-            android:text="@string/dialog_cancel" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#484848" />
-
-        <Button
-            android:id="@+id/light_save"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/dark_button_background"
-            android:text="@string/dialog_save" />
-    </LinearLayout>
+        android:layout_marginBottom="15dp"
+        android:background="#33b5e5" />
     
+    <LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="15dp"
+	    android:layout_marginRight="15dp"
+	    android:layout_marginBottom="15dp"
+	    android:orientation="horizontal">
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="0"
+	        android:layout_marginRight="5dp"
+	        android:text="@string/light_name"
+	        android:textSize="18sp" />
+	
+	    <EditText
+	        android:id="@+id/light_name"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:inputType="textCapWords"
+	        android:maxLength="32" />
+	</LinearLayout>
+	   
+	<!-- Color picker -->
+	
+	<TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginBottom="5dp"
+       android:layout_marginLeft="7dp"
+       android:text="@string/light_color"
+       android:textAllCaps="true"
+       android:textColor="#33b5e5"
+       android:textStyle="bold" />
+	
+   <View
+       android:layout_width="match_parent"
+       android:layout_height="1dp"
+       android:background="#33b5e5" />
+
+   <LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="15dp"
+		android:orientation="vertical">
+    
+		<nl.q42.hue2.views.TempSlider
+			android:id="@+id/light_color_temp"
+			android:layout_width="match_parent"
+			android:layout_marginBottom="15dp"
+			android:layout_height="50dp" />
+	
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_weight="1">
+			    
+			<nl.q42.hue2.views.SatBriSlider
+			    android:id="@+id/light_color_sat_bri"
+			    android:layout_width="match_parent"
+			    android:layout_height="match_parent"
+			    android:layout_weight="1"
+			    android:layout_marginRight="15dp" />
+			 
+			<nl.q42.hue2.views.HueSlider
+				android:id="@+id/light_color_hue"
+				android:layout_width="50dp"
+				android:layout_height="match_parent"
+				android:layout_weight="0" />
+		</LinearLayout>
+		
+		<Button
+		    android:id="@+id/light_add_preset"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginTop="15dp"
+		    android:layout_weight="0"
+		    android:text="@string/light_add_preset" />
+
+	</LinearLayout>
 </LinearLayout>

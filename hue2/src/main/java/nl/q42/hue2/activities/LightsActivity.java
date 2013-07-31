@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -70,8 +69,8 @@ public class LightsActivity extends Activity {
 	
 	// Database operations are simple, so they can be run in UI thread
 	private PresetsDataSource datasource;
-	private Map<String, List<Preset>> lightPresets;
-	private Map<String, List<Preset>> groupPresets;
+	private HashMap<String, ArrayList<Preset>> lightPresets;
+	private HashMap<String, ArrayList<Preset>> groupPresets;
 	
 	private Timer refreshTimer = new Timer();
 	
@@ -190,20 +189,25 @@ public class LightsActivity extends Activity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == ACTIVITY_LIGHT && resultCode == RESULT_OK) {
-			// Check which values changed and start requests
+		if (requestCode == ACTIVITY_LIGHT && resultCode == RESULT_OK) {			
 			String id = data.getStringExtra("id");
 			Light light = lights.get(id);
 			String name = data.getStringExtra("name");
 			float[] xy = data.getFloatArrayExtra("xy");
 			int bri = data.getIntExtra("bri", 0);
 			
-			if (!light.name.equals(name)) {
-				setLightName(id, name);
-			}
-			
-			if (data.getBooleanExtra("colorChanged", false)) {
-				setLightColor(id, xy, bri);
+			// If we're just adding a preset, do that
+			if (data.getBooleanExtra("addPreset", false)) {
+				addLightPreset(id, xy, bri);
+			} else {			
+				// Otherwise check which values changed and start requests
+				if (!light.name.equals(name)) {
+					setLightName(id, name);
+				}
+				
+				if (data.getBooleanExtra("colorChanged", false)) {
+					setLightColor(id, xy, bri);
+				}
 			}
 		}
 	}
@@ -362,10 +366,10 @@ public class LightsActivity extends Activity {
 				switchView.setCheckedCode(light.state.reachable && light.state.on);
 				
 				// Add preset buttons - if there are any presets	
-				if (lightPresets.containsKey(id)) {
-					LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
-					presetsView.removeAllViews();
+				LinearLayout presetsView = (LinearLayout) view.findViewById(R.id.lights_light_presets);
+				presetsView.removeAllViews();
 					
+				if (lightPresets.containsKey(id)) {
 					for (final Preset preset : lightPresets.get(id)) {
 						ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
 						

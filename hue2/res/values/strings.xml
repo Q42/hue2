@@ -20,6 +20,7 @@
     <string name="light_light">Light</string>
     <string name="light_name">Name:</string>
     <string name="light_color">Color</string>
+    <string name="light_add_preset">Save as preset</string>
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
@@ -67,4 +68,5 @@
     <!-- Menus -->
     <string name="menu_bridges">Search bridges</string>
     <string name="menu_new_group">New group</string>
+    <string name="menu_save">Save</string>
 </resources>

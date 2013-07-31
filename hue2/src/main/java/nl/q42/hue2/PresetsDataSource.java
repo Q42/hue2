@@ -53,16 +53,16 @@ public class PresetsDataSource {
 	/**
 	 * Return mapping from light IDs to color presets
 	 */
-	public Map<String, List<Preset>> getLightPresets(Bridge bridge) {
+	public HashMap<String, ArrayList<Preset>> getLightPresets(Bridge bridge) {
 		return getPresets(bridge, "group_id IS NULL");
 	}
 	
-	public Map<String, List<Preset>> getGroupPresets(Bridge bridge) {
+	public HashMap<String, ArrayList<Preset>> getGroupPresets(Bridge bridge) {
 		return getPresets(bridge, "light_id IS NULL");
 	}
 	
-	private Map<String, List<Preset>> getPresets(Bridge bridge, String where) {
-		Map<String, List<Preset>> presets = new HashMap<String, List<Preset>>();
+	private HashMap<String, ArrayList<Preset>> getPresets(Bridge bridge, String where) {
+		HashMap<String, ArrayList<Preset>> presets = new HashMap<String, ArrayList<Preset>>();
 
 		Cursor cursor = db.query("presets", dbHelper.allColumns(), "bridge_serial=? AND " + where, new String[]{bridge.getSerial()}, null, null, null);
 		cursor.moveToFirst();

@@ -11,6 +11,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -35,6 +38,7 @@ public class LightActivity extends Activity {
 		// UI setup
 		setContentView(R.layout.activity_light);
 		setTitle(light.name);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		nameView = (EditText) findViewById(R.id.light_name);
 		hueSlider = (HueSlider) findViewById(R.id.light_color_hue);
@@ -43,35 +47,6 @@ public class LightActivity extends Activity {
 		
 		hueSlider.setSatBriSlider(satBriSlider);
 		tempSlider.setSliders(hueSlider, satBriSlider);
-		
-		findViewById(R.id.light_cancel).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setResult(RESULT_CANCELED);
-				finish();
-			}
-		});
-		
-		findViewById(R.id.light_save).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String model = light != null ? light.modelid : null;
-				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), model);
-				int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-				
-				Intent result = new Intent();
-				result.putExtra("id", id);
-				result.putExtra("name", nameView.getText().toString().trim());
-				result.putExtra("xy", xy);
-				result.putExtra("bri", bri);
-				
-				// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
-				result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
-				
-				setResult(RESULT_OK, result);
-				finish();	
-			}
-		});
 		
 		// Fill in current name/color in UI or restore previous
 		if (savedInstanceState == null) {
@@ -82,6 +57,60 @@ public class LightActivity extends Activity {
 			hueSlider.setHue(hsv[0]);
 			satBriSlider.setSaturation(hsv[1]);
 			satBriSlider.setBrightness(light.state.bri / 255.0f);
+		}
+		
+		// Add preset adding event handler
+		findViewById(R.id.light_add_preset).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
+				int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+				
+				Intent result = new Intent();
+				result.putExtra("addPreset", true);
+				result.putExtra("id", id);
+				result.putExtra("xy", xy);
+				result.putExtra("bri", bri);
+				
+				setResult(RESULT_OK, result);
+				finish();
+			}
+		});
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.light, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == android.R.id.home) {
+			setResult(RESULT_CANCELED);
+			finish();
+			
+			return true;
+		} else if (item.getItemId() == R.id.menu_save) {
+			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
+			int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+			
+			Intent result = new Intent();
+			result.putExtra("id", id);
+			result.putExtra("name", nameView.getText().toString().trim());
+			result.putExtra("xy", xy);
+			result.putExtra("bri", bri);
+			
+			// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
+			result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
+			
+			setResult(RESULT_OK, result);
+			finish();
+			
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
 		}
 	}
 }
