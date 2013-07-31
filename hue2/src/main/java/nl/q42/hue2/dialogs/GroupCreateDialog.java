@@ -1,4 +1,4 @@
-package nl.q42.hue.dialogs;
+package nl.q42.hue2.dialogs;
 
 import java.util.ArrayList;
 import java.util.Collections;

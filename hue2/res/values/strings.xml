@@ -2,13 +2,12 @@
 <resources>
     <string name="app_name">Hue2</string>
     
-    <!-- Link view -->
+    <!-- Link activity -->
     <string name="link_local">Local bridges</string>
     <string name="link_empty">No bridges found so far.</string>
     
-    <!-- Lights view -->
+    <!-- Lights activity -->
     <string name="lights_groups">Groups</string>
-    <string name="lights_lights">Lights</string>
     
     <string name="lights_group_all">All lights</string>
     <string name="lights_group_other">Other</string>
@@ -16,6 +15,11 @@
     
     <string name="lights_on">ON</string>
     <string name="lights_off">OFF</string>
+    
+    <!-- Light activity -->
+    <string name="light_light">Light</string>
+    <string name="light_name">Name:</string>
+    <string name="light_color">Color</string>
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
@@ -56,7 +60,6 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
-    <string name="dialog_apply">Apply</string>
     <string name="dialog_save">Save</string>
     <string name="dialog_create">Create</string>
     <string name="dialog_cancel">Cancel</string>
@@ -64,7 +67,4 @@
     <!-- Menus -->
     <string name="menu_bridges">Search bridges</string>
     <string name="menu_new_group">New group</string>
-    
-    <!-- UI things -->
-    <string name="add_plus">+</string>
 </resources>

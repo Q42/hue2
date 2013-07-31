@@ -8,6 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,11 +25,38 @@ public class SatBriSlider extends View {
 	private float sat = 0.95f;
 	private float bri = 0.95f;
 	
+	private boolean userSet = false;
+	
 	public SatBriSlider(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
 		// Load saturation and brightness foreground
 		foreground = BitmapFactory.decodeResource(context.getResources(), R.drawable.sat_bri_foreground);
+	}
+	
+	public boolean hasUserSet() {
+		return userSet;
+	}
+	
+	@Override
+	public Parcelable onSaveInstanceState() {
+		Bundle bundle = new Bundle();
+		bundle.putParcelable("savedInstanceState", super.onSaveInstanceState());
+		bundle.putFloat("hue", hue);
+		bundle.putFloat("sat", sat);
+		bundle.putFloat("bri", bri);
+		
+		return bundle;
+	}
+	
+	@Override
+	public void onRestoreInstanceState(Parcelable savedInstanceState) {
+		Bundle bundle = (Bundle) savedInstanceState;
+		
+		super.onRestoreInstanceState(bundle.getParcelable("savedInstanceState"));
+		setHue(bundle.getFloat("hue"));
+		setSaturation(bundle.getFloat("sat"));
+		setBrightness(bundle.getFloat("bri"));
 	}
 	
 	public void setHue(float hue) {
@@ -110,6 +139,7 @@ public class SatBriSlider extends View {
 			case MotionEvent.ACTION_MOVE:
 				sat = Math.max(0.0f, Math.min(event.getX() / viewRect.right, 1.0f));
 				bri = Math.max(0.0f, Math.min(1.0f - event.getY() / viewRect.bottom, 1.0f));
+				userSet = true;
 				invalidate();
 				break;
 		}

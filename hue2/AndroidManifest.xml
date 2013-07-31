@@ -33,7 +33,10 @@
         </activity>
         
         <!-- Activity for selecting bridge -->
-        <activity android:name=".activities.LinkActivity"></activity>        
+        <activity android:name=".activities.LinkActivity"></activity>
+        
+        <!-- Activity for editing light -->
+        <activity android:name=".activities.LightActivity" android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

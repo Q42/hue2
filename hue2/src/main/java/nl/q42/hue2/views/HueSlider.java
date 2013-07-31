@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,11 +24,34 @@ public class HueSlider extends View {
 	
 	private SatBriSlider satBri;
 	
+	private boolean userSet = false;
+	
 	public HueSlider(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
 		// Load hue background
 		background = BitmapFactory.decodeResource(context.getResources(), R.drawable.hue_slider);
+	}
+	
+	public boolean hasUserSet() {
+		return userSet;
+	}
+	
+	@Override
+	public Parcelable onSaveInstanceState() {
+		Bundle bundle = new Bundle();
+		bundle.putParcelable("savedInstanceState", super.onSaveInstanceState());
+		bundle.putFloat("hue", hue);
+		
+		return bundle;
+	}
+	
+	@Override
+	public void onRestoreInstanceState(Parcelable savedInstanceState) {
+		Bundle bundle = (Bundle) savedInstanceState;
+		
+		super.onRestoreInstanceState(bundle.getParcelable("savedInstanceState"));
+		setHue(bundle.getFloat("hue"));
 	}
 	
 	public void setSatBriSlider(SatBriSlider slider) {
@@ -77,6 +102,7 @@ public class HueSlider extends View {
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_MOVE:
 				hue = 360.0f - Math.max(0.0f, Math.min(event.getY() / viewRect.bottom * 360.0f, 359.0f));
+				userSet = true;
 				if (satBri != null) satBri.setHue(hue);
 				invalidate();
 				break;

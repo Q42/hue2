@@ -8,16 +8,15 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import nl.q42.hue.dialogs.ColorDialog;
-import nl.q42.hue.dialogs.ErrorDialog;
-import nl.q42.hue.dialogs.GroupCreateDialog;
-import nl.q42.hue.dialogs.GroupRemoveDialog;
-import nl.q42.hue.dialogs.LightEditDialog;
-import nl.q42.hue.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.PresetsDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
+import nl.q42.hue2.dialogs.ColorDialog;
+import nl.q42.hue2.dialogs.ErrorDialog;
+import nl.q42.hue2.dialogs.GroupCreateDialog;
+import nl.q42.hue2.dialogs.GroupRemoveDialog;
+import nl.q42.hue2.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.hue2.models.Preset;
 import nl.q42.hue2.views.ColorButton;
@@ -50,6 +49,9 @@ import android.widget.TextView;
 public class LightsActivity extends Activity {
 	// It takes extremely long for the server to update its data, so this interval is reasonable
 	private final static long REFRESH_INTERVAL = 5000;
+	
+	// startActivityForResult identifiers
+	private final static int ACTIVITY_LIGHT = 1;
 	
 	private Bridge bridge;
 	private HueService service;
@@ -184,6 +186,26 @@ public class LightsActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		startRefreshTimer();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == ACTIVITY_LIGHT && resultCode == RESULT_OK) {
+			// Check which values changed and start requests
+			String id = data.getStringExtra("id");
+			Light light = lights.get(id);
+			String name = data.getStringExtra("name");
+			float[] xy = data.getFloatArrayExtra("xy");
+			int bri = data.getIntExtra("bri", 0);
+			
+			if (!light.name.equals(name)) {
+				setLightName(id, name);
+			}
+			
+			if (data.getBooleanExtra("colorChanged", false)) {
+				setLightColor(id, xy, bri);
+			}
+		}
 	}
 	
 	private void startRefreshTimer() {
@@ -640,23 +662,14 @@ public class LightsActivity extends Activity {
 	private View addLightView(ViewGroup container, final String id, final Light light) {
 		View view = getLayoutInflater().inflate(R.layout.lights_light, container, false);
 		
-		// Set color picker event handler
+		// Set light edit event handler
 		view.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {				
-				ColorDialog dialog = ColorDialog.newInstance(id, lights.get(id));
-				dialog.show(getFragmentManager(), "dialog_color");
-			}
-		});
-		
-		// Set name changing event handler
-		view.setOnLongClickListener(new OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				LightEditDialog dialog = LightEditDialog.newInstance(id, lights.get(id));
-				dialog.show(getFragmentManager(), "dialog_edit_light");
-				
-				return true;
+				Intent lightIntent = new Intent(LightsActivity.this, LightActivity.class);
+				lightIntent.putExtra("id", id);
+				lightIntent.putExtra("light", lights.get(id));
+				startActivityForResult(lightIntent, ACTIVITY_LIGHT);
 			}
 		});
 		

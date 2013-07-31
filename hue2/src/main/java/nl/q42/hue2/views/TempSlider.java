@@ -9,6 +9,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,11 +27,34 @@ public class TempSlider extends View {
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
 	
+	private boolean userSet = false;
+	
 	public TempSlider(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
 		// Load color temperature foreground
 		background = BitmapFactory.decodeResource(context.getResources(), R.drawable.color_temperature_strip);
+	}
+	
+	public boolean hasUserSet() {
+		return userSet;
+	}
+	
+	@Override
+	public Parcelable onSaveInstanceState() {
+		Bundle bundle = new Bundle();
+		bundle.putParcelable("savedInstanceState", super.onSaveInstanceState());
+		bundle.putFloat("temp", temp);
+		
+		return bundle;
+	}
+	
+	@Override
+	public void onRestoreInstanceState(Parcelable savedInstanceState) {
+		Bundle bundle = (Bundle) savedInstanceState;
+		
+		super.onRestoreInstanceState(bundle.getParcelable("savedInstanceState"));
+		temp = bundle.getFloat("temp");
 	}
 	
 	public void setSliders(HueSlider slider, SatBriSlider slider2) {
@@ -84,6 +109,7 @@ public class TempSlider extends View {
 					satBriSlider.setBrightness(hsv[2]);
 				}
 				
+				userSet = true;
 				invalidate();
 				break;
 		}

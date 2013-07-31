@@ -1,4 +1,4 @@
-package nl.q42.hue.dialogs;
+package nl.q42.hue2.dialogs;
 
 import nl.q42.hue2.R;
 import nl.q42.hue2.activities.LinkActivity;

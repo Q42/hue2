@@ -295,7 +295,7 @@ public class PHUtilitiesImpl {
 	private static float getDistanceBetweenTwoPoints(PointF one, PointF two) {
 		float dx = one.x - two.x; // horizontal difference
 		float dy = one.y - two.y; // vertical difference
-		float dist = FloatMath.sqrt(dx * dx + dy * dy);
+		float dist = (float) Math.sqrt(dx * dx + dy * dy);
 
 		return dist;
 	}

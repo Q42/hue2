@@ -13,12 +13,12 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import nl.q42.hue.dialogs.BridgeInfoDialog;
-import nl.q42.hue.dialogs.BridgeLinkDialog;
-import nl.q42.hue.dialogs.ErrorDialog;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.adapters.BridgeAdapter;
+import nl.q42.hue2.dialogs.BridgeInfoDialog;
+import nl.q42.hue2.dialogs.BridgeLinkDialog;
+import nl.q42.hue2.dialogs.ErrorDialog;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.HueService.ApiException;
