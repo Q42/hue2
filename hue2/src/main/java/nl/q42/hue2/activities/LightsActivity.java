@@ -188,29 +188,52 @@ public class LightsActivity extends Activity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == ACTIVITY_LIGHT && resultCode == RESULT_OK) {			
+		if (resultCode == RESULT_OK) {
 			String id = data.getStringExtra("id");
-			Light light = lights.get(id);
 			String name = data.getStringExtra("name");
 			String mode = data.getStringExtra("mode");
 			float[] xy = data.getFloatArrayExtra("xy");
 			int ct = data.getIntExtra("ct", 153);
 			int bri = data.getIntExtra("bri", 0);
 			
-			// If we're just adding a preset, do that
-			if (data.getBooleanExtra("addPreset", false)) {
-				addLightPreset(id, xy, bri);
-			} else {
-				// Otherwise check which values changed and start requests
-				if (!light.name.equals(name)) {
-					setLightName(id, name);
-				}
+			if (requestCode == ACTIVITY_LIGHT) {
+				Light light = lights.get(id);
 				
-				if (data.getBooleanExtra("colorChanged", false)) {
-					if (mode.equals("ct")) {
-						setLightColorCT(id, ct, bri);
-					} else {
-						setLightColorXY(id, xy, bri);
+				// If we're just adding a preset, do that
+				if (data.getBooleanExtra("addPreset", false)) {
+					addLightPreset(id, xy, bri);
+				} else {
+					// Otherwise check which values changed and start requests
+					if (!light.name.equals(name)) {
+						setLightName(id, name);
+					}
+					
+					if (data.getBooleanExtra("colorChanged", false)) {
+						if (mode.equals("ct")) {
+							setLightColorCT(id, ct, bri);
+						} else {
+							setLightColorXY(id, xy, bri);
+						}
+					}
+				}
+			} else {
+				Group group = groups.get(id);
+				
+				// If we're just adding a preset, do that
+				if (data.getBooleanExtra("addPreset", false)) {
+					addGroupPreset(id, xy, bri);
+				} else {
+					// Otherwise check which values changed and start requests
+					if (!group.name.equals(name)) {
+						setGroupName(id, name);
+					}
+					
+					if (data.getBooleanExtra("colorChanged", false)) {
+						if (mode.equals("ct")) {
+							setGroupColorCT(id, ct, bri);
+						} else {
+							setGroupColorXY(id, xy, bri);
+						}
 					}
 				}
 			}
@@ -325,7 +348,7 @@ public class LightsActivity extends Activity {
 					presetBut.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							setGroupColor(id, preset.xy, preset.brightness);
+							setGroupColorXY(id, preset.xy, preset.brightness);
 						}
 					});
 					
@@ -608,29 +631,6 @@ public class LightsActivity extends Activity {
 			}
 		});
 		
-		// Set color picker event handler
-		// TODO: Remove
-		/*view.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ColorDialog dialog = ColorDialog.newInstance(id, groups.get(id)); // Make sure to get the latest data
-				dialog.show(getFragmentManager(), "dialog_color");
-			}
-		});
-		
-		// Set group remove handler
-		if (!id.equals("0")) {
-			view.setOnLongClickListener(new OnLongClickListener() {
-				@Override
-				public boolean onLongClick(View v) {
-					GroupRemoveDialog dialog = GroupRemoveDialog.newInstance(id, groups.get(id));
-					dialog.show(getFragmentManager(), "dialog_remove_group");
-					
-					return true;
-				}
-			});
-		}*/
-		
 		// Set on/off button event handlers
 		OnClickListener listener = new OnClickListener() {
 			@Override
@@ -775,7 +775,7 @@ public class LightsActivity extends Activity {
 		refreshViews();
 	}
 	
-	public void setGroupColor(final String id, final float[] xy, final int bri) {
+	public void setGroupColorXY(final String id, final float[] xy, final int bri) {
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected void onPreExecute() {
@@ -806,6 +806,80 @@ public class LightsActivity extends Activity {
 						light.state.xy = new double[] { xy[0], xy[1] };
 						light.state.bri = bri;
 					}
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
+				
+				refreshViews();
+			}
+		}.execute();
+	}
+	
+	public void setGroupColorCT(final String id, final int ct, final int bri) {
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, false);
+			}
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				try {					
+					service.setGroupCT(id, ct, bri);
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Boolean result) {
+				setActivityIndicator(false, false);
+				
+				// Set successful, update state
+				if (result) {
+					for (String lid : groups.get(id).lights) {
+						Light light = lights.get(lid);
+						
+						light.state.on = true;
+						light.state.colormode = "ct";
+						light.state.ct = ct;
+						light.state.bri = bri;
+					}
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
+				
+				refreshViews();
+			}
+		}.execute();
+	}
+	
+	public void setGroupName(final String id, final String name) {
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, false);
+			}
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				try {					
+					service.setGroupName(id, name);
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Boolean result) {
+				setActivityIndicator(false, false);
+				
+				// Set successful, update state
+				if (result) {
+					groups.get(id).name = name;
+					repopulateViews();
 				} else {
 					ErrorDialog.showNetworkError(getFragmentManager());
 				}

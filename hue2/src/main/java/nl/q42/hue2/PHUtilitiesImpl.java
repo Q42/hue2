@@ -7,7 +7,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Build;
-import android.util.FloatMath;
 
 /**
  * This class comes from the original Android app.

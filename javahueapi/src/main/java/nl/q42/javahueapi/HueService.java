@@ -156,6 +156,20 @@ public class HueService implements Serializable {
 			throw new ApiException(result);
 	}
 	
+	public void setGroupCT(String id, int ct, int bri) throws IOException, ApiException {
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id + "/action",
+				"{\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}");
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
+	public void setGroupName(String id, String name) throws IOException, ApiException {
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id,
+				"{\"name\":\"" + name + "\"}");
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
 	public void turnGroupOn(String id, boolean on) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id + "/action",
 				"{\"on\":" + on + "}");

@@ -23,6 +23,14 @@
     <string name="light_cancel">Cancel</string>
     <string name="light_save">Save</string>
     
+    <!-- Group activity -->
+    <string name="group_group">Group</string>
+    <string name="group_name">Name:</string>
+    <string name="group_lights">Lights:</string>
+    <string name="group_color">Color</string>
+    <string name="group_cancel">Cancel</string>
+    <string name="group_save">Save</string>    
+    
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
     

@@ -7,5 +7,7 @@ import java.util.List;
 public class Group implements Serializable {
 	public List<String> lights;
 	
+	public State action;
+	
 	public String name;
 }

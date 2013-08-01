@@ -2,8 +2,6 @@ package nl.q42.hue2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import nl.q42.hue2.models.Bridge;
 import nl.q42.hue2.models.Preset;

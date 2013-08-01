@@ -22,8 +22,8 @@ public class SatBriSlider extends View {
 	private int w, h;
 	
 	private float hue = 0.0f;
-	private float sat = 0.95f;
-	private float bri = 0.95f;
+	private float sat = 1.0f;
+	private float bri = 1.0f;
 	
 	private boolean userSet = false;
 	
