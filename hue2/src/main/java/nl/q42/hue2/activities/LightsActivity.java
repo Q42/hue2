@@ -680,6 +680,7 @@ public class LightsActivity extends Activity {
 				Intent lightIntent = new Intent(LightsActivity.this, LightActivity.class);
 				lightIntent.putExtra("id", id);
 				lightIntent.putExtra("light", lights.get(id));
+				lightIntent.putExtra("service", service); // Used for color preview requests
 				startActivityForResult(lightIntent, ACTIVITY_LIGHT);
 			}
 		});

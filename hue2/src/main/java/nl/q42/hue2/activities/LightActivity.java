@@ -1,11 +1,15 @@
 package nl.q42.hue2.activities;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
+import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
 import android.app.Activity;
 import android.content.Intent;
@@ -21,8 +25,11 @@ import android.view.View.OnTouchListener;
 import android.widget.EditText;
 
 public class LightActivity extends Activity {
+	private final static int PREVIEW_INTERVAL = 500;
+	
 	private Light light;
 	private String id;
+	private HueService service;
 	
 	private EditText nameView;
 	private HueSlider hueSlider;
@@ -31,6 +38,9 @@ public class LightActivity extends Activity {
 	
 	private String colorMode;
 	
+	private Timer colorPreviewTimer = new Timer();
+	private boolean previewNeeded = false; // Set to true when color slider is moved
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -38,6 +48,7 @@ public class LightActivity extends Activity {
 		// Light details
 		light = (Light) getIntent().getSerializableExtra("light");
 		id = getIntent().getStringExtra("id");
+		service = (HueService) getIntent().getSerializableExtra("service");
 		
 		// UI setup
 		setContentView(R.layout.activity_light);
@@ -51,9 +62,11 @@ public class LightActivity extends Activity {
 		hueSlider.setSatBriSlider(satBriSlider);
 		tempSlider.setSliders(hueSlider, satBriSlider);
 		
+		// Set listeners for color slider interaction to record last used color mode (hue/sat or temperature)
+		// and to send preview requests
 		tempSlider.setOnTouchListener(getColorModeListener("ct"));
-		hueSlider.setOnTouchListener(getColorModeListener("hs"));
-		satBriSlider.setOnTouchListener(getColorModeListener("hs"));
+		hueSlider.setOnTouchListener(getColorModeListener("xy"));
+		satBriSlider.setOnTouchListener(getColorModeListener("xy"));
 		
 		// Fill in current name/color in UI or restore previous
 		if (savedInstanceState == null) {
@@ -74,7 +87,7 @@ public class LightActivity extends Activity {
 		findViewById(R.id.light_cancel).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				setResult(RESULT_CANCELED);
+				restoreColor();
 				finish();
 			}
 		});
@@ -104,11 +117,77 @@ public class LightActivity extends Activity {
 		});
 	}
 	
+	@Override
+	public void onBackPressed() {
+		restoreColor();
+		super.onBackPressed();
+	}
+	
+	private void restoreColor() {
+		float[] xy;
+		if (light.state.colormode.equals("xy")) {
+			xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
+		} else {
+			xy = PHUtilitiesImpl.calculateXY(Util.getRGBColor(light), light.modelid);
+		}
+		
+		Intent result = new Intent();
+		result.putExtra("id", id);
+		result.putExtra("name", light.name);
+		
+		// Original mode may have been hs, but convert that to xy
+		result.putExtra("mode", light.state.colormode.equals("ct") ? "ct" : "xy");
+		
+		result.putExtra("xy", xy);
+		result.putExtra("ct", light.state.ct);
+		result.putExtra("bri", light.state.bri);
+		result.putExtra("colorChanged", true);
+		
+		setResult(RESULT_OK, result);
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		colorPreviewTimer.cancel();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		// Start timer that sends requests for color previews
+		colorPreviewTimer = new Timer();
+		colorPreviewTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				if (previewNeeded) {
+					previewNeeded = false;
+					
+					try {
+						float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
+						int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+						int ct = (int) tempSlider.getTemp();
+						
+						if (colorMode.equals("ct")) {
+							service.setLightCT(id, ct, bri);
+						} else {
+							service.setLightXY(id, xy, bri);
+						}
+					} catch (Exception e) {
+						// Don't report exceptions since previewing is a non-essential feature
+					}
+				}
+			}
+		}, 0, PREVIEW_INTERVAL);
+	}
+	
 	private OnTouchListener getColorModeListener(final String mode) {
 		return new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				colorMode = mode;				
+				colorMode = mode;
+				previewNeeded = true;
 				return false;
 			}
 		};

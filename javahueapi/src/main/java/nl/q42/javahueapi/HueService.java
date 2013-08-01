@@ -1,6 +1,7 @@
 package nl.q42.javahueapi;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -21,7 +22,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 // TODO: JSON string escaping
-public class HueService {
+@SuppressWarnings("serial")
+public class HueService implements Serializable {
 	
 	private String bridgeIp;
 	private String username;
@@ -194,7 +196,6 @@ public class HueService {
 	}
 	
 	
-	@SuppressWarnings("serial")
 	public static class ApiException extends Exception {
 		public ApiException(Result result) {
 			super("Error " + result.getResponseCode() + ": " + result.getBody());
