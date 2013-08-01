@@ -151,7 +151,7 @@ public class GroupActivity extends Activity {
 			
 			return true;
 		} else if (item.getItemId() == R.id.menu_delete_group) {
-			GroupRemoveDialog.newInstance(id).show(getFragmentManager(), "dialog_remove_group");
+			GroupRemoveDialog.newInstance().show(getFragmentManager(), "dialog_remove_group");
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);

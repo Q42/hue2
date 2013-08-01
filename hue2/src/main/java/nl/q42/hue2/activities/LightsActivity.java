@@ -482,10 +482,16 @@ public class LightsActivity extends Activity {
 					// Check if groups changed internally
 					boolean groupChanged = false;
 					for (String id : oldGroups.keySet()) {
+						if (!groups.containsKey(id)) continue;
+						
 						if (groups.get(id).lights.hashCode() != oldGroups.get(id).lights.hashCode() ||
 							!groups.get(id).name.equals(oldGroups.get(id).name)) {
 							groupChanged = true;
-							break;
+						}
+						
+						// If the server reports a group as empty, ignore it and keep the local list
+						if (groups.get(id).lights.size() == 0 && oldGroups.get(id).lights.size() != 0) {
+							groups.get(id).lights = oldGroups.get(id).lights;
 						}
 					}
 					

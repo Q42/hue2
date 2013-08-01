@@ -10,20 +10,12 @@ import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
 public class GroupRemoveDialog extends DialogFragment {
-	public static GroupRemoveDialog newInstance(String id) {
-		GroupRemoveDialog dialog = new GroupRemoveDialog();
-		
-		Bundle args = new Bundle();
-		args.putString("id", id);
-		dialog.setArguments(args);
-		
-		return dialog;
+	public static GroupRemoveDialog newInstance() {
+		return new GroupRemoveDialog();
 	}
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		final String id = getArguments().getString("id");
-		
 		return new AlertDialog.Builder(getActivity())
 			.setMessage(R.string.dialog_remove_group)
 			.setPositiveButton(R.string.dialog_yes, new OnClickListener() {
