@@ -140,6 +140,13 @@ public class HueService {
 			throw new ApiException(result);
 	}
 	
+	public void setLightCT(String id, int ct, int bri) throws IOException, ApiException {
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state",
+				"{\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}");
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
 	public void setGroupXY(String id, float[] xy, int bri) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id + "/action",
 				"{\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}");

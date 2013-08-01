@@ -96,7 +96,7 @@ public class ColorDialog extends DialogFragment {
 					if (light == null) {
 						((LightsActivity) getActivity()).setGroupColor(getArguments().getString("id"), xy, bri);
 					} else {
-						((LightsActivity) getActivity()).setLightColor(getArguments().getString("id"), xy, bri);
+						((LightsActivity) getActivity()).setLightColorXY(getArguments().getString("id"), xy, bri);
 					}
 				}
 			})

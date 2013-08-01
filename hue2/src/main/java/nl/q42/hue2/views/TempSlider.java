@@ -40,6 +40,24 @@ public class TempSlider extends View {
 		return userSet;
 	}
 	
+	public void setTemp(float temp) {
+		this.temp = temp;
+		
+		if (hueSlider != null && satBriSlider != null) {
+			int col = Util.temperatureToColor(1000000 / (long) temp);
+			float[] hsv = new float[3];
+			Color.colorToHSV(col, hsv);
+			
+			hueSlider.setHue(hsv[0]);
+			satBriSlider.setSaturation(hsv[1]);
+			satBriSlider.setBrightness(hsv[2]);
+		}
+	}
+	
+	public float getTemp() {
+		return temp;
+	}
+	
 	@Override
 	public Parcelable onSaveInstanceState() {
 		Bundle bundle = new Bundle();

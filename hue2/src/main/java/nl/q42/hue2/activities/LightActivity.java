@@ -14,8 +14,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.EditText;
 
 public class LightActivity extends Activity {
@@ -26,6 +28,8 @@ public class LightActivity extends Activity {
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
 	private TempSlider tempSlider;
+	
+	private String colorMode;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,15 +51,23 @@ public class LightActivity extends Activity {
 		hueSlider.setSatBriSlider(satBriSlider);
 		tempSlider.setSliders(hueSlider, satBriSlider);
 		
+		tempSlider.setOnTouchListener(getColorModeListener("ct"));
+		hueSlider.setOnTouchListener(getColorModeListener("hs"));
+		satBriSlider.setOnTouchListener(getColorModeListener("hs"));
+		
 		// Fill in current name/color in UI or restore previous
 		if (savedInstanceState == null) {
 			nameView.setText(light.name);
 			
-			float hsv[] = new float[3];
-			Color.colorToHSV(Util.getRGBColor(light), hsv);
-			hueSlider.setHue(hsv[0]);
-			satBriSlider.setSaturation(hsv[1]);
-			satBriSlider.setBrightness(light.state.bri / 255.0f);
+			if (light.state.colormode.equals("ct")) {
+				tempSlider.setTemp(light.state.ct);
+			} else {
+				float hsv[] = new float[3];
+				Color.colorToHSV(Util.getRGBColor(light), hsv);
+				hueSlider.setHue(hsv[0]);
+				satBriSlider.setSaturation(hsv[1]);
+				satBriSlider.setBrightness(light.state.bri / 255.0f);
+			}
 		}
 		
 		// Add cancel event handler
@@ -73,11 +85,14 @@ public class LightActivity extends Activity {
 			public void onClick(View v) {
 				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
 				int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+				int ct = (int) tempSlider.getTemp();
 				
 				Intent result = new Intent();
 				result.putExtra("id", id);
 				result.putExtra("name", nameView.getText().toString().trim());
+				result.putExtra("mode", colorMode);
 				result.putExtra("xy", xy);
+				result.putExtra("ct", ct);
 				result.putExtra("bri", bri);
 				
 				// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
@@ -87,6 +102,16 @@ public class LightActivity extends Activity {
 				finish();
 			}
 		});
+	}
+	
+	private OnTouchListener getColorModeListener(final String mode) {
+		return new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				colorMode = mode;				
+				return false;
+			}
+		};
 	}
 	
 	@Override

@@ -193,11 +193,14 @@ public class LightsActivity extends Activity {
 			String id = data.getStringExtra("id");
 			Light light = lights.get(id);
 			String name = data.getStringExtra("name");
+			String mode = data.getStringExtra("mode");
 			float[] xy = data.getFloatArrayExtra("xy");
+			int ct = data.getIntExtra("ct", 153);
 			int bri = data.getIntExtra("bri", 0);
 			
 			// If we're just adding a preset, do that
 			if (data.getBooleanExtra("addPreset", false)) {
+				// TODO: Support ct
 				addLightPreset(id, xy, bri);
 			} else {			
 				// Otherwise check which values changed and start requests
@@ -206,7 +209,11 @@ public class LightsActivity extends Activity {
 				}
 				
 				if (data.getBooleanExtra("colorChanged", false)) {
-					setLightColor(id, xy, bri);
+					if (mode.equals("ct")) {
+						setLightColorCT(id, ct, bri);
+					} else {
+						setLightColorXY(id, xy, bri);
+					}
 				}
 			}
 		}
@@ -378,7 +385,7 @@ public class LightsActivity extends Activity {
 						presetBut.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								setLightColor(id, preset.xy, preset.brightness);
+								setLightColorXY(id, preset.xy, preset.brightness);
 							}
 						});
 						
@@ -908,7 +915,44 @@ public class LightsActivity extends Activity {
 		}.execute();
 	}
 	
-	public void setLightColor(final String id, final float[] xy, final int bri) {		
+	public void setLightColorCT(final String id, final int ct, final int bri) {		
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected void onPreExecute() {
+				setActivityIndicator(true, false);
+			}
+			
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				try {					
+					service.setLightCT(id, ct, bri);
+					return true;
+				} catch (Exception e) {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(Boolean result) {
+				setActivityIndicator(false, false);
+				
+				// Set successful, update state
+				if (result) {
+					Light light = lights.get(id);
+					light.state.on = true;
+					light.state.colormode = "ct";
+					light.state.ct = ct;
+					light.state.bri = bri;
+				} else {
+					ErrorDialog.showNetworkError(getFragmentManager());
+				}
+				
+				refreshViews();
+			}
+		}.execute();
+	}
+	
+	public void setLightColorXY(final String id, final float[] xy, final int bri) {		
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected void onPreExecute() {
