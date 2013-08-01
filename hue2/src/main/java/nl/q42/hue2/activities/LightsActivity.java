@@ -199,11 +199,10 @@ public class LightsActivity extends Activity {
 			if (requestCode == ACTIVITY_LIGHT) {
 				Light light = lights.get(id);
 				
-				// If we're just adding a preset, do that
+				// Check which action user selected
 				if (data.getBooleanExtra("addPreset", false)) {
 					addLightPreset(id, xy, bri);
 				} else {
-					// Otherwise check which values changed and start requests
 					if (!light.name.equals(name)) {
 						setLightName(id, name);
 					}
@@ -219,11 +218,12 @@ public class LightsActivity extends Activity {
 			} else {
 				Group group = groups.get(id);
 				
-				// If we're just adding a preset, do that
+				// Check which action user selected
 				if (data.getBooleanExtra("addPreset", false)) {
 					addGroupPreset(id, xy, bri);
+				} else if (data.getBooleanExtra("remove", false)) {
+					removeGroup(id);
 				} else {
-					// Otherwise check which values changed and start requests
 					if (!group.name.equals(name)) {
 						setGroupName(id, name);
 					}

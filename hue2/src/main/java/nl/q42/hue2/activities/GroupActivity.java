@@ -2,6 +2,7 @@ package nl.q42.hue2.activities;
 
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
+import nl.q42.hue2.dialogs.GroupRemoveDialog;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
@@ -16,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.EditText;
 
 public class GroupActivity extends Activity {
@@ -23,6 +25,7 @@ public class GroupActivity extends Activity {
 	private String id;
 	
 	private EditText nameView;
+	private Button lightsButton;
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
 	private TempSlider tempSlider;
@@ -42,6 +45,7 @@ public class GroupActivity extends Activity {
 		setTitle(group.name);
 		
 		nameView = (EditText) findViewById(R.id.group_name);
+		lightsButton = (Button) findViewById(R.id.group_lights);
 		hueSlider = (HueSlider) findViewById(R.id.group_color_hue);
 		satBriSlider = (SatBriSlider) findViewById(R.id.group_color_sat_bri);
 		tempSlider = (TempSlider) findViewById(R.id.group_color_temp);
@@ -58,6 +62,12 @@ public class GroupActivity extends Activity {
 		// Fill in current name/color in UI or restore previous
 		if (savedInstanceState == null) {
 			nameView.setText(group.name);
+		}
+		
+		// If this is the all lights pseudo group, only the color can be changed
+		if (id.equals("0")) {
+			nameView.setEnabled(false);
+			lightsButton.setEnabled(false);
 		}
 		
 		// Add cancel event handler
@@ -103,10 +113,24 @@ public class GroupActivity extends Activity {
 		};
 	}
 	
+	// Called by GroupRemoveDialog after confirmation
+	public void removeGroup() {
+		Intent result = new Intent();
+		result.putExtra("id", id);
+		result.putExtra("remove", true);
+		
+		setResult(RESULT_OK, result);
+		finish();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.group, menu);
+	    
+	    // Pseudo group with all lights cannot be removed
+	    menu.findItem(R.id.menu_delete_group).setVisible(!id.equals("0"));
+	    
 	    return true;
 	}
 	
@@ -125,6 +149,9 @@ public class GroupActivity extends Activity {
 			setResult(RESULT_OK, result);
 			finish();
 			
+			return true;
+		} else if (item.getItemId() == R.id.menu_delete_group) {
+			GroupRemoveDialog.newInstance(id).show(getFragmentManager(), "dialog_remove_group");
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);

@@ -55,7 +55,7 @@
     <string name="dialog_remove_preset_title">Color preset</string>
     <string name="dialog_remove_preset">Would you like to remove this preset?</string>
     
-    <string name="dialog_remove_group">Would you like to remove this group?</string>
+    <string name="dialog_remove_group">Are you sure you want to remove this group?</string>
     
     <string name="dialog_light_title">Edit light</string>
     <string name="dialog_light_name">Name:</string>
@@ -78,4 +78,5 @@
     <string name="menu_bridges">Search bridges</string>
     <string name="menu_new_group">New group</string>
     <string name="menu_add_preset">Add preset</string>
+    <string name="menu_delete_group">Remove group</string>
 </resources>
