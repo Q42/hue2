@@ -29,7 +29,9 @@
     <string name="group_lights">Lights:</string>
     <string name="group_color">Color</string>
     <string name="group_cancel">Cancel</string>
-    <string name="group_save">Save</string>    
+    <string name="group_save">Save</string>
+    <string name="group_create">Create</string>
+    <string name="group_new">New group</string>
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>

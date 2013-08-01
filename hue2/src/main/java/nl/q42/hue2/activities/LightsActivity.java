@@ -12,7 +12,6 @@ import nl.q42.hue2.PresetsDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.dialogs.ErrorDialog;
-import nl.q42.hue2.dialogs.GroupCreateDialog;
 import nl.q42.hue2.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.hue2.models.Preset;
@@ -153,7 +152,9 @@ public class LightsActivity extends Activity {
 			startActivity(searchIntent);
 			return true;
 		} else if (item.getItemId() == R.id.menu_new_group) {
-			GroupCreateDialog.newInstance(lights).show(getFragmentManager(), "dialog_new_group");
+			Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
+			groupIntent.putExtra("lights", lights);
+			startActivityForResult(groupIntent, ACTIVITY_GROUP);
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
@@ -215,26 +216,35 @@ public class LightsActivity extends Activity {
 						}
 					}
 				}
-			} else {
-				Group group = groups.get(id);
-				
-				// Check which action user selected
-				if (data.getBooleanExtra("addPreset", false)) {
-					addGroupPreset(id, xy, bri);
-				} else if (data.getBooleanExtra("remove", false)) {
-					removeGroup(id);
-				} else {
-					if (!group.name.equals(name)) {
-						setGroupName(id, name);
-					}
+			} else if (requestCode == ACTIVITY_GROUP) {
+				// If id was given, an existing group was edited, otherwise a new one is to be created
+				if (id != null) {
+					Group group = groups.get(id);
 					
-					if (data.getBooleanExtra("colorChanged", false)) {
-						if (mode.equals("ct")) {
-							setGroupColorCT(id, ct, bri);
-						} else {
-							setGroupColorXY(id, xy, bri);
+					// Check which action user selected
+					if (data.getBooleanExtra("addPreset", false)) {
+						addGroupPreset(id, xy, bri);
+					} else if (data.getBooleanExtra("remove", false)) {
+						removeGroup(id);
+					} else {
+						if (!group.name.equals(name)) {
+							setGroupName(id, name);
+						}
+						
+						if (data.getBooleanExtra("colorChanged", false)) {
+							if (mode.equals("ct")) {
+								setGroupColorCT(id, ct, bri);
+							} else {
+								setGroupColorXY(id, xy, bri);
+							}
 						}
 					}
+				} else {
+					// TODO: Take actual list
+					ArrayList<String> lights = new ArrayList<String>();
+					lights.add("1");
+					
+					createGroup(name, lights);
 				}
 			}
 		}

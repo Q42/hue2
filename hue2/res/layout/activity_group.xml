@@ -86,52 +86,60 @@
 		   
 		<!-- Color picker -->
 		
-		<TextView
-	       android:layout_width="wrap_content"
-	       android:layout_height="wrap_content"
-	       android:layout_marginBottom="5dp"
-	       android:layout_marginLeft="7dp"
-	       android:text="@string/group_color"
-	       android:textAllCaps="true"
-	       android:textColor="#33b5e5"
-	       android:textStyle="bold" />
+		<LinearLayout
+		    android:id="@+id/group_color_picker"
+		    android:layout_width="match_parent"
+		    android:layout_height="0dp"
+		    android:layout_weight="1"
+		    android:orientation="vertical">
+		    		
+			<TextView
+		       android:layout_width="wrap_content"
+		       android:layout_height="wrap_content"
+		       android:layout_marginBottom="5dp"
+		       android:layout_marginLeft="7dp"
+		       android:text="@string/group_color"
+		       android:textAllCaps="true"
+		       android:textColor="#33b5e5"
+		       android:textStyle="bold" />
+			
+		   <View
+		       android:layout_width="match_parent"
+		       android:layout_height="1dp"
+		       android:background="#33b5e5" />
 		
-	   <View
-	       android:layout_width="match_parent"
-	       android:layout_height="1dp"
-	       android:background="#33b5e5" />
-	
-	   <LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="0dp"
-			android:layout_weight="1"
-			android:layout_marginLeft="15dp"
-			android:layout_marginRight="15dp"
-			android:layout_marginTop="15dp"
-			android:orientation="vertical">
-	    
-			<nl.q42.hue2.views.TempSlider
-				android:id="@+id/group_color_temp"
+		   <LinearLayout
 				android:layout_width="match_parent"
-				android:layout_marginBottom="15dp"
-				android:layout_height="50dp" />
-		
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="match_parent">
-				    
-				<nl.q42.hue2.views.SatBriSlider
-				    android:id="@+id/group_color_sat_bri"
-				    android:layout_width="match_parent"
-				    android:layout_height="match_parent"
-				    android:layout_weight="1"
-				    android:layout_marginRight="15dp" />
-				 
-				<nl.q42.hue2.views.HueSlider
-					android:id="@+id/group_color_hue"
-					android:layout_width="50dp"
-					android:layout_height="match_parent"
-					android:layout_weight="0" />
+				android:layout_height="0dp"
+				android:layout_weight="1"
+				android:layout_marginLeft="15dp"
+				android:layout_marginRight="15dp"
+				android:layout_marginTop="15dp"
+				android:orientation="vertical">
+		    
+				<nl.q42.hue2.views.TempSlider
+					android:id="@+id/group_color_temp"
+					android:layout_width="match_parent"
+					android:layout_marginBottom="15dp"
+					android:layout_height="50dp" />
+			
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="match_parent">
+					    
+					<nl.q42.hue2.views.SatBriSlider
+					    android:id="@+id/group_color_sat_bri"
+					    android:layout_width="match_parent"
+					    android:layout_height="match_parent"
+					    android:layout_weight="1"
+					    android:layout_marginRight="15dp" />
+					 
+					<nl.q42.hue2.views.HueSlider
+						android:id="@+id/group_color_hue"
+						android:layout_width="50dp"
+						android:layout_height="match_parent"
+						android:layout_weight="0" />
+				</LinearLayout>
 			</LinearLayout>
 		</LinearLayout>
 	</LinearLayout>
@@ -162,11 +170,10 @@
 	       android:background="#484848" />
 	   
 	   <Button
-	       android:id="@+id/group_save"
+	       android:id="@+id/group_apply"
 	       android:layout_width="match_parent"
 	       android:layout_height="wrap_content"
 	       android:layout_weight="1"
-	       android:background="@drawable/dark_button_background"
-	       android:text="@string/group_save" />
+	       android:background="@drawable/dark_button_background" />
    </LinearLayout>
 </LinearLayout>

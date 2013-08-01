@@ -19,6 +19,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 public class GroupActivity extends Activity {
 	private Group group;
@@ -26,6 +27,7 @@ public class GroupActivity extends Activity {
 	
 	private EditText nameView;
 	private Button lightsButton;
+	private LinearLayout colorPicker;
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
 	private TempSlider tempSlider;
@@ -42,10 +44,11 @@ public class GroupActivity extends Activity {
 		
 		// UI setup
 		setContentView(R.layout.activity_group);
-		setTitle(group.name);
+		setTitle(id == null ? getString(R.string.group_new) : group.name);
 		
 		nameView = (EditText) findViewById(R.id.group_name);
 		lightsButton = (Button) findViewById(R.id.group_lights);
+		colorPicker = (LinearLayout) findViewById(R.id.group_color_picker);
 		hueSlider = (HueSlider) findViewById(R.id.group_color_hue);
 		satBriSlider = (SatBriSlider) findViewById(R.id.group_color_sat_bri);
 		tempSlider = (TempSlider) findViewById(R.id.group_color_temp);
@@ -61,13 +64,16 @@ public class GroupActivity extends Activity {
 		
 		// Fill in current name/color in UI or restore previous
 		if (savedInstanceState == null) {
-			nameView.setText(group.name);
+			nameView.setText(id == null ? "" : group.name);
 		}
 		
 		// If this is the all lights pseudo group, only the color can be changed
-		if (id.equals("0")) {
+		if ("0".equals(id)) {
 			nameView.setEnabled(false);
 			lightsButton.setEnabled(false);
+		} else if (id == null) {
+			// Or if a new group is being created, no color can be set yet
+			colorPicker.setVisibility(View.GONE);
 		}
 		
 		// Add cancel event handler
@@ -78,27 +84,37 @@ public class GroupActivity extends Activity {
 			}
 		});
 		
-		// Add save event handler
-		findViewById(R.id.group_save).setOnClickListener(new OnClickListener() {
+		// Add save/create event handler
+		Button applyButton = (Button) findViewById(R.id.group_apply);
+		applyButton.setText(id == null ? R.string.group_create : R.string.group_save);
+		applyButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
-				int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-				int ct = (int) tempSlider.getTemp();
-				
-				Intent result = new Intent();
-				result.putExtra("id", id);
-				result.putExtra("name", nameView.getText().toString().trim());
-				result.putExtra("mode", colorMode);
-				result.putExtra("xy", xy);
-				result.putExtra("ct", ct);
-				result.putExtra("bri", bri);
-				
-				// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
-				result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
-				
-				setResult(RESULT_OK, result);
-				finish();
+				if (id != null) {
+					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+					int ct = (int) tempSlider.getTemp();
+					
+					Intent result = new Intent();
+					result.putExtra("id", id);
+					result.putExtra("name", nameView.getText().toString().trim());
+					result.putExtra("mode", colorMode);
+					result.putExtra("xy", xy);
+					result.putExtra("ct", ct);
+					result.putExtra("bri", bri);
+					
+					// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
+					result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
+					
+					setResult(RESULT_OK, result);
+					finish();
+				} else {
+					Intent result = new Intent();
+					result.putExtra("name", nameView.getText().toString().trim());
+					
+					setResult(RESULT_OK, result);
+					finish();
+				}
 			}
 		});
 	}
@@ -128,8 +144,11 @@ public class GroupActivity extends Activity {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.group, menu);
 	    
-	    // Pseudo group with all lights cannot be removed
-	    menu.findItem(R.id.menu_delete_group).setVisible(!id.equals("0"));
+	    // TODO: Make presets work for groups being created
+	    menu.findItem(R.id.menu_add_preset).setVisible(id != null);
+	    
+	    // Pseudo group with all lights (or a new group) cannot be removed
+	    menu.findItem(R.id.menu_delete_group).setVisible(id != null && !id.equals("0"));
 	    
 	    return true;
 	}
