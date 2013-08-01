@@ -637,38 +637,20 @@ public class LightsActivity extends Activity {
 			public void onClick(final View v) {
 				final boolean checked = v.getId() == R.id.lights_group_on;
 				
-				new AsyncTask<Void, Void, Boolean>() {
+				asyncUpdate(new AsyncCallbacks() {			
 					@Override
-					protected void onPreExecute() {
-						setActivityIndicator(true, false);
+					public Object doUpdate() throws Exception {
+						service.turnGroupOn(id, checked);
+						return null;
 					}
 					
 					@Override
-					protected Boolean doInBackground(Void... params) {
-						try {
-							service.turnGroupOn(id, checked);
-							return true;
-						} catch (Exception e) {
-							return false;
+					public void updateState(Object result) {
+						for (String lid : groups.get(id).lights) {
+							lights.get(lid).state.on = checked;
 						}
 					}
-					
-					@Override
-					protected void onPostExecute(Boolean result) {						
-						setActivityIndicator(false, false);
-						
-						// Toggle successful
-						if (result) {
-							for (String lid : groups.get(id).lights) {
-								lights.get(lid).state.on = checked;
-							}
-						} else {
-							ErrorDialog.showNetworkError(getFragmentManager());
-						}
-						
-						refreshViews();
-					}
-				}.execute();
+				});
 			}
 		};
 		
@@ -701,38 +683,18 @@ public class LightsActivity extends Activity {
 		switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton view, final boolean checked) {				
-				new AsyncTask<Void, Void, Boolean>() {
+				asyncUpdate(new AsyncCallbacks() {			
 					@Override
-					protected void onPreExecute() {
-						setActivityIndicator(true, false);
-						switchView.setEnabled(false);
+					public Object doUpdate() throws Exception {
+						service.turnLightOn(id, checked);
+						return null;
 					}
 					
 					@Override
-					protected Boolean doInBackground(Void... params) {
-						try {
-							service.turnLightOn(id, checked);
-							return true;
-						} catch (Exception e) {
-							return false;
-						}
+					public void updateState(Object result) {
+						lights.get(id).state.on = checked;
 					}
-					
-					@Override
-					protected void onPostExecute(Boolean result) {
-						setActivityIndicator(false, false);
-						switchView.setEnabled(true);
-						
-						// Toggle successful
-						if (result) {
-							lights.get(id).state.on = checked;
-						} else {
-							ErrorDialog.showNetworkError(getFragmentManager());
-						}
-						
-						refreshViews();
-					}
-				}.execute();
+				});
 			}
 		});
 		
@@ -741,7 +703,7 @@ public class LightsActivity extends Activity {
 		return view;
 	}
 	
-	public void addLightPreset(final String id, final float[] xy, final int bri) {
+	private void addLightPreset(final String id, final float[] xy, final int bri) {
 		int db_id = datasource.insertPreset(bridge.getSerial(), id, null, xy, bri);
 		
 		if (!lightPresets.containsKey(id)) {
@@ -752,7 +714,7 @@ public class LightsActivity extends Activity {
 		refreshViews();
 	}
 	
-	public void addGroupPreset(final String id, final float[] xy, final int bri) {
+	private void addGroupPreset(final String id, final float[] xy, final int bri) {
 		int db_id = datasource.insertPreset(bridge.getSerial(), null, id, xy, bri);
 		
 		if (!groupPresets.containsKey(id)) {
@@ -775,187 +737,99 @@ public class LightsActivity extends Activity {
 		refreshViews();
 	}
 	
-	public void setGroupColorXY(final String id, final float[] xy, final int bri) {
-		new AsyncTask<Void, Void, Boolean>() {
+	private void setGroupColorXY(final String id, final float[] xy, final int bri) {
+		asyncUpdate(new AsyncCallbacks() {			
 			@Override
-			protected void onPreExecute() {
-				setActivityIndicator(true, false);
+			public Object doUpdate() throws Exception {
+				service.setGroupXY(id, xy, bri);;
+				return null;
 			}
 			
 			@Override
-			protected Boolean doInBackground(Void... params) {
-				try {					
-					service.setGroupXY(id, xy, bri);
-					return true;
-				} catch (Exception e) {
-					return false;
+			public void updateState(Object result) {
+				for (String lid : groups.get(id).lights) {
+					Light light = lights.get(lid);
+					
+					light.state.on = true;
+					light.state.colormode = "xy";
+					light.state.xy = new double[] { xy[0], xy[1] };
+					light.state.bri = bri;
 				}
 			}
-			
-			@Override
-			protected void onPostExecute(Boolean result) {
-				setActivityIndicator(false, false);
-				
-				// Set successful, update state
-				if (result) {
-					for (String lid : groups.get(id).lights) {
-						Light light = lights.get(lid);
-						
-						light.state.on = true;
-						light.state.colormode = "xy";
-						light.state.xy = new double[] { xy[0], xy[1] };
-						light.state.bri = bri;
-					}
-				} else {
-					ErrorDialog.showNetworkError(getFragmentManager());
-				}
-				
-				refreshViews();
-			}
-		}.execute();
+		});
 	}
 	
-	public void setGroupColorCT(final String id, final int ct, final int bri) {
-		new AsyncTask<Void, Void, Boolean>() {
+	private void setGroupColorCT(final String id, final int ct, final int bri) {
+		asyncUpdate(new AsyncCallbacks() {			
 			@Override
-			protected void onPreExecute() {
-				setActivityIndicator(true, false);
+			public Object doUpdate() throws Exception {
+				service.setGroupCT(id, ct, bri);
+				return null;
 			}
 			
 			@Override
-			protected Boolean doInBackground(Void... params) {
-				try {					
-					service.setGroupCT(id, ct, bri);
-					return true;
-				} catch (Exception e) {
-					return false;
+			public void updateState(Object result) {
+				for (String lid : groups.get(id).lights) {
+					Light light = lights.get(lid);
+					
+					light.state.on = true;
+					light.state.colormode = "ct";
+					light.state.ct = ct;
+					light.state.bri = bri;
 				}
 			}
-			
-			@Override
-			protected void onPostExecute(Boolean result) {
-				setActivityIndicator(false, false);
-				
-				// Set successful, update state
-				if (result) {
-					for (String lid : groups.get(id).lights) {
-						Light light = lights.get(lid);
-						
-						light.state.on = true;
-						light.state.colormode = "ct";
-						light.state.ct = ct;
-						light.state.bri = bri;
-					}
-				} else {
-					ErrorDialog.showNetworkError(getFragmentManager());
-				}
-				
-				refreshViews();
-			}
-		}.execute();
+		});
 	}
 	
-	public void setGroupName(final String id, final String name) {
-		new AsyncTask<Void, Void, Boolean>() {
+	private void setGroupName(final String id, final String name) {		
+		asyncUpdate(new AsyncCallbacks() {			
 			@Override
-			protected void onPreExecute() {
-				setActivityIndicator(true, false);
+			public Object doUpdate() throws Exception {
+				service.setGroupName(id, name);
+				return null;
 			}
 			
 			@Override
-			protected Boolean doInBackground(Void... params) {
-				try {					
-					service.setGroupName(id, name);
-					return true;
-				} catch (Exception e) {
-					return false;
-				}
+			public void updateState(Object result) {
+				groups.get(id).name = name;
+				repopulateViews();
 			}
-			
-			@Override
-			protected void onPostExecute(Boolean result) {
-				setActivityIndicator(false, false);
-				
-				// Set successful, update state
-				if (result) {
-					groups.get(id).name = name;
-					repopulateViews();
-				} else {
-					ErrorDialog.showNetworkError(getFragmentManager());
-				}
-				
-				refreshViews();
-			}
-		}.execute();
+		});
 	}
 	
 	public void removeGroup(final String id) {
-		new AsyncTask<Void, Void, Boolean>() {
+		asyncUpdate(new AsyncCallbacks() {			
 			@Override
-			protected void onPreExecute() {
-				setActivityIndicator(true, true);
+			public Object doUpdate() throws Exception {
+				service.removeGroup(id);
+				return null;
 			}
 			
 			@Override
-			protected Boolean doInBackground(Void... params) {
-				try {					
-					service.removeGroup(id);					
-					return true;
-				} catch (Exception e) {
-					return false;
-				}
-			}
-			
-			@Override
-			protected void onPostExecute(Boolean result) {
-				setActivityIndicator(false, true);
+			public void updateState(Object result) {
+				groups.remove(id);
 				
-				// Set successful, update state
-				if (result) {
-					groups.remove(id);
-					
-					groupPresets.remove(id);
-					datasource.removePresetsGroup(id);
-					
-					repopulateViews();
-				} else {
-					ErrorDialog.showNetworkError(getFragmentManager());
-				}
+				groupPresets.remove(id);
+				datasource.removePresetsGroup(id);
+				
+				repopulateViews();
 			}
-		}.execute();
+		});
 	}
 	
-	public void setLightName(final String id, final String name) {
-		new AsyncTask<Void, Void, Boolean>() {
+	private void setLightName(final String id, final String name) {
+		asyncUpdate(new AsyncCallbacks() {			
 			@Override
-			protected void onPreExecute() {
-				setActivityIndicator(true, false);
+			public Object doUpdate() throws Exception {
+				service.setLightName(id, name);
+				return null;
 			}
 			
 			@Override
-			protected Boolean doInBackground(Void... params) {
-				try {					
-					service.setLightName(id, name);
-					return true;
-				} catch (Exception e) {
-					return false;
-				}
+			public void updateState(Object result) {
+				lights.get(id).name = name;
 			}
-			
-			@Override
-			protected void onPostExecute(Boolean result) {
-				setActivityIndicator(false, false);
-				
-				// Set successful, update state
-				if (result) {
-					lights.get(id).name = name;
-				} else {
-					ErrorDialog.showNetworkError(getFragmentManager());
-				}
-				
-				refreshViews();
-			}
-		}.execute();
+		});
 	}
 	
 	public void createGroup(final String name, final List<String> lights) {
@@ -964,107 +838,90 @@ public class LightsActivity extends Activity {
 			return;
 		}
 		
-		new AsyncTask<Void, Void, Integer>() {
+		asyncUpdate(new AsyncCallbacks() {			
 			@Override
-			protected void onPreExecute() {
-				setActivityIndicator(true, false);
+			public Object doUpdate() throws Exception {
+				return service.createGroup(name, lights);
 			}
 			
 			@Override
-			protected Integer doInBackground(Void... params) {
-				try {					
-					return service.createGroup(name, lights);
-				} catch (Exception e) {
-					return null;
-				}
-			}
-			
-			@Override
-			protected void onPostExecute(Integer result) {
-				setActivityIndicator(false, false);
+			public void updateState(Object result) {
+				Group group = new Group();
+				group.name = name;
+				group.lights = new ArrayList<String>(lights);
+				groups.put(String.valueOf(result), group);
 				
-				// Set successful, update state
-				if (result != null) {
-					Group group = new Group();
-					group.name = name;
-					group.lights = new ArrayList<String>(lights);
-					groups.put(String.valueOf(result), group);
-					
-					repopulateViews();
-				} else {
-					ErrorDialog.showNetworkError(getFragmentManager());
-				}
-				
-				refreshViews();
+				repopulateViews();
 			}
-		}.execute();
+		});
 	}
 	
-	public void setLightColorCT(final String id, final int ct, final int bri) {		
-		new AsyncTask<Void, Void, Boolean>() {
+	private void setLightColorCT(final String id, final int ct, final int bri) {		
+		asyncUpdate(new AsyncCallbacks() {			
 			@Override
-			protected void onPreExecute() {
-				setActivityIndicator(true, false);
+			public Object doUpdate() throws Exception {
+				service.setLightCT(id, ct, bri);
+				return null;
 			}
 			
 			@Override
-			protected Boolean doInBackground(Void... params) {
-				try {					
-					service.setLightCT(id, ct, bri);
-					return true;
-				} catch (Exception e) {
-					return false;
-				}
+			public void updateState(Object result) {
+				Light light = lights.get(id);
+				light.state.on = true;
+				light.state.colormode = "ct";
+				light.state.ct = ct;
+				light.state.bri = bri;
 			}
-			
-			@Override
-			protected void onPostExecute(Boolean result) {
-				setActivityIndicator(false, false);
-				
-				// Set successful, update state
-				if (result) {
-					Light light = lights.get(id);
-					light.state.on = true;
-					light.state.colormode = "ct";
-					light.state.ct = ct;
-					light.state.bri = bri;
-				} else {
-					ErrorDialog.showNetworkError(getFragmentManager());
-				}
-				
-				refreshViews();
-			}
-		}.execute();
+		});
 	}
 	
-	public void setLightColorXY(final String id, final float[] xy, final int bri) {		
-		new AsyncTask<Void, Void, Boolean>() {
+	private void setLightColorXY(final String id, final float[] xy, final int bri) {		
+		asyncUpdate(new AsyncCallbacks() {			
+			@Override
+			public Object doUpdate() throws Exception {
+				service.setLightXY(id, xy, bri);
+				return null;
+			}
+			
+			@Override
+			public void updateState(Object result) {
+				Light light = lights.get(id);
+				light.state.on = true;
+				light.state.colormode = "xy";
+				light.state.xy = new double[] { xy[0], xy[1] };
+				light.state.bri = bri;
+			}
+		});
+	}
+	
+	private interface AsyncCallbacks {
+		public Object doUpdate() throws Exception;
+		public void updateState(Object result);
+	}
+	
+	private void asyncUpdate(final AsyncCallbacks callback) {
+		new AsyncTask<Void, Void, Object>() {
 			@Override
 			protected void onPreExecute() {
 				setActivityIndicator(true, false);
 			}
 			
 			@Override
-			protected Boolean doInBackground(Void... params) {
+			protected Object doInBackground(Void... params) {
 				try {					
-					service.setLightXY(id, xy, bri);
-					return true;
+					return callback.doUpdate();
 				} catch (Exception e) {
-					return false;
+					return e;
 				}
 			}
 			
 			@Override
-			protected void onPostExecute(Boolean result) {
+			protected void onPostExecute(Object result) {
 				setActivityIndicator(false, false);
 				
 				// Set successful, update state
-				if (result) {
-					Light light = lights.get(id);
-					light.state.on = true;
-					light.state.colormode = "xy";
-					light.state.xy = new double[] { xy[0], xy[1] };
-					light.state.bri = bri;
+				if (!(result instanceof Exception)) {
+					callback.updateState(result);
 				} else {
 					ErrorDialog.showNetworkError(getFragmentManager());
 				}
