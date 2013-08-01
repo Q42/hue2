@@ -75,7 +75,9 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_weight="1"
-			android:layout_margin="15dp"
+			android:layout_marginLeft="15dp"
+			android:layout_marginRight="15dp"
+			android:layout_marginTop="15dp"
 			android:orientation="vertical">
 	    
 			<nl.q42.hue2.views.TempSlider
@@ -111,17 +113,16 @@
        android:background="#484848" />
    
    <LinearLayout
-       style="?android:attr/buttonBarStyle"
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
        android:orientation="horizontal">
 	   
        <Button
-           style="?android:attr/buttonBarButtonStyle"
 	       android:id="@+id/light_cancel"
 	       android:layout_width="match_parent"
 	       android:layout_height="wrap_content"
 	       android:layout_weight="1"
+	       android:background="@drawable/dark_button_background"
 	       android:text="@string/light_cancel" />
        
        <View
@@ -131,11 +132,11 @@
 	       android:background="#484848" />
 	   
 	   <Button
-	       style="?android:attr/buttonBarButtonStyle"
 	       android:id="@+id/light_save"
 	       android:layout_width="match_parent"
 	       android:layout_height="wrap_content"
 	       android:layout_weight="1"
+	       android:background="@drawable/dark_button_background"
 	       android:text="@string/light_save" />
    </LinearLayout>
 </LinearLayout>

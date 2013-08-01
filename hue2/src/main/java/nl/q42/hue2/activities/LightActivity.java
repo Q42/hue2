@@ -87,7 +87,7 @@ public class LightActivity extends Activity {
 		findViewById(R.id.light_cancel).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				restoreColor();
+				restoreLight();
 				finish();
 			}
 		});
@@ -119,11 +119,13 @@ public class LightActivity extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-		restoreColor();
+		restoreLight();
 		super.onBackPressed();
 	}
 	
-	private void restoreColor() {
+	private void restoreLight() {
+		if (!light.state.on) return;
+		
 		float[] xy;
 		if (light.state.colormode.equals("xy")) {
 			xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
@@ -164,6 +166,8 @@ public class LightActivity extends Activity {
 				if (previewNeeded) {
 					previewNeeded = false;
 					
+					if (!light.state.on) return;
+					
 					try {
 						float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
 						int bri = (int) (satBriSlider.getBrightness() * 255.0f);
@@ -185,7 +189,7 @@ public class LightActivity extends Activity {
 	private OnTouchListener getColorModeListener(final String mode) {
 		return new OnTouchListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
+			public boolean onTouch(View v, MotionEvent event) {				
 				colorMode = mode;
 				previewNeeded = true;
 				return false;

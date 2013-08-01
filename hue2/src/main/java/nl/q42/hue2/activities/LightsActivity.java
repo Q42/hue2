@@ -11,10 +11,8 @@ import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.PresetsDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
-import nl.q42.hue2.dialogs.ColorDialog;
 import nl.q42.hue2.dialogs.ErrorDialog;
 import nl.q42.hue2.dialogs.GroupCreateDialog;
-import nl.q42.hue2.dialogs.GroupRemoveDialog;
 import nl.q42.hue2.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.hue2.models.Preset;
@@ -51,6 +49,7 @@ public class LightsActivity extends Activity {
 	
 	// startActivityForResult identifiers
 	private final static int ACTIVITY_LIGHT = 1;
+	private final static int ACTIVITY_GROUP = 2;
 	
 	private Bridge bridge;
 	private HueService service;
@@ -200,9 +199,8 @@ public class LightsActivity extends Activity {
 			
 			// If we're just adding a preset, do that
 			if (data.getBooleanExtra("addPreset", false)) {
-				// TODO: Support ct
 				addLightPreset(id, xy, bri);
-			} else {			
+			} else {
 				// Otherwise check which values changed and start requests
 				if (!light.name.equals(name)) {
 					setLightName(id, name);
@@ -599,8 +597,20 @@ public class LightsActivity extends Activity {
 	private View addGroupListView(ViewGroup container, final String id, final Group group) {
 		View view = getLayoutInflater().inflate(R.layout.lights_group, container, false);
 		
-		// Set color picker event handler
+		// Set group edit event handler
 		view.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
+				groupIntent.putExtra("id", id);
+				groupIntent.putExtra("group", groups.get(id));
+				startActivityForResult(groupIntent, ACTIVITY_GROUP);
+			}
+		});
+		
+		// Set color picker event handler
+		// TODO: Remove
+		/*view.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				ColorDialog dialog = ColorDialog.newInstance(id, groups.get(id)); // Make sure to get the latest data
@@ -619,7 +629,7 @@ public class LightsActivity extends Activity {
 					return true;
 				}
 			});
-		}
+		}*/
 		
 		// Set on/off button event handlers
 		OnClickListener listener = new OnClickListener() {

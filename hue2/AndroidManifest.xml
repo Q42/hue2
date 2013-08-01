@@ -35,8 +35,10 @@
         <!-- Activity for selecting bridge -->
         <activity android:name=".activities.LinkActivity"></activity>
         
-        <!-- Activity for editing light -->
+        <!-- Activities for editing lights/groups -->
+        <!-- Landscape orientation doesn't fit color picker -->
         <activity android:name=".activities.LightActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".activities.GroupActivity" android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>
