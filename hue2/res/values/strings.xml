@@ -69,6 +69,8 @@
     <string name="dialog_no_lights_title">No lights selected</string>
     <string name="dialog_no_lights">You cannot create a group without lights.</string>
     
+    <string name="dialog_lights_title">Lights</string>
+    
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>

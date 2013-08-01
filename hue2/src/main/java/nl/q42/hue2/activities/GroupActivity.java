@@ -1,12 +1,16 @@
 package nl.q42.hue2.activities;
 
+import java.util.HashMap;
+
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
+import nl.q42.hue2.dialogs.GroupLightDialog;
 import nl.q42.hue2.dialogs.GroupRemoveDialog;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
 import nl.q42.javahueapi.models.Group;
+import nl.q42.javahueapi.models.Light;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +28,7 @@ import android.widget.LinearLayout;
 public class GroupActivity extends Activity {
 	private Group group;
 	private String id;
+	private HashMap<String, Light> lights;
 	
 	private EditText nameView;
 	private Button lightsButton;
@@ -34,6 +39,7 @@ public class GroupActivity extends Activity {
 	
 	private String colorMode;
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,6 +47,7 @@ public class GroupActivity extends Activity {
 		// Group details
 		group = (Group) getIntent().getSerializableExtra("group");
 		id = getIntent().getStringExtra("id");
+		lights = (HashMap<String, Light>) getIntent().getSerializableExtra("lights");
 		
 		// UI setup
 		setContentView(R.layout.activity_group);
@@ -75,6 +82,14 @@ public class GroupActivity extends Activity {
 			// Or if a new group is being created, no color can be set yet
 			colorPicker.setVisibility(View.GONE);
 		}
+		
+		// Add lights button event handler
+		lightsButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				GroupLightDialog.newInstance(lights).show(getFragmentManager(), "dialog_lights");
+			}
+		});
 		
 		// Add cancel event handler
 		findViewById(R.id.group_cancel).setOnClickListener(new OnClickListener() {

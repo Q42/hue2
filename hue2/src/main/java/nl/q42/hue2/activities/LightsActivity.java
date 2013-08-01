@@ -643,6 +643,7 @@ public class LightsActivity extends Activity {
 				Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
 				groupIntent.putExtra("id", id);
 				groupIntent.putExtra("group", groups.get(id));
+				groupIntent.putExtra("lights", lights);
 				startActivityForResult(groupIntent, ACTIVITY_GROUP);
 			}
 		});
