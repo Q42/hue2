@@ -13,7 +13,7 @@ public class DBHelper extends SQLiteOpenHelper{
     }
 
     public String[] allColumns() {
-    	return new String[]{ "id", "bridge_serial", "light_id", "group_id", "x_color", "y_color", "brightness" };
+    	return new String[]{ "id", "bridge_serial", "light_id", "group_id", "color_mode", "x_color", "y_color", "ct", "brightness" };
     }
     
     @Override
@@ -23,8 +23,10 @@ public class DBHelper extends SQLiteOpenHelper{
         		"bridge_serial TEXT," +
         		"light_id TEXT," +
         		"group_id TEXT," +
+        		"color_mode TEXT," +
         		"x_color REAL," +
         		"y_color REAL," +
+        		"ct REAL," +
         		"brightness INTEGER)");
     }
 

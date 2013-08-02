@@ -199,11 +199,14 @@ public class GroupActivity extends Activity {
 		if (item.getItemId() == R.id.menu_add_preset) {
 			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
 			int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+			int ct = (int) tempSlider.getTemp();
 			
 			Intent result = new Intent();
 			result.putExtra("addPreset", true);
 			result.putExtra("id", id);
+			result.putExtra("mode", colorMode);
 			result.putExtra("xy", xy);
+			result.putExtra("ct", ct);
 			result.putExtra("bri", bri);
 			
 			setResult(RESULT_OK, result);

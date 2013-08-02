@@ -33,8 +33,22 @@ public class PresetsDataSource {
 		values.put("bridge_serial", bridge_serial);
 		values.put("light_id", light_id);
 		values.put("group_id", group_id);
+		values.put("color_mode", "xy");
 		values.put("x_color", xy_color[0]);
 		values.put("y_color", xy_color[1]);
+		values.put("brightness", brightness);
+		
+		return (int) db.insert("presets", null, values);
+	}
+	
+	public int insertPreset(String bridge_serial, String light_id, String group_id, float ct, int brightness) {
+		ContentValues values = new ContentValues();
+		
+		values.put("bridge_serial", bridge_serial);
+		values.put("light_id", light_id);
+		values.put("group_id", group_id);
+		values.put("color_mode", "ct");
+		values.put("ct", ct);
 		values.put("brightness", brightness);
 		
 		return (int) db.insert("presets", null, values);
@@ -90,8 +104,10 @@ public class PresetsDataSource {
 		preset.id = cursor.getInt(0);
 		preset.light = cursor.getString(2);
 		preset.group = cursor.getString(3);
-		preset.xy = new float[] { cursor.getFloat(4), cursor.getFloat(5) };
-		preset.brightness = cursor.getInt(6);
+		preset.color_mode = cursor.getString(4);
+		preset.xy = new float[] { cursor.getFloat(5), cursor.getFloat(6) };
+		preset.ct = cursor.getFloat(7);
+		preset.brightness = cursor.getInt(8);
 		
 		return preset;
 	}

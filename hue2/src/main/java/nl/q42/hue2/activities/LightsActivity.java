@@ -208,7 +208,11 @@ public class LightsActivity extends Activity {
 				
 				// Check which action user selected
 				if (data.getBooleanExtra("addPreset", false)) {
-					addLightPreset(id, xy, bri);
+					if (mode.equals("ct")) {
+						addLightPresetCT(id, ct, bri);
+					} else {
+						addLightPresetXY(id, xy, bri);
+					}
 				} else {
 					if (!light.name.equals(name)) {
 						setLightName(id, name);
@@ -231,7 +235,11 @@ public class LightsActivity extends Activity {
 					
 					// Check which action user selected
 					if (data.getBooleanExtra("addPreset", false)) {
-						addGroupPreset(id, xy, bri);
+						if (mode.equals("ct")) {
+							addGroupPresetCT(id, ct, bri);
+						} else {
+							addGroupPresetXY(id, xy, bri);
+						}
 					} else if (data.getBooleanExtra("remove", false)) {
 						removeGroup(id);
 					} else {
@@ -361,12 +369,20 @@ public class LightsActivity extends Activity {
 				for (final Preset preset : groupPresets.get(id)) {
 					ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
 					
-					presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, null));
+					if (preset.color_mode.equals("xy")) {
+						presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, null));
+					} else {
+						presetBut.setColor(Util.temperatureToColor(1000000 / (int) preset.ct));
+					}
 					
 					presetBut.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							setGroupColorXY(id, preset.xy, preset.brightness);
+							if (preset.color_mode.equals("xy")) {
+								setGroupColorXY(id, preset.xy, preset.brightness);
+							} else {
+								setGroupColorCT(id, (int) preset.ct, preset.brightness);
+							}
 						}
 					});
 					
@@ -419,12 +435,20 @@ public class LightsActivity extends Activity {
 					for (final Preset preset : lightPresets.get(id)) {
 						ColorButton presetBut = (ColorButton) getLayoutInflater().inflate(R.layout.lights_preset_button, presetsView, false);
 						
-						presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
+						if (preset.color_mode.equals("xy")) {
+							presetBut.setColor(PHUtilitiesImpl.colorFromXY(preset.xy, light.modelid));
+						} else {
+							presetBut.setColor(Util.temperatureToColor(1000000 / (int) preset.ct));
+						}
 						
 						presetBut.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								setLightColorXY(id, preset.xy, preset.brightness);
+								if (preset.color_mode.equals("xy")) {
+									setLightColorXY(id, preset.xy, preset.brightness);
+								} else {
+									setLightColorCT(id, (int) preset.ct, preset.brightness);
+								}
 							}
 						});
 						
@@ -720,7 +744,18 @@ public class LightsActivity extends Activity {
 		return view;
 	}
 	
-	private void addLightPreset(final String id, final float[] xy, final int bri) {
+	private void addLightPresetCT(final String id, final float ct, final int bri) {
+		int db_id = datasource.insertPreset(bridge.getSerial(), id, null, ct, bri);
+		
+		if (!lightPresets.containsKey(id)) {
+			lightPresets.put(id, new ArrayList<Preset>());
+		}
+		lightPresets.get(id).add(new Preset(db_id, id, null, ct, bri));
+		
+		refreshViews();
+	}
+	
+	private void addLightPresetXY(final String id, final float[] xy, final int bri) {
 		int db_id = datasource.insertPreset(bridge.getSerial(), id, null, xy, bri);
 		
 		if (!lightPresets.containsKey(id)) {
@@ -731,7 +766,18 @@ public class LightsActivity extends Activity {
 		refreshViews();
 	}
 	
-	private void addGroupPreset(final String id, final float[] xy, final int bri) {
+	private void addGroupPresetCT(final String id, final float ct, final int bri) {
+		int db_id = datasource.insertPreset(bridge.getSerial(), null, id, ct, bri);
+		
+		if (!groupPresets.containsKey(id)) {
+			groupPresets.put(id, new ArrayList<Preset>());
+		}
+		groupPresets.get(id).add(new Preset(db_id, null, id, ct, bri));
+		
+		refreshViews();
+	}
+	
+	private void addGroupPresetXY(final String id, final float[] xy, final int bri) {
 		int db_id = datasource.insertPreset(bridge.getSerial(), null, id, xy, bri);
 		
 		if (!groupPresets.containsKey(id)) {
