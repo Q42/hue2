@@ -152,9 +152,15 @@ public class LightsActivity extends Activity {
 			startActivity(searchIntent);
 			return true;
 		} else if (item.getItemId() == R.id.menu_new_group) {
-			Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
-			groupIntent.putExtra("lights", lights);
-			startActivityForResult(groupIntent, ACTIVITY_GROUP);
+			// Check if the group limit has been reached (all pseudo group doesn't count)
+			if (groups.size() >= 1 + 16) {
+				ErrorDialog.show(getFragmentManager(), R.string.dialog_too_many_groups_title, R.string.dialog_too_many_groups);
+			} else {
+				Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
+				groupIntent.putExtra("lights", lights);
+				startActivityForResult(groupIntent, ACTIVITY_GROUP);
+			}
+			
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);

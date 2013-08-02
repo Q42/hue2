@@ -208,6 +208,10 @@ public class HueService implements Serializable {
 		if (result.getResponseCode() != 200)
 			throw new ApiException(result);
 		
+		if (result.getBody().contains("error")) {
+			throw new ApiException(result);
+		}
+		
 		// Parse new group id
 		Matcher m = Pattern.compile("[0-9]+").matcher(result.getBody());
 		m.find();

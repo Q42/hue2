@@ -50,32 +50,22 @@
     <string name="dialog_network_error_title">Network error</string>
     <string name="dialog_network_error">Make sure you have an active network connection and try again.</string>
     
-    <string name="dialog_color_picker_title">Color picker</string>
-    <string name="dialog_color_add">Add preset</string>
-    <string name="dialog_color_set">Set color</string>
-    
     <string name="dialog_remove_preset_title">Color preset</string>
     <string name="dialog_remove_preset">Would you like to remove this preset?</string>
     
     <string name="dialog_remove_group">Are you sure you want to remove this group?</string>
-    
-    <string name="dialog_light_title">Edit light</string>
-    <string name="dialog_light_name">Name:</string>
-    
-    <string name="dialog_group_create_title">Create group</string>
-    <string name="dialog_group_create_name">Name:</string>
-    <string name="dialog_group_create_lights">Lights:</string>
     
     <string name="dialog_no_lights_title">No lights selected</string>
     <string name="dialog_no_lights">You cannot create a group without lights.</string>
     
     <string name="dialog_lights_title">Lights</string>
     
+    <string name="dialog_too_many_groups_title">Group limit reached</string>
+    <string name="dialog_too_many_groups">You can\'t add more than 16 groups to a bridge!</string>
+    
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
-    <string name="dialog_save">Save</string>
-    <string name="dialog_create">Create</string>
     <string name="dialog_cancel">Cancel</string>
     
     <!-- Menus -->
