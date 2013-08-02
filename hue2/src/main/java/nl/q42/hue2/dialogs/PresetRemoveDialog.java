@@ -2,6 +2,7 @@ package nl.q42.hue2.dialogs;
 
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
+import nl.q42.hue2.Util;
 import nl.q42.hue2.activities.LightsActivity;
 import nl.q42.hue2.models.Preset;
 import nl.q42.javahueapi.models.Light;
@@ -45,7 +46,12 @@ public class PresetRemoveDialog extends DialogFragment {
 		
 		int size = (int) (getResources().getDisplayMetrics().density * 64.0f);
 		Bitmap bm = Bitmap.createBitmap(size, size, Config.ARGB_8888);
-		bm.eraseColor(PHUtilitiesImpl.colorFromXY(preset.xy, light != null ? light.modelid : null));
+		
+		if (preset.color_mode.equals("xy")) {
+			bm.eraseColor(PHUtilitiesImpl.colorFromXY(preset.xy, light != null ? light.modelid : null));
+		} else {
+			bm.eraseColor(Util.temperatureToColor(1000000 / (int) preset.ct));
+		}
 		
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.dialog_remove_preset_title)
