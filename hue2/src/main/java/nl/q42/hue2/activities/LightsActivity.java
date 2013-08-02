@@ -1,7 +1,6 @@
 package nl.q42.hue2.activities;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -152,8 +151,8 @@ public class LightsActivity extends Activity {
 			startActivity(searchIntent);
 			return true;
 		} else if (item.getItemId() == R.id.menu_new_group) {
-			// Check if the group limit has been reached (all pseudo group doesn't count)
-			if (groups.size() >= 1 + 16) {
+			// Check if the group limit has been reached (group 16 always returns empty lights list, so ignore)
+			if (groups.size() >= 1 + 15) {
 				ErrorDialog.show(getFragmentManager(), R.string.dialog_too_many_groups_title, R.string.dialog_too_many_groups);
 			} else {
 				Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
@@ -543,10 +542,8 @@ public class LightsActivity extends Activity {
 		
 		// Sort groups by id
 		ArrayList<String> groupIds = new ArrayList<String>();
-		for (String id : groups.keySet()) {
-			groupIds.add(id);
-		}
-		Collections.sort(groupIds);
+		groupIds.addAll(groups.keySet());
+		Util.sortNumericallyIfPossible(groupIds);
 		
 		for (final String id : groupIds) {
 			Group group = groups.get(id);
@@ -566,17 +563,13 @@ public class LightsActivity extends Activity {
 	private void populateGroups() {
 		// Sort groups by id
 		ArrayList<String> groupIds = new ArrayList<String>();
-		for (String id : groups.keySet()) {
-			groupIds.add(id);
-		}
-		Collections.sort(groupIds);
+		groupIds.addAll(groups.keySet());
+		Util.sortNumericallyIfPossible(groupIds);
 		
 		// Build sorted list of all lights 
 		ArrayList<String> otherLights = new ArrayList<String>();
-		for (String id : lights.keySet()) {
-			otherLights.add(id);
-		}
-		Collections.sort(otherLights);
+		otherLights.addAll(lights.keySet());
+		Util.sortNumericallyIfPossible(otherLights);
 		
 		// For each group, add a header and the lights		
 		for (final String id : groupIds) {
@@ -612,10 +605,8 @@ public class LightsActivity extends Activity {
 		
 		// Sort lights in group by id
 		ArrayList<String> lightIds = new ArrayList<String>();
-		for (String lid : group.lights) {
-			lightIds.add(lid);
-		}
-		Collections.sort(lightIds);
+		lightIds.addAll(group.lights);
+		Util.sortNumericallyIfPossible(lightIds);
 		
 		// Create and add view for all lights
 		View lastView = null;

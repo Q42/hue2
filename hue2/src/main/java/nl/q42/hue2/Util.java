@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -106,6 +109,25 @@ public class Util {
 		  } else {
 			  return manufacturer.substring(0, 1).toUpperCase() + manufacturer.substring(1) + " " + model;
 		  }
+	}
+	
+	/**
+	 * Sorts list of strings by integer values if available
+	 */
+	public static void sortNumericallyIfPossible(ArrayList<String> list) {
+		Collections.sort(list, new Comparator<String>() {
+			@Override
+			public int compare(String lhs, String rhs) {
+				Integer lhsi = Integer.valueOf(lhs);
+				Integer rhsi = Integer.valueOf(rhs);
+				
+				if (lhsi != null && rhsi != null) {
+					return lhsi - rhsi;
+				} else {
+					return lhs.compareTo(rhs);
+				}
+			}
+		});
 	}
 	
 	/**
