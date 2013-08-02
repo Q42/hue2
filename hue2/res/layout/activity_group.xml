@@ -20,6 +20,7 @@
         android:orientation="vertical">
         
 	    <TextView
+	        android:id="@+id/group_header"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_marginBottom="5dp"
@@ -58,7 +59,7 @@
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_weight="1"
-		        android:inputType="textCapWords"
+		        android:inputType="textCapSentences"
 		        android:maxLength="32" />
 		</LinearLayout>
 		
@@ -156,30 +157,32 @@
        android:layout_weight="0"
        android:background="#484848" />
    
-   <LinearLayout
+   <Button
+       android:id="@+id/group_create"
+       android:visibility="gone"
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
-       android:orientation="horizontal">
-	   
-       <Button
-	       android:id="@+id/group_cancel"
-	       android:layout_width="match_parent"
-	       android:layout_height="wrap_content"
-	       android:layout_weight="1"
-	       android:background="@drawable/dark_button_background"
-	       android:text="@string/group_cancel" />
-       
-       <View
-	       android:layout_width="1dp"
-	       android:layout_height="match_parent"
-	       android:layout_weight="0"
-	       android:background="#484848" />
+       android:background="@drawable/dark_button_background"
+       android:text="@string/group_create" />
+   
+   <RelativeLayout
+       android:id="@+id/group_save"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
 	   
 	   <Button
-	       android:id="@+id/group_apply"
+	       android:id="@+id/group_save_preset"
 	       android:layout_width="match_parent"
 	       android:layout_height="wrap_content"
-	       android:layout_weight="1"
-	       android:background="@drawable/dark_button_background" />
-   </LinearLayout>
+	       android:background="@drawable/dark_button_background"
+	       android:text="@string/group_save_preset" />
+
+	   <nl.q42.hue2.views.ColorButton
+	       android:id="@+id/group_preset_color"
+	       android:layout_width="40dp"
+	       android:layout_height="40dp"
+	       android:clickable="false"
+	       android:layout_centerInParent="true"
+	       android:translationX="-85dp" />
+   </RelativeLayout>
 </LinearLayout>

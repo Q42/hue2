@@ -5,13 +5,16 @@ import java.util.HashMap;
 
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
+import nl.q42.hue2.Util;
 import nl.q42.hue2.dialogs.GroupLightDialog;
 import nl.q42.hue2.dialogs.GroupRemoveDialog;
+import nl.q42.hue2.views.ColorButton;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +28,7 @@ import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class GroupActivity extends Activity {
 	private Group group;
@@ -37,6 +41,7 @@ public class GroupActivity extends Activity {
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
 	private TempSlider tempSlider;
+	private ColorButton presetColorView;
 	
 	private String colorMode;
 	
@@ -44,6 +49,10 @@ public class GroupActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		ActionBar ab = getActionBar();
+		ab.setDisplayHomeAsUpEnabled(true);
+		ab.setDisplayShowTitleEnabled(false);
 		
 		// Group details
 		group = (Group) getIntent().getSerializableExtra("group");
@@ -57,7 +66,8 @@ public class GroupActivity extends Activity {
 		
 		// UI setup
 		setContentView(R.layout.activity_group);
-		setTitle(id == null ? getString(R.string.group_new) : getString(R.string.group_edit));
+		
+		((TextView) findViewById(R.id.group_header)).setText(id == null ? R.string.group_new : R.string.group_group);
 		
 		nameView = (EditText) findViewById(R.id.group_name);
 		lightsButton = (Button) findViewById(R.id.group_lights);
@@ -69,11 +79,43 @@ public class GroupActivity extends Activity {
 		hueSlider.setSatBriSlider(satBriSlider);
 		tempSlider.setSliders(hueSlider, satBriSlider);
 		
+		presetColorView = (ColorButton) findViewById(R.id.group_preset_color);
+		
 		// Set listeners for color slider interaction to record last used color mode (hue/sat or temperature)
 		// and to send preview requests
 		tempSlider.setOnTouchListener(getColorModeListener("ct"));
 		hueSlider.setOnTouchListener(getColorModeListener("xy"));
 		satBriSlider.setOnTouchListener(getColorModeListener("xy"));
+		
+		// Save preset button
+		findViewById(R.id.group_save_preset).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+				int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+				int ct = (int) tempSlider.getTemp();
+				
+				Intent result = new Intent();
+				result.putExtra("addPreset", true);
+				result.putExtra("id", id);
+				result.putExtra("mode", colorMode);
+				result.putExtra("xy", xy);
+				result.putExtra("ct", ct);
+				result.putExtra("bri", bri);
+				
+				setResult(RESULT_OK, result);
+				finish();
+			}
+		});
+		
+		// Create group button
+		findViewById(R.id.group_create).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				saveGroup();
+				finish();
+			}
+		});
 		
 		// If this is the all lights pseudo group, only the color can be changed
 		if ("0".equals(id)) {
@@ -93,56 +135,24 @@ public class GroupActivity extends Activity {
 			}
 		});
 		
-		// Add cancel event handler
-		findViewById(R.id.group_cancel).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				finish();
-			}
-		});
-		
-		// Add save/create event handler
-		Button applyButton = (Button) findViewById(R.id.group_apply);
-		applyButton.setText(id == null ? R.string.group_create : R.string.group_save);
-		applyButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				ArrayList<String> groupLights = new ArrayList<String>();
-				groupLights.addAll(group.lights);
-				
-				if (id != null) {
-					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
-					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-					int ct = (int) tempSlider.getTemp();
-					
-					Intent result = new Intent();
-					result.putExtra("id", id);
-					result.putExtra("name", nameView.getText().toString().trim());
-					result.putExtra("lights", groupLights);
-					result.putExtra("mode", colorMode);
-					result.putExtra("xy", xy);
-					result.putExtra("ct", ct);
-					result.putExtra("bri", bri);
-					
-					// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
-					result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
-					
-					setResult(RESULT_OK, result);
-					finish();
-				} else {
-					Intent result = new Intent();
-					result.putExtra("name", nameView.getText().toString().trim());
-					result.putExtra("lights", groupLights);
-					
-					setResult(RESULT_OK, result);
-					finish();
-				}
-			}
-		});
+		// Switch buttons when creating group
+		if (id == null) {
+			findViewById(R.id.group_save).setVisibility(View.GONE);
+			findViewById(R.id.group_create).setVisibility(View.VISIBLE);
+		}
 		
 		if (savedInstanceState == null) {
 			nameView.setText(id == null ? "" : group.name);
 		}
+		
+		colorMode = "xy";
+		updatePresetPreview();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if (id != null) saveGroup();
+		super.onBackPressed();
 	}
 	
 	private OnTouchListener getColorModeListener(final String mode) {
@@ -150,9 +160,19 @@ public class GroupActivity extends Activity {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {				
 				colorMode = mode;
+				updatePresetPreview();
 				return false;
 			}
 		};
+	}
+	
+	private void updatePresetPreview() {
+		if (colorMode.equals("ct")) {
+			presetColorView.setColor(Util.temperatureToColor(1000000 / (int) tempSlider.getTemp()));
+		} else {
+			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+			presetColorView.setColor(PHUtilitiesImpl.colorFromXY(xy, null));
+		}
 	}
 	
 	private String getLightsList() {
@@ -180,6 +200,37 @@ public class GroupActivity extends Activity {
 		lightsButton.setText(getLightsList());
 	}
 	
+	private void saveGroup() {
+		ArrayList<String> groupLights = new ArrayList<String>();
+		groupLights.addAll(group.lights);
+		
+		if (id != null) {
+			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+			int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+			int ct = (int) tempSlider.getTemp();
+			
+			Intent result = new Intent();
+			result.putExtra("id", id);
+			result.putExtra("name", nameView.getText().toString().trim());
+			result.putExtra("lights", groupLights);
+			result.putExtra("mode", colorMode);
+			result.putExtra("xy", xy);
+			result.putExtra("ct", ct);
+			result.putExtra("bri", bri);
+			
+			// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
+			result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
+			
+			setResult(RESULT_OK, result);
+		} else {
+			Intent result = new Intent();
+			result.putExtra("name", nameView.getText().toString().trim());
+			result.putExtra("lights", groupLights);
+			
+			setResult(RESULT_OK, result);
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
@@ -195,6 +246,14 @@ public class GroupActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_delete_group) {
 			GroupRemoveDialog.newInstance().show(getFragmentManager(), "dialog_remove_group");
+			return true;
+		} else if (item.getItemId() == R.id.menu_cancel) {
+			finish();			
+			return true;
+		} else if (item.getItemId() == android.R.id.home) {
+			if (id != null) saveGroup();
+			finish();
+			
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);

@@ -22,7 +22,6 @@ public class ColorButton extends Button {
 		
 		// Load white button background
 		template = BitmapFactory.decodeResource(context.getResources(), R.drawable.btn_template);
-		setColor(Color.WHITE);
 	}
 	
 	public ColorButton(Context context, AttributeSet attrs) {
@@ -30,7 +29,6 @@ public class ColorButton extends Button {
 		
 		// Load white button background
 		template = BitmapFactory.decodeResource(context.getResources(), R.drawable.btn_template);
-		setColor(Color.WHITE);
 	}
 	
 	@SuppressWarnings("deprecation")

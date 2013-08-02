@@ -34,7 +34,8 @@
     <string name="group_color">Color</string>
     <string name="group_cancel">Cancel</string>
     <string name="group_save">Save</string>
-    <string name="group_create">Create</string>
+    <string name="group_save_preset">Save as preset</string>
+    <string name="group_create">Create group</string>
     <string name="group_new">New group</string>
     <string name="group_edit">Edit group</string>
     
