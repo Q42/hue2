@@ -91,19 +91,7 @@ public class GroupActivity extends Activity {
 		findViewById(R.id.group_save_preset).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
-				int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-				int ct = (int) tempSlider.getTemp();
-				
-				Intent result = new Intent();
-				result.putExtra("addPreset", true);
-				result.putExtra("id", id);
-				result.putExtra("mode", colorMode);
-				result.putExtra("xy", xy);
-				result.putExtra("ct", ct);
-				result.putExtra("bri", bri);
-				
-				setResult(RESULT_OK, result);
+				saveGroup(true);
 				finish();
 			}
 		});
@@ -112,7 +100,7 @@ public class GroupActivity extends Activity {
 		findViewById(R.id.group_create).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				saveGroup();
+				saveGroup(false);
 				finish();
 			}
 		});
@@ -151,7 +139,7 @@ public class GroupActivity extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-		if (id != null) saveGroup();
+		if (id != null) saveGroup(false);
 		super.onBackPressed();
 	}
 	
@@ -200,7 +188,7 @@ public class GroupActivity extends Activity {
 		lightsButton.setText(getLightsList());
 	}
 	
-	private void saveGroup() {
+	private void saveGroup(boolean addPreset) {
 		ArrayList<String> groupLights = new ArrayList<String>();
 		groupLights.addAll(group.lights);
 		
@@ -217,6 +205,8 @@ public class GroupActivity extends Activity {
 			result.putExtra("xy", xy);
 			result.putExtra("ct", ct);
 			result.putExtra("bri", bri);
+			
+			if (addPreset) result.putExtra("addPreset", true);
 			
 			// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
 			result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
@@ -251,7 +241,7 @@ public class GroupActivity extends Activity {
 			finish();			
 			return true;
 		} else if (item.getItemId() == android.R.id.home) {
-			if (id != null) saveGroup();
+			if (id != null) saveGroup(false);
 			finish();
 			
 			return true;

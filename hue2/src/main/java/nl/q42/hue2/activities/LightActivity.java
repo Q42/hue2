@@ -81,19 +81,7 @@ public class LightActivity extends Activity {
 		findViewById(R.id.light_save_preset).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
-				int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-				int ct = (int) tempSlider.getTemp();
-				
-				Intent result = new Intent();
-				result.putExtra("addPreset", true);
-				result.putExtra("id", id);
-				result.putExtra("mode", colorMode);
-				result.putExtra("xy", xy);
-				result.putExtra("ct", ct);
-				result.putExtra("bri", bri);
-				
-				setResult(RESULT_OK, result);
+				saveLight(true);
 				finish();
 			}
 		});
@@ -120,11 +108,11 @@ public class LightActivity extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-		saveLight();
+		saveLight(false);
 		super.onBackPressed();
 	}
 	
-	private void saveLight() {
+	private void saveLight(boolean addPreset) {
 		float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
 		int bri = (int) (satBriSlider.getBrightness() * 255.0f);
 		int ct = (int) tempSlider.getTemp();
@@ -137,6 +125,8 @@ public class LightActivity extends Activity {
 		result.putExtra("ct", ct);
 		result.putExtra("bri", bri);
 		
+		if (addPreset) result.putExtra("addPreset", true);
+
 		// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
 		result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
 		
@@ -243,7 +233,7 @@ public class LightActivity extends Activity {
 			
 			return true;
 		} else if (item.getItemId() == android.R.id.home) {
-			saveLight();
+			saveLight(false);
 			finish();
 			
 			return true;

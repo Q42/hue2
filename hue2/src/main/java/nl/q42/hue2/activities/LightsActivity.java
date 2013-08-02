@@ -207,24 +207,23 @@ public class LightsActivity extends Activity {
 			if (requestCode == ACTIVITY_LIGHT) {
 				Light light = lights.get(id);
 				
-				// Check which action user selected
 				if (data.getBooleanExtra("addPreset", false)) {
 					if (mode.equals("ct")) {
 						addLightPresetCT(id, ct, bri);
 					} else {
 						addLightPresetXY(id, xy, bri);
 					}
-				} else {
-					if (!light.name.equals(name)) {
-						setLightName(id, name);
-					}
-					
-					if (data.getBooleanExtra("colorChanged", false)) {
-						if (mode.equals("ct")) {
-							setLightColorCT(id, ct, bri);
-						} else {
-							setLightColorXY(id, xy, bri);
-						}
+				}
+				
+				if (!light.name.equals(name)) {
+					setLightName(id, name);
+				}
+				
+				if (data.getBooleanExtra("colorChanged", false)) {
+					if (mode.equals("ct")) {
+						setLightColorCT(id, ct, bri);
+					} else {
+						setLightColorXY(id, xy, bri);
 					}
 				}
 			} else if (requestCode == ACTIVITY_GROUP) {
@@ -234,16 +233,17 @@ public class LightsActivity extends Activity {
 				if (id != null) {
 					Group group = groups.get(id);
 					
-					// Check which action user selected
-					if (data.getBooleanExtra("addPreset", false)) {
-						if (mode.equals("ct")) {
-							addGroupPresetCT(id, ct, bri);
-						} else {
-							addGroupPresetXY(id, xy, bri);
-						}
-					} else if (data.getBooleanExtra("remove", false)) {
+					if (data.getBooleanExtra("remove", false)) {
 						removeGroup(id);
 					} else {
+						if (data.getBooleanExtra("addPreset", false)) {
+							if (mode.equals("ct")) {
+								addGroupPresetCT(id, ct, bri);
+							} else {
+								addGroupPresetXY(id, xy, bri);
+							}
+						}
+						
 						if (!group.name.equals(name)) {
 							setGroupName(id, name);
 						}
@@ -955,7 +955,7 @@ public class LightsActivity extends Activity {
 		});
 	}
 	
-	private void setLightColorXY(final String id, final float[] xy, final int bri) {		
+	private void setLightColorXY(final String id, final float[] xy, final int bri) {
 		asyncUpdate(new AsyncCallbacks() {			
 			@Override
 			public Object doUpdate() throws Exception {
