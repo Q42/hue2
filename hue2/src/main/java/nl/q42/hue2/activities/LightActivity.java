@@ -134,8 +134,6 @@ public class LightActivity extends Activity {
 	}
 	
 	private void restoreLight() {
-		if (!light.state.on) return;
-		
 		float[] xy;
 		if (light.state.colormode.equals("xy")) {
 			xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
@@ -175,8 +173,6 @@ public class LightActivity extends Activity {
 			public void run() {
 				if (previewNeeded) {
 					previewNeeded = false;
-					
-					if (!light.state.on) return;
 					
 					try {
 						float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);

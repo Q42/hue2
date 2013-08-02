@@ -140,7 +140,7 @@ public class SatBriSlider extends View {
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_MOVE:
 				sat = Math.max(0.0f, Math.min(event.getX() / viewRect.right, 1.0f));
-				bri = Math.max(0.0f, Math.min(1.0f - event.getY() / viewRect.bottom, 1.0f));
+				bri = Math.max(1.0f / 255.0f, Math.min(1.0f - event.getY() / viewRect.bottom, 1.0f));
 				userSet = true;
 				invalidate();
 				break;

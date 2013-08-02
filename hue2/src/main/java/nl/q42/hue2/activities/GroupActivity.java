@@ -2,6 +2,8 @@ package nl.q42.hue2.activities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
@@ -12,11 +14,13 @@ import nl.q42.hue2.views.ColorButton;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
+import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,9 +35,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class GroupActivity extends Activity {
+	private final static int PREVIEW_INTERVAL = 500;
+	
 	private Group group;
 	private String id;
 	private HashMap<String, Light> lights;
+	private HueService service;
 	
 	private EditText nameView;
 	private Button lightsButton;
@@ -44,6 +51,9 @@ public class GroupActivity extends Activity {
 	private ColorButton presetColorView;
 	
 	private String colorMode;
+	
+	private Timer colorPreviewTimer = new Timer();
+	private boolean previewNeeded = false; // Set to true when color slider is moved
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -58,6 +68,7 @@ public class GroupActivity extends Activity {
 		group = (Group) getIntent().getSerializableExtra("group");
 		id = getIntent().getStringExtra("id");
 		lights = (HashMap<String, Light>) getIntent().getSerializableExtra("lights");
+		service = (HueService) getIntent().getSerializableExtra("service");
 		
 		if (group == null) {
 			group = new Group();
@@ -143,11 +154,83 @@ public class GroupActivity extends Activity {
 		super.onBackPressed();
 	}
 	
+	private void restoreLights() {
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					for (String id : group.lights) {
+						Light light = lights.get(id);
+						
+						float[] xy;
+						if (light.state.colormode.equals("xy")) {
+							xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
+						} else {
+							xy = PHUtilitiesImpl.calculateXY(Util.getRGBColor(light), light.modelid);
+						}
+						
+						int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+						int ct = (int) tempSlider.getTemp();
+						
+						if (light.state.colormode.equals("ct")) {
+							service.setLightCT(id, ct, bri);
+						} else {
+							service.setLightXY(id, xy, bri);
+						}
+						
+						setResult(RESULT_CANCELED);
+					}
+				} catch (Exception e) {
+					// Ignore right now
+				}
+				
+				return null;
+			}
+		}.execute();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		colorPreviewTimer.cancel();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		// Start timer that sends requests for color previews
+		colorPreviewTimer = new Timer();
+		colorPreviewTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				if (previewNeeded) {
+					previewNeeded = false;
+					
+					try {
+						float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+						int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+						int ct = (int) tempSlider.getTemp();
+						
+						if (colorMode.equals("ct")) {
+							service.setGroupCT(id, ct, bri);
+						} else {
+							service.setGroupXY(id, xy, bri);
+						}
+					} catch (Exception e) {
+						// Don't report exceptions since previewing is a non-essential feature
+					}
+				}
+			}
+		}, 0, PREVIEW_INTERVAL);
+	}
+	
 	private OnTouchListener getColorModeListener(final String mode) {
 		return new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {				
 				colorMode = mode;
+				previewNeeded = true;
 				updatePresetPreview();
 				return false;
 			}
@@ -238,6 +321,7 @@ public class GroupActivity extends Activity {
 			GroupRemoveDialog.newInstance().show(getFragmentManager(), "dialog_remove_group");
 			return true;
 		} else if (item.getItemId() == R.id.menu_cancel) {
+			restoreLights();
 			finish();			
 			return true;
 		} else if (item.getItemId() == android.R.id.home) {
