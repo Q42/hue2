@@ -112,31 +112,24 @@
        android:layout_weight="0"
        android:background="#484848" />
    
-   <LinearLayout
+   <RelativeLayout
        android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:orientation="horizontal">
-	   
-       <Button
-	       android:id="@+id/light_cancel"
-	       android:layout_width="match_parent"
-	       android:layout_height="wrap_content"
-	       android:layout_weight="1"
-	       android:background="@drawable/dark_button_background"
-	       android:text="@string/light_cancel" />
-       
-       <View
-	       android:layout_width="1dp"
-	       android:layout_height="match_parent"
-	       android:layout_weight="0"
-	       android:background="#484848" />
+       android:layout_height="wrap_content">
 	   
 	   <Button
-	       android:id="@+id/light_save"
+	       android:id="@+id/light_save_preset"
 	       android:layout_width="match_parent"
 	       android:layout_height="wrap_content"
-	       android:layout_weight="1"
 	       android:background="@drawable/dark_button_background"
-	       android:text="@string/light_save" />
-   </LinearLayout>
+	       android:text="@string/light_save_preset" />
+
+	   <nl.q42.hue2.views.ColorButton
+	       android:id="@+id/light_preset_color"
+	       android:layout_width="40dp"
+	       android:layout_height="40dp"
+	       android:clickable="false"
+	       android:layout_centerInParent="true"
+	       android:translationX="-85dp" />
+
+   </RelativeLayout>
 </LinearLayout>

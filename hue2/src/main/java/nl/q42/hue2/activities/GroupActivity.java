@@ -57,7 +57,7 @@ public class GroupActivity extends Activity {
 		
 		// UI setup
 		setContentView(R.layout.activity_group);
-		setTitle(id == null ? getString(R.string.group_new) : group.name);
+		setTitle(id == null ? getString(R.string.group_new) : getString(R.string.group_edit));
 		
 		nameView = (EditText) findViewById(R.id.group_name);
 		lightsButton = (Button) findViewById(R.id.group_lights);
@@ -185,9 +185,6 @@ public class GroupActivity extends Activity {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.group, menu);
 	    
-	    // TODO: Make presets work for groups being created
-	    menu.findItem(R.id.menu_add_preset).setVisible(id != null);
-	    
 	    // Pseudo group with all lights (or a new group) cannot be removed
 	    menu.findItem(R.id.menu_delete_group).setVisible(id != null && !id.equals("0"));
 	    
@@ -196,24 +193,7 @@ public class GroupActivity extends Activity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.menu_add_preset) {
-			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
-			int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-			int ct = (int) tempSlider.getTemp();
-			
-			Intent result = new Intent();
-			result.putExtra("addPreset", true);
-			result.putExtra("id", id);
-			result.putExtra("mode", colorMode);
-			result.putExtra("xy", xy);
-			result.putExtra("ct", ct);
-			result.putExtra("bri", bri);
-			
-			setResult(RESULT_OK, result);
-			finish();
-			
-			return true;
-		} else if (item.getItemId() == R.id.menu_delete_group) {
+		if (item.getItemId() == R.id.menu_delete_group) {
 			GroupRemoveDialog.newInstance().show(getFragmentManager(), "dialog_remove_group");
 			return true;
 		} else {

@@ -22,6 +22,8 @@
     <string name="light_color">Color</string>
     <string name="light_cancel">Cancel</string>
     <string name="light_save">Save</string>
+    <string name="light_save_preset">Save as preset</string>
+    <string name="light_edit">Edit light</string>
     
     <!-- Group activity -->
     <string name="group_group">Group</string>
@@ -32,6 +34,7 @@
     <string name="group_save">Save</string>
     <string name="group_create">Create</string>
     <string name="group_new">New group</string>
+    <string name="group_edit">Edit group</string>
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
@@ -73,4 +76,5 @@
     <string name="menu_new_group">New group</string>
     <string name="menu_add_preset">Add preset</string>
     <string name="menu_delete_group">Remove group</string>
+    <string name="menu_cancel">Cancel</string>
 </resources>

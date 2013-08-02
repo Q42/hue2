@@ -234,13 +234,7 @@ public class LightsActivity extends Activity {
 					Group group = groups.get(id);
 					
 					// Check which action user selected
-					if (data.getBooleanExtra("addPreset", false)) {
-						if (mode.equals("ct")) {
-							addGroupPresetCT(id, ct, bri);
-						} else {
-							addGroupPresetXY(id, xy, bri);
-						}
-					} else if (data.getBooleanExtra("remove", false)) {
+					if (data.getBooleanExtra("remove", false)) {
 						removeGroup(id);
 					} else {
 						if (!group.name.equals(name)) {
@@ -762,28 +756,6 @@ public class LightsActivity extends Activity {
 			lightPresets.put(id, new ArrayList<Preset>());
 		}
 		lightPresets.get(id).add(new Preset(db_id, id, null, xy, bri));
-		
-		refreshViews();
-	}
-	
-	private void addGroupPresetCT(final String id, final float ct, final int bri) {
-		int db_id = datasource.insertPreset(bridge.getSerial(), null, id, ct, bri);
-		
-		if (!groupPresets.containsKey(id)) {
-			groupPresets.put(id, new ArrayList<Preset>());
-		}
-		groupPresets.get(id).add(new Preset(db_id, null, id, ct, bri));
-		
-		refreshViews();
-	}
-	
-	private void addGroupPresetXY(final String id, final float[] xy, final int bri) {
-		int db_id = datasource.insertPreset(bridge.getSerial(), null, id, xy, bri);
-		
-		if (!groupPresets.containsKey(id)) {
-			groupPresets.put(id, new ArrayList<Preset>());
-		}
-		groupPresets.get(id).add(new Preset(db_id, null, id, xy, bri));
 		
 		refreshViews();
 	}

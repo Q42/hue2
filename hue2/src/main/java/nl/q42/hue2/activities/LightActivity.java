@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
+import nl.q42.hue2.views.ColorButton;
 import nl.q42.hue2.views.HueSlider;
 import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
@@ -35,6 +36,7 @@ public class LightActivity extends Activity {
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
 	private TempSlider tempSlider;
+	private ColorButton presetColorView;
 	
 	private String colorMode;
 	
@@ -44,6 +46,7 @@ public class LightActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		// Light details
 		light = (Light) getIntent().getSerializableExtra("light");
@@ -52,7 +55,7 @@ public class LightActivity extends Activity {
 		
 		// UI setup
 		setContentView(R.layout.activity_light);
-		setTitle(light.name);
+		setTitle(getString(R.string.light_edit));
 		
 		nameView = (EditText) findViewById(R.id.light_name);
 		hueSlider = (HueSlider) findViewById(R.id.light_color_hue);
@@ -62,38 +65,16 @@ public class LightActivity extends Activity {
 		hueSlider.setSatBriSlider(satBriSlider);
 		tempSlider.setSliders(hueSlider, satBriSlider);
 		
+		presetColorView = (ColorButton) findViewById(R.id.light_preset_color);
+		
 		// Set listeners for color slider interaction to record last used color mode (hue/sat or temperature)
 		// and to send preview requests
 		tempSlider.setOnTouchListener(getColorModeListener("ct"));
 		hueSlider.setOnTouchListener(getColorModeListener("xy"));
 		satBriSlider.setOnTouchListener(getColorModeListener("xy"));
 		
-		// Fill in current name/color in UI or restore previous
-		if (savedInstanceState == null) {
-			nameView.setText(light.name);
-			
-			if (light.state.colormode.equals("ct")) {
-				tempSlider.setTemp(light.state.ct);
-			} else {
-				float hsv[] = new float[3];
-				Color.colorToHSV(Util.getRGBColor(light), hsv);
-				hueSlider.setHue(hsv[0]);
-				satBriSlider.setSaturation(hsv[1]);
-				satBriSlider.setBrightness(light.state.bri / 255.0f);
-			}
-		}
-		
-		// Add cancel event handler
-		findViewById(R.id.light_cancel).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				restoreLight();
-				finish();
-			}
-		});
-		
-		// Add save event handler
-		findViewById(R.id.light_save).setOnClickListener(new OnClickListener() {
+		// Save preset button
+		findViewById(R.id.light_save_preset).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
@@ -101,26 +82,61 @@ public class LightActivity extends Activity {
 				int ct = (int) tempSlider.getTemp();
 				
 				Intent result = new Intent();
+				result.putExtra("addPreset", true);
 				result.putExtra("id", id);
-				result.putExtra("name", nameView.getText().toString().trim());
 				result.putExtra("mode", colorMode);
 				result.putExtra("xy", xy);
 				result.putExtra("ct", ct);
 				result.putExtra("bri", bri);
 				
-				// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
-				result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
-				
 				setResult(RESULT_OK, result);
 				finish();
 			}
 		});
+		
+		// Fill in current name/color in UI or restore previous
+		if (savedInstanceState == null) {
+			nameView.setText(light.name);
+			
+			if (light.state.colormode.equals("ct")) {
+				tempSlider.setTemp(light.state.ct);
+				colorMode = "ct";
+			} else {
+				float hsv[] = new float[3];
+				Color.colorToHSV(Util.getRGBColor(light), hsv);
+				hueSlider.setHue(hsv[0]);
+				satBriSlider.setSaturation(hsv[1]);
+				satBriSlider.setBrightness(light.state.bri / 255.0f);
+				colorMode = "xy";
+			}
+		}
+		
+		updatePresetPreview();
 	}
 	
 	@Override
 	public void onBackPressed() {
-		restoreLight();
+		saveLight();
 		super.onBackPressed();
+	}
+	
+	private void saveLight() {
+		float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
+		int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+		int ct = (int) tempSlider.getTemp();
+		
+		Intent result = new Intent();
+		result.putExtra("id", id);
+		result.putExtra("name", nameView.getText().toString().trim());
+		result.putExtra("mode", colorMode);
+		result.putExtra("xy", xy);
+		result.putExtra("ct", ct);
+		result.putExtra("bri", bri);
+		
+		// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
+		result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
+		
+		setResult(RESULT_OK, result);
 	}
 	
 	private void restoreLight() {
@@ -192,9 +208,20 @@ public class LightActivity extends Activity {
 			public boolean onTouch(View v, MotionEvent event) {				
 				colorMode = mode;
 				previewNeeded = true;
+				updatePresetPreview();
+				
 				return false;
 			}
 		};
+	}
+	
+	private void updatePresetPreview() {
+		if (colorMode.equals("ct")) {
+			presetColorView.setColor(Util.temperatureToColor(1000000 / (int) tempSlider.getTemp()));
+		} else {
+			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
+			presetColorView.setColor(PHUtilitiesImpl.colorFromXY(xy, light.modelid));
+		}
 	}
 	
 	@Override
@@ -206,20 +233,13 @@ public class LightActivity extends Activity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.menu_add_preset) {
-			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
-			int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-			int ct = (int) tempSlider.getTemp();
+		if (item.getItemId() == R.id.menu_cancel) {
+			restoreLight();
+			finish();
 			
-			Intent result = new Intent();
-			result.putExtra("addPreset", true);
-			result.putExtra("id", id);
-			result.putExtra("mode", colorMode);
-			result.putExtra("xy", xy);
-			result.putExtra("ct", ct);
-			result.putExtra("bri", bri);
-			
-			setResult(RESULT_OK, result);
+			return true;
+		} else if (item.getItemId() == android.R.id.home) {
+			saveLight();
 			finish();
 			
 			return true;
