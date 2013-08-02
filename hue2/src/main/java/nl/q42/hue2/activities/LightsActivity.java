@@ -187,6 +187,7 @@ public class LightsActivity extends Activity {
 		startRefreshTimer();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == RESULT_OK) {
@@ -217,6 +218,8 @@ public class LightsActivity extends Activity {
 					}
 				}
 			} else if (requestCode == ACTIVITY_GROUP) {
+				ArrayList<String> lights = (ArrayList<String>) data.getSerializableExtra("lights");
+				
 				// If id was given, an existing group was edited, otherwise a new one is to be created
 				if (id != null) {
 					Group group = groups.get(id);
@@ -238,12 +241,12 @@ public class LightsActivity extends Activity {
 								setGroupColorXY(id, xy, bri);
 							}
 						}
+						
+						if (!group.lights.equals(lights)) {
+							setGroupLights(id, lights);
+						}
 					}
 				} else {
-					// TODO: Take actual list
-					ArrayList<String> lights = new ArrayList<String>();
-					lights.add("1");
-					
 					createGroup(name, lights);
 				}
 			}
@@ -794,6 +797,22 @@ public class LightsActivity extends Activity {
 					light.state.ct = ct;
 					light.state.bri = bri;
 				}
+			}
+		});
+	}
+	
+	private void setGroupLights(final String id, final ArrayList<String> lights) {
+		asyncUpdate(new AsyncCallbacks() {			
+			@Override
+			public Object doUpdate() throws Exception {
+				service.setGroupLights(id, lights);
+				return null;
+			}
+			
+			@Override
+			public void updateState(Object result) {
+				groups.get(id).lights = lights;
+				repopulateViews();
 			}
 		});
 	}

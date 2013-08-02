@@ -170,6 +170,19 @@ public class HueService implements Serializable {
 			throw new ApiException(result);
 	}
 	
+	public void setGroupLights(String id, ArrayList<String> lights) throws IOException, ApiException {
+		String lightsStr = "";
+		for (int i = 0; i < lights.size(); i++) {
+			lightsStr += "\"" + lights.get(i) + "\"";
+			if (i < lights.size() - 1) lightsStr += ",";
+		}
+		
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id,
+				"{\"lights\":[" + lightsStr + "]}");
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
 	public void turnGroupOn(String id, boolean on) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id + "/action",
 				"{\"on\":" + on + "}");

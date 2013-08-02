@@ -1,5 +1,6 @@
 package nl.q42.hue2.activities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import nl.q42.hue2.PHUtilitiesImpl;
@@ -49,6 +50,11 @@ public class GroupActivity extends Activity {
 		id = getIntent().getStringExtra("id");
 		lights = (HashMap<String, Light>) getIntent().getSerializableExtra("lights");
 		
+		if (group == null) {
+			group = new Group();
+			group.lights = new ArrayList<String>();
+		}
+		
 		// UI setup
 		setContentView(R.layout.activity_group);
 		setTitle(id == null ? getString(R.string.group_new) : group.name);
@@ -69,11 +75,6 @@ public class GroupActivity extends Activity {
 		hueSlider.setOnTouchListener(getColorModeListener("xy"));
 		satBriSlider.setOnTouchListener(getColorModeListener("xy"));
 		
-		// Fill in current name/color in UI or restore previous
-		if (savedInstanceState == null) {
-			nameView.setText(id == null ? "" : group.name);
-		}
-		
 		// If this is the all lights pseudo group, only the color can be changed
 		if ("0".equals(id)) {
 			nameView.setEnabled(false);
@@ -84,10 +85,11 @@ public class GroupActivity extends Activity {
 		}
 		
 		// Add lights button event handler
+		lightsButton.setText(getLightsList());
 		lightsButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				GroupLightDialog.newInstance(lights).show(getFragmentManager(), "dialog_lights");
+				GroupLightDialog.newInstance(lights, group).show(getFragmentManager(), "dialog_lights");
 			}
 		});
 		
@@ -105,6 +107,9 @@ public class GroupActivity extends Activity {
 		applyButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				ArrayList<String> groupLights = new ArrayList<String>();
+				groupLights.addAll(group.lights);
+				
 				if (id != null) {
 					float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
 					int bri = (int) (satBriSlider.getBrightness() * 255.0f);
@@ -113,6 +118,7 @@ public class GroupActivity extends Activity {
 					Intent result = new Intent();
 					result.putExtra("id", id);
 					result.putExtra("name", nameView.getText().toString().trim());
+					result.putExtra("lights", groupLights);
 					result.putExtra("mode", colorMode);
 					result.putExtra("xy", xy);
 					result.putExtra("ct", ct);
@@ -126,12 +132,17 @@ public class GroupActivity extends Activity {
 				} else {
 					Intent result = new Intent();
 					result.putExtra("name", nameView.getText().toString().trim());
+					result.putExtra("lights", groupLights);
 					
 					setResult(RESULT_OK, result);
 					finish();
 				}
 			}
 		});
+		
+		if (savedInstanceState == null) {
+			nameView.setText(id == null ? "" : group.name);
+		}
 	}
 	
 	private OnTouchListener getColorModeListener(final String mode) {
@@ -144,6 +155,15 @@ public class GroupActivity extends Activity {
 		};
 	}
 	
+	private String getLightsList() {
+		String lightsStr = "";
+		for (int i = 0; i < group.lights.size(); i++) {
+			lightsStr += lights.get(group.lights.get(i)).name;
+			if (i < group.lights.size() - 1) lightsStr += ", ";
+		}
+		return lightsStr;
+	}
+	
 	// Called by GroupRemoveDialog after confirmation
 	public void removeGroup() {
 		Intent result = new Intent();
@@ -152,6 +172,12 @@ public class GroupActivity extends Activity {
 		
 		setResult(RESULT_OK, result);
 		finish();
+	}
+	
+	// Called by GroupLightDialog after confirmation
+	public void setLights(ArrayList<String> lights) {
+		group.lights = lights;
+		lightsButton.setText(getLightsList());
 	}
 	
 	@Override
