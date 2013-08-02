@@ -4,23 +4,30 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
-    <TextView
-        android:id="@+id/lights_group_container_title"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_marginLeft="22dp"
-	    android:layout_marginTop="20dp"
-	    android:layout_marginBottom="5dp"
-	    android:textAllCaps="true"
-	    android:textStyle="bold"
-	    android:textColor="#33b5e5" />
-	
-	<View
-	    android:layout_width="match_parent"
-	    android:layout_height="1dp"       
-	    android:layout_marginLeft="15dp"
-	    android:layout_marginRight="15dp"
-	    android:background="#33b5e5" />
+    <LinearLayout
+        android:id="@+id/lights_group_container_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        
+	    <TextView
+	        android:id="@+id/lights_group_container_title"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_marginLeft="22dp"
+		    android:layout_marginTop="20dp"
+		    android:layout_marginBottom="5dp"
+		    android:textAllCaps="true"
+		    android:textStyle="bold"
+		    android:textColor="#33b5e5" />
+		
+		<View
+		    android:layout_width="match_parent"
+		    android:layout_height="1dp"       
+		    android:layout_marginLeft="15dp"
+		    android:layout_marginRight="15dp"
+		    android:background="#33b5e5" />
+	</LinearLayout>
 	
 	<LinearLayout
 	    android:id="@+id/lights_group_container_list"

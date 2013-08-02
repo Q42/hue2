@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -565,6 +566,9 @@ public class LightsActivity extends Activity {
 	private void populateGroupList() {
 		View lastView = null;
 		
+		// Show group header only when there's actually multiple groups
+		findViewById(R.id.lights_groups_header).setVisibility(groups.size() > 1 ? View.VISIBLE : View.GONE);
+		
 		// Sort groups by id
 		ArrayList<String> groupIds = new ArrayList<String>();
 		groupIds.addAll(groups.keySet());
@@ -580,8 +584,11 @@ public class LightsActivity extends Activity {
 			groupViews.put(id, lastView);
 		}
 		
-		if (lastView != null) {
+		if (lastView != null && groups.size() > 1) {
 			lastView.findViewById(R.id.lights_group_divider).setVisibility(View.INVISIBLE);
+			lastView.findViewById(R.id.lights_group_divider).setBackgroundColor(Color.rgb(87, 87, 87));
+		} else {
+			lastView.findViewById(R.id.lights_group_divider).setBackgroundColor(Color.rgb(51, 181, 229));
 		}
 	}
 	
@@ -628,6 +635,9 @@ public class LightsActivity extends Activity {
 		((TextView) view.findViewById(R.id.lights_group_container_title)).setText(group.name);
 		LinearLayout lightList = (LinearLayout) view.findViewById(R.id.lights_group_container_list);
 		
+		// Only show header if there are custom groups
+		view.findViewById(R.id.lights_group_container_header).setVisibility(groups.size() > 1 ? View.VISIBLE : View.GONE);
+		
 		// Sort lights in group by id
 		ArrayList<String> lightIds = new ArrayList<String>();
 		lightIds.addAll(group.lights);
@@ -660,6 +670,16 @@ public class LightsActivity extends Activity {
 	
 	private View addGroupListView(ViewGroup container, final String id, final Group group) {
 		View view = getLayoutInflater().inflate(R.layout.lights_group, container, false);
+		
+		// Highlight all group if it's the only one
+		TextView nameView = ((TextView) view.findViewById(R.id.lights_group_name));
+		if (groups.size() == 1) {
+			nameView.setTextColor(Color.rgb(51, 181, 229));
+			nameView.setTextSize(TypedValue.COMPLEX_UNIT_PT, 10);
+		} else {
+			nameView.setTextColor(Color.WHITE);
+			nameView.setTextSize(TypedValue.COMPLEX_UNIT_PT, 7);
+		}
 		
 		// Set group edit event handler
 		view.setOnClickListener(new OnClickListener() {

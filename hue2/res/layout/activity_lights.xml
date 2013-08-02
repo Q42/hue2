@@ -19,26 +19,34 @@
 	    	    android:id="@+id/lights_result_container"
 	    	    android:layout_width="match_parent"
 	    	    android:layout_height="wrap_content"
+	    	    android:paddingTop="15dp"
 	    	    android:orientation="vertical">
 	    	    
 	    	    <!-- Groups -->
-			    <TextView
-			        android:layout_width="wrap_content"
-			        android:layout_height="wrap_content"
-			        android:layout_marginLeft="22dp"
-			        android:layout_marginTop="20dp"
-			        android:layout_marginBottom="5dp"
-			        android:textAllCaps="true"
-			        android:textStyle="bold"
-			        android:textColor="#33b5e5"
-			        android:text="@string/lights_groups" />
-			    
-			    <View
-			        android:layout_width="match_parent"
-			        android:layout_height="1dp"       
-			        android:layout_marginLeft="15dp"
-			        android:layout_marginRight="15dp"
-			        android:background="#33b5e5" />
+	    	    <LinearLayout
+	    	        android:id="@+id/lights_groups_header"
+	    	        android:layout_width="match_parent"
+	    	        android:layout_height="wrap_content"
+	    	        android:orientation="vertical">
+	    	        
+				    <TextView
+				        android:layout_width="wrap_content"
+				        android:layout_height="wrap_content"
+				        android:layout_marginLeft="22dp"
+				        android:layout_marginBottom="5dp"
+				        android:layout_marginTop="5dp"
+				        android:textAllCaps="true"
+				        android:textStyle="bold"
+				        android:textColor="#33b5e5"
+				        android:text="@string/lights_groups" />
+				    
+				    <View
+				        android:layout_width="match_parent"
+				        android:layout_height="1dp"       
+				        android:layout_marginLeft="15dp"
+				        android:layout_marginRight="15dp"
+				        android:background="#33b5e5" />
+			    </LinearLayout>
 			    
 			    <LinearLayout
 			        android:id="@+id/lights_groups_list"
