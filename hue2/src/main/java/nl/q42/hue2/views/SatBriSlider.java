@@ -134,6 +134,8 @@ public class SatBriSlider extends View {
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		if (viewRect == null) return true; // In rare events, a touch event is registered before the first draw
+		
 		switch (event.getActionMasked()) {
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_MOVE:
