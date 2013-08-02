@@ -7,6 +7,8 @@
     <string name="link_empty">No bridges found so far.</string>
     
     <!-- Lights activity -->
+    <string name="lights_title">My Lights</string>
+    
     <string name="lights_groups">Groups</string>
     
     <string name="lights_group_all">All lights</string>

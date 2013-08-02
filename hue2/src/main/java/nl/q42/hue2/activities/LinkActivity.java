@@ -71,6 +71,7 @@ public class LinkActivity extends Activity {
 		ActionBar ab = getActionBar();
 		ab.setCustomView(R.layout.loader);
 		ab.setDisplayShowCustomEnabled(true);
+		ab.setDisplayShowHomeEnabled(false);
 		
 		RelativeLayout loadingLayout = (RelativeLayout) ab.getCustomView();
 

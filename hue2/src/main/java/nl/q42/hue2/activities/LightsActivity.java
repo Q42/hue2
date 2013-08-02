@@ -81,6 +81,7 @@ public class LightsActivity extends Activity {
 		ActionBar ab = getActionBar();
 		ab.setCustomView(R.layout.loader);
 		ab.setDisplayShowCustomEnabled(true);
+		ab.setDisplayShowHomeEnabled(false);
 		
 		RelativeLayout loadingLayout = (RelativeLayout) ab.getCustomView();
 		
@@ -122,7 +123,7 @@ public class LightsActivity extends Activity {
 		
 		// Set up bridge info
 		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
-		setTitle(bridge.getName());
+		setTitle(getString(R.string.lights_title));
 		
 		// Loading lights
 		if (savedInstanceState == null) {

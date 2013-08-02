@@ -12,6 +12,7 @@ import nl.q42.hue2.views.SatBriSlider;
 import nl.q42.hue2.views.TempSlider;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -46,7 +47,10 @@ public class LightActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		ActionBar ab = getActionBar();
+		ab.setDisplayHomeAsUpEnabled(true);
+		ab.setDisplayShowTitleEnabled(false);
 		
 		// Light details
 		light = (Light) getIntent().getSerializableExtra("light");
