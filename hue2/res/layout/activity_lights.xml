@@ -1,8 +1,7 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".LightsActivity" >
 
     <ImageView
@@ -10,6 +9,18 @@
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
         android:src="@drawable/colorbar" />
+    
+    <TextView
+        android:id="@+id/lights_message"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:text="@string/lights_connecting"
+        android:textColor="#4c4c4c"
+        android:textSize="20sp" />
     
     <ScrollView
 	    android:layout_width="match_parent"
@@ -62,4 +73,4 @@
 			        android:orientation="vertical" />			    
 	    	</LinearLayout>
 	</ScrollView>
-</LinearLayout>
+</RelativeLayout>

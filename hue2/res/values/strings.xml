@@ -6,7 +6,10 @@
     <string name="link_local">Local bridges</string>
     <string name="link_empty">No bridges found so far.</string>
     
-    <!-- Lights activity -->    
+    <!-- Lights activity -->
+    <string name="lights_connecting">Connecting to bridge&#8230;</string>
+    <string name="lights_not_connected">Not connected to bridge.</string>
+    
     <string name="lights_groups">Groups</string>
     
     <string name="lights_group_all">All lights</string>

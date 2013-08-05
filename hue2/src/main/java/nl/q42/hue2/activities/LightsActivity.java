@@ -50,6 +50,8 @@ public class LightsActivity extends Activity {
 	private final static int ACTIVITY_LIGHT = 1;
 	private final static int ACTIVITY_GROUP = 2;
 	
+	private boolean connected = false;
+	
 	private Bridge bridge;
 	private HueService service;
 	
@@ -59,6 +61,7 @@ public class LightsActivity extends Activity {
 	private HashMap<String, Group> groups = new HashMap<String, Group>();
 	private HashMap<String, View> groupViews = new HashMap<String, View>();
 	
+	private TextView messageView;
 	private LinearLayout resultContainer;
 	private LinearLayout groupResultList;
 	private LinearLayout lightResultList;
@@ -89,6 +92,8 @@ public class LightsActivity extends Activity {
 		
 		loadingSpinner = (ProgressBar) loadingLayout.findViewById(R.id.loader_spinner);
 		refreshButton = (ImageButton) loadingLayout.findViewById(R.id.loader_refresh);
+		
+		messageView = (TextView) findViewById(R.id.lights_message);
 		
 		resultContainer = (LinearLayout) findViewById(R.id.lights_result_container);
 		groupResultList = (LinearLayout) findViewById(R.id.lights_groups_list);
@@ -132,7 +137,13 @@ public class LightsActivity extends Activity {
 		} else {
 			lights = (HashMap<String, Light>) savedInstanceState.getSerializable("lights");
 			groups = (HashMap<String, Group>) savedInstanceState.getSerializable("groups");
-			populateViews();
+			connected = savedInstanceState.getBoolean("connected");
+			
+			if (connected) {
+				populateViews();
+			} else {
+				refreshState(true);
+			}
 		}
 	}
 	
@@ -174,6 +185,7 @@ public class LightsActivity extends Activity {
 		
 		state.putSerializable("lights", lights);
 		state.putSerializable("groups", groups);
+		state.putBoolean("connected", connected);
 	}
 	
 	@Override
@@ -485,7 +497,7 @@ public class LightsActivity extends Activity {
 			@Override
 			protected void onPreExecute() {
 				// Empty state
-				if (flush) {
+				if (flush) {					
 					lights.clear();
 					lightViews.clear();
 					lightResultList.removeAllViews();
@@ -495,6 +507,11 @@ public class LightsActivity extends Activity {
 					groupResultList.removeAllViews();
 					
 					resultContainer.setVisibility(View.INVISIBLE);
+					
+					if (!connected) {
+						messageView.setVisibility(View.VISIBLE);
+						messageView.setText(R.string.lights_connecting);
+					}
 					
 					setActivityIndicator(true, true);
 				}
@@ -522,7 +539,12 @@ public class LightsActivity extends Activity {
 
 			@Override
 			protected void onPostExecute(Boolean success) {
+				messageView.setVisibility(success ? View.GONE : View.VISIBLE);
+				messageView.setText(R.string.lights_not_connected);
+				
 				if (success) {
+					connected = true;
+					
 					// Check if groups changed internally
 					boolean groupChanged = false;
 					for (String id : oldGroups.keySet()) {
@@ -547,9 +569,8 @@ public class LightsActivity extends Activity {
 					} else {
 						refreshViews();
 					}
-				} else if (flush) {
-					// Being able to retrieve the light list is critical, so if this fails we go back to the bridge selection activity
-					ErrorDialog.show(getFragmentManager(), R.string.dialog_connection_title, R.string.dialog_network_error);
+				} else if (!success && flush) {
+					connected = false;
 				}
 				
 				setActivityIndicator(false, true);
@@ -933,12 +954,7 @@ public class LightsActivity extends Activity {
 		});
 	}
 	
-	public void createGroup(final String name, final List<String> lights) {
-		if (lights.size() == 0) {
-			ErrorDialog.show(getFragmentManager(), R.string.dialog_no_lights_title, R.string.dialog_no_lights);
-			return;
-		}
-		
+	public void createGroup(final String name, final List<String> lights) {		
 		asyncUpdate(new AsyncCallbacks() {			
 			@Override
 			public Object doUpdate() throws Exception {

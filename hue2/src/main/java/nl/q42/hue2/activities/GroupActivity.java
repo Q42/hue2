@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import nl.q42.hue2.PHUtilitiesImpl;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
+import nl.q42.hue2.dialogs.ErrorDialog;
 import nl.q42.hue2.dialogs.GroupLightDialog;
 import nl.q42.hue2.dialogs.GroupRemoveDialog;
 import nl.q42.hue2.views.ColorButton;
@@ -111,8 +112,12 @@ public class GroupActivity extends Activity {
 		findViewById(R.id.group_create).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				saveGroup(false);
-				finish();
+				if (group.lights.size() == 0) {
+					ErrorDialog.show(getFragmentManager(), R.string.dialog_no_lights_title, R.string.dialog_no_lights);
+				} else {				
+					saveGroup(false);
+					finish();
+				}
 			}
 		});
 		
@@ -134,7 +139,7 @@ public class GroupActivity extends Activity {
 			}
 		});
 		
-		// Switch buttons when creating group
+		// Switch buttons when creating group and open keyboard for name
 		if (id == null) {
 			findViewById(R.id.group_save).setVisibility(View.GONE);
 			findViewById(R.id.group_create).setVisibility(View.VISIBLE);
