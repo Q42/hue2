@@ -30,9 +30,11 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -778,19 +780,7 @@ public class LightsActivity extends Activity {
 	}
 	
 	private View addLightView(ViewGroup container, final String id, final Light light) {
-		View view = getLayoutInflater().inflate(R.layout.lights_light, container, false);
-		
-		// Set light edit event handler
-		view.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {				
-				Intent lightIntent = new Intent(LightsActivity.this, LightActivity.class);
-				lightIntent.putExtra("id", id);
-				lightIntent.putExtra("light", lights.get(id));
-				lightIntent.putExtra("service", service); // Used for color preview requests
-				startActivityForResult(lightIntent, ACTIVITY_LIGHT);
-			}
-		});
+		final View view = getLayoutInflater().inflate(R.layout.lights_light, container, false);
 		
 		// Set switch event handler
 		final FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
@@ -799,6 +789,34 @@ public class LightsActivity extends Activity {
 			@Override
 			public void onCheckedChanged(CompoundButton view, final boolean checked) {				
 				turnLightOn(id, checked);
+			}
+		});
+		
+		// Set light edit event handlers
+		view.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+					// This is just a convenient variable to save the X in on a per-view basis
+					view.setPivotX(event.getX());
+				}
+				return false;
+			}
+		});
+		
+		view.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// If the right side of the view was touched, the user probably wanted to touch the switch instead
+				if (view.getPivotX() >= switchView.getX() + 20.0f) {
+					switchView.toggle();
+				} else {
+					Intent lightIntent = new Intent(LightsActivity.this, LightActivity.class);
+					lightIntent.putExtra("id", id);
+					lightIntent.putExtra("light", lights.get(id));
+					lightIntent.putExtra("service", service); // Used for color preview requests
+					startActivityForResult(lightIntent, ACTIVITY_LIGHT);
+				}
 			}
 		});
 		
