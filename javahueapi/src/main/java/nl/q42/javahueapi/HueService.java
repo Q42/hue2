@@ -135,16 +135,35 @@ public class HueService implements Serializable {
 			throw new ApiException(result);
 	}
 	
-	public void setLightXY(String id, float[] xy, int bri) throws IOException, ApiException {
-		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state",
-				"{\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}");
+	public void setLightXY(String id, float[] xy, int bri, boolean on) throws IOException, ApiException {
+		String body = "{\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}"; 
+		if (!on) {
+			body = "{\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + ",\"on\":false}";
+		}
+		
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state", body);
 		if (result.getResponseCode() != 200)
 			throw new ApiException(result);
 	}
 	
-	public void setLightCT(String id, int ct, int bri) throws IOException, ApiException {
-		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state",
-				"{\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}");
+	public void setLightHS(String id, int hue, int sat, int bri, boolean on) throws IOException, ApiException {
+		String body = "{\"on\":true,\"hue\":" + hue + ",\"sat\":" + sat + ",\"bri\":" + bri + "}"; 
+		if (!on) {
+			body = "{\"hue\":" + hue + ",\"sat\":" + sat + ",\"bri\":" + bri + ",\"on\":false}";
+		}
+		
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state", body);
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
+	public void setLightCT(String id, int ct, int bri, boolean on) throws IOException, ApiException {
+		String body = "{\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}"; 
+		if (!on) {
+			body = "{\"ct\":" + ct + ",\"bri\":" + bri + ",\"on\":false}";
+		}
+		
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state", body);
 		if (result.getResponseCode() != 200)
 			throw new ApiException(result);
 	}

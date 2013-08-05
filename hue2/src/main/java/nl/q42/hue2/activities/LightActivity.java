@@ -128,36 +128,21 @@ public class LightActivity extends Activity {
 		if (addPreset) result.putExtra("addPreset", true);
 
 		// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
-		result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
+		result.putExtra("colorChanged", hasColorChanged());
 		
 		setResult(RESULT_OK, result);
 	}
 	
+	private boolean hasColorChanged() {
+		return hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet();
+	}
+	
 	private void restoreLight() {
-		if (hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet()) {
-			float[] xy;
-			if (light.state.colormode.equals("xy")) {
-				xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
-			} else {
-				xy = PHUtilitiesImpl.calculateXY(Util.getRGBColor(light), light.modelid);
-			}
-			
-			Intent result = new Intent();
-			result.putExtra("id", id);
-			result.putExtra("name", light.name);
-			
-			// Original mode may have been hs, but convert that to xy
-			result.putExtra("mode", light.state.colormode.equals("ct") ? "ct" : "xy");
-			
-			result.putExtra("xy", xy);
-			result.putExtra("ct", light.state.ct);
-			result.putExtra("bri", light.state.bri);
-			result.putExtra("colorChanged", true);
-			
-			setResult(RESULT_OK, result);
-		} else {
-			setResult(RESULT_CANCELED);
-		}
+		Intent result = new Intent();
+		result.putExtra("id", id);
+		result.putExtra("colorChanged", hasColorChanged());
+		
+		setResult(RESULT_CANCELED, result);
 	}
 	
 	@Override
@@ -184,9 +169,9 @@ public class LightActivity extends Activity {
 						int ct = (int) tempSlider.getTemp();
 						
 						if (colorMode.equals("ct")) {
-							service.setLightCT(id, ct, bri);
+							service.setLightCT(id, ct, bri, true);
 						} else {
-							service.setLightXY(id, xy, bri);
+							service.setLightXY(id, xy, bri, true);
 						}
 					} catch (Exception e) {
 						// Don't report exceptions since previewing is a non-essential feature

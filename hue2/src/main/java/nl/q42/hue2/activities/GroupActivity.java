@@ -21,16 +21,15 @@ import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -162,39 +161,16 @@ public class GroupActivity extends Activity {
 		super.onBackPressed();
 	}
 	
+	private boolean hasColorChanged() {
+		return hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet();
+	}
+	
 	private void restoreLights() {
-		new AsyncTask<Void, Void, Void>() {
-			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					for (String id : group.lights) {
-						Light light = lights.get(id);
-						
-						float[] xy;
-						if (light.state.colormode.equals("xy")) {
-							xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
-						} else {
-							xy = PHUtilitiesImpl.calculateXY(Util.getRGBColor(light), light.modelid);
-						}
-						
-						int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-						int ct = (int) tempSlider.getTemp();
-						
-						if (light.state.colormode.equals("ct")) {
-							service.setLightCT(id, ct, bri);
-						} else {
-							service.setLightXY(id, xy, bri);
-						}
-						
-						setResult(RESULT_CANCELED);
-					}
-				} catch (Exception e) {
-					// Ignore right now
-				}
-				
-				return null;
-			}
-		}.execute();
+		Intent result = new Intent();
+		result.putExtra("id", id);
+		result.putExtra("colorChanged", hasColorChanged());
+		
+		setResult(RESULT_CANCELED, result);
 	}
 	
 	@Override
@@ -300,7 +276,7 @@ public class GroupActivity extends Activity {
 			if (addPreset) result.putExtra("addPreset", true);
 			
 			// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
-			result.putExtra("colorChanged", hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet());
+			result.putExtra("colorChanged", hasColorChanged());
 			
 			setResult(RESULT_OK, result);
 		} else {

@@ -209,8 +209,31 @@ public class LightsActivity extends Activity {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode == RESULT_OK) {
-			String id = data.getStringExtra("id");
+		String id = data.getStringExtra("id");
+		boolean colorChanged = data.getBooleanExtra("colorChanged", false);
+		
+		// If user was picking colors and then cancelled, restore original colors for individual light or entire group
+		if (resultCode == RESULT_CANCELED && colorChanged) {
+			ArrayList<String> lightsToRestore = new ArrayList<String>();
+			
+			if (requestCode == ACTIVITY_GROUP) {
+				lightsToRestore.addAll(groups.get(id).lights);
+			} else {
+				lightsToRestore.add(id);
+			}
+			
+			for (String lid : lightsToRestore) {
+				Light light = lights.get(lid);
+				
+				if (light.state.colormode.equals("ct")) {
+					setLightColorCT(lid, light.state.ct, light.state.bri, light.state.on);
+				} else if (light.state.colormode.equals("hs")) {
+					setLightColorHS(lid, light.state.hue, light.state.sat, light.state.bri, light.state.on);
+				} else {
+					setLightColorXY(lid, light.state.xy, light.state.bri, light.state.on);
+				}
+			}
+		} else if (resultCode == RESULT_OK) {
 			String name = data.getStringExtra("name");
 			String mode = data.getStringExtra("mode");
 			float[] xy = data.getFloatArrayExtra("xy");
@@ -232,11 +255,11 @@ public class LightsActivity extends Activity {
 					setLightName(id, name);
 				}
 				
-				if (data.getBooleanExtra("colorChanged", false)) {
+				if (colorChanged) {
 					if (mode.equals("ct")) {
-						setLightColorCT(id, ct, bri);
+						setLightColorCT(id, ct, bri, true);
 					} else {
-						setLightColorXY(id, xy, bri);
+						setLightColorXY(id, xy, bri, true);
 					}
 				}
 			} else if (requestCode == ACTIVITY_GROUP) {
@@ -261,7 +284,7 @@ public class LightsActivity extends Activity {
 							setGroupName(id, name);
 						}
 						
-						if (data.getBooleanExtra("colorChanged", false)) {
+						if (colorChanged) {
 							if (mode.equals("ct")) {
 								setGroupColorCT(id, ct, bri);
 							} else {
@@ -459,9 +482,9 @@ public class LightsActivity extends Activity {
 							@Override
 							public void onClick(View v) {
 								if (preset.color_mode.equals("xy")) {
-									setLightColorXY(id, preset.xy, preset.brightness);
+									setLightColorXY(id, preset.xy, preset.brightness, true);
 								} else {
-									setLightColorCT(id, (int) preset.ct, preset.brightness);
+									setLightColorCT(id, (int) preset.ct, preset.brightness, true);
 								}
 							}
 						});
@@ -767,18 +790,7 @@ public class LightsActivity extends Activity {
 		switchView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton view, final boolean checked) {				
-				asyncUpdate(new AsyncCallbacks() {			
-					@Override
-					public Object doUpdate() throws Exception {
-						service.turnLightOn(id, checked);
-						return null;
-					}
-					
-					@Override
-					public void updateState(Object result) {
-						lights.get(id).state.on = checked;
-					}
-				});
+				turnLightOn(id, checked);
 			}
 		});
 		
@@ -858,7 +870,7 @@ public class LightsActivity extends Activity {
 					
 					light.state.on = true;
 					light.state.colormode = "xy";
-					light.state.xy = new double[] { xy[0], xy[1] };
+					light.state.xy = xy;
 					light.state.bri = bri;
 				}
 			}
@@ -973,18 +985,18 @@ public class LightsActivity extends Activity {
 		});
 	}
 	
-	private void setLightColorCT(final String id, final int ct, final int bri) {		
+	private void setLightColorCT(final String id, final int ct, final int bri, final boolean on) {		
 		asyncUpdate(new AsyncCallbacks() {			
 			@Override
 			public Object doUpdate() throws Exception {
-				service.setLightCT(id, ct, bri);
+				service.setLightCT(id, ct, bri, on);
 				return null;
 			}
 			
 			@Override
 			public void updateState(Object result) {
 				Light light = lights.get(id);
-				light.state.on = true;
+				light.state.on = on;
 				light.state.colormode = "ct";
 				light.state.ct = ct;
 				light.state.bri = bri;
@@ -992,21 +1004,57 @@ public class LightsActivity extends Activity {
 		});
 	}
 	
-	private void setLightColorXY(final String id, final float[] xy, final int bri) {
+	private void setLightColorHS(final String id, final int hue, final int sat, final int bri, final boolean on) {
 		asyncUpdate(new AsyncCallbacks() {			
 			@Override
 			public Object doUpdate() throws Exception {
-				service.setLightXY(id, xy, bri);
+				service.setLightHS(id, hue, sat, bri, on);
 				return null;
 			}
 			
 			@Override
 			public void updateState(Object result) {
 				Light light = lights.get(id);
-				light.state.on = true;
-				light.state.colormode = "xy";
-				light.state.xy = new double[] { xy[0], xy[1] };
+				light.state.on = on;
+				light.state.colormode = "hs";
+				light.state.hue = hue;
+				light.state.sat = sat;
 				light.state.bri = bri;
+			}
+		});
+	}
+	
+	private void setLightColorXY(final String id, final float[] xy, final int bri, final boolean on) {
+		asyncUpdate(new AsyncCallbacks() {			
+			@Override
+			public Object doUpdate() throws Exception {
+				service.setLightXY(id, xy, bri, on);
+				return null;
+			}
+			
+			@Override
+			public void updateState(Object result) {
+				Light light = lights.get(id);
+				light.state.on = on;
+				light.state.colormode = "xy";
+				light.state.xy = xy;
+				light.state.bri = bri;
+			}
+		});
+	}
+	
+	private void turnLightOn(final String id, final boolean on) {
+		asyncUpdate(new AsyncCallbacks() {			
+			@Override
+			public Object doUpdate() throws Exception {
+				service.turnLightOn(id, on);
+				return null;
+			}
+			
+			@Override
+			public void updateState(Object result) {
+				Light light = lights.get(id);
+				light.state.on = on;
 			}
 		});
 	}
