@@ -322,14 +322,12 @@ public class LightsActivity extends Activity {
 	 * Enable/disable all switches (use while executing actions or refreshing state)
 	 */
 	private Timer indicatorTimer = new Timer();
+	private int indicatorStack = 0; // Keep track of multiple tasks starting and ending
+	
 	private void setActivityIndicator(boolean enabled, boolean forced) {		
 		if (enabled) {
 			// Tasks shorter than 300 ms don't warrant a visual loading indicator
-			if (!forced) {
-				if (indicatorTimer != null) {
-					indicatorTimer.cancel();
-				}
-				
+			if (!forced && indicatorStack == 0) {
 				indicatorTimer = new Timer();
 				indicatorTimer.schedule(new TimerTask() {
 					@Override
@@ -347,11 +345,17 @@ public class LightsActivity extends Activity {
 				refreshButton.setVisibility(View.GONE);
 				loadingSpinner.setVisibility(View.VISIBLE);
 			}
-		} else {
-			indicatorTimer.cancel();
 			
-			refreshButton.setVisibility(View.VISIBLE);
-			loadingSpinner.setVisibility(View.GONE);
+			indicatorStack++;
+		} else {			
+			indicatorStack = Math.max(0, indicatorStack - 1);
+			
+			if (indicatorStack == 0) {
+				indicatorTimer.cancel();
+				
+				refreshButton.setVisibility(View.VISIBLE);
+				loadingSpinner.setVisibility(View.GONE);
+			}
 		}
 	}
 	
@@ -635,7 +639,7 @@ public class LightsActivity extends Activity {
 		if (lastView != null && groups.size() > 1) {
 			lastView.findViewById(R.id.lights_group_divider).setVisibility(View.INVISIBLE);
 			lastView.findViewById(R.id.lights_group_divider).setBackgroundColor(Color.rgb(87, 87, 87));
-		} else {
+		} else if (lastView != null) {
 			lastView.findViewById(R.id.lights_group_divider).setBackgroundColor(Color.rgb(51, 181, 229));
 		}
 	}
