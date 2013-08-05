@@ -134,26 +134,30 @@ public class LightActivity extends Activity {
 	}
 	
 	private void restoreLight() {
-		float[] xy;
-		if (light.state.colormode.equals("xy")) {
-			xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
+		if (hueSlider.hasUserSet() || satBriSlider.hasUserSet() || tempSlider.hasUserSet()) {
+			float[] xy;
+			if (light.state.colormode.equals("xy")) {
+				xy = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
+			} else {
+				xy = PHUtilitiesImpl.calculateXY(Util.getRGBColor(light), light.modelid);
+			}
+			
+			Intent result = new Intent();
+			result.putExtra("id", id);
+			result.putExtra("name", light.name);
+			
+			// Original mode may have been hs, but convert that to xy
+			result.putExtra("mode", light.state.colormode.equals("ct") ? "ct" : "xy");
+			
+			result.putExtra("xy", xy);
+			result.putExtra("ct", light.state.ct);
+			result.putExtra("bri", light.state.bri);
+			result.putExtra("colorChanged", true);
+			
+			setResult(RESULT_OK, result);
 		} else {
-			xy = PHUtilitiesImpl.calculateXY(Util.getRGBColor(light), light.modelid);
+			setResult(RESULT_CANCELED);
 		}
-		
-		Intent result = new Intent();
-		result.putExtra("id", id);
-		result.putExtra("name", light.name);
-		
-		// Original mode may have been hs, but convert that to xy
-		result.putExtra("mode", light.state.colormode.equals("ct") ? "ct" : "xy");
-		
-		result.putExtra("xy", xy);
-		result.putExtra("ct", light.state.ct);
-		result.putExtra("bri", light.state.bri);
-		result.putExtra("colorChanged", true);
-		
-		setResult(RESULT_OK, result);
 	}
 	
 	@Override
