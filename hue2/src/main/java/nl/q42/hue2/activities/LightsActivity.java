@@ -144,7 +144,9 @@ public class LightsActivity extends Activity {
 			if (connected) {
 				populateViews();
 			} else {
-				refreshState(true);
+				findViewById(R.id.lights_message).setVisibility(View.VISIBLE);
+				((TextView) findViewById(R.id.lights_message)).setText(R.string.lights_not_connected);
+				findViewById(R.id.lights_result_container).setVisibility(View.GONE);
 			}
 		}
 	}
@@ -313,7 +315,9 @@ public class LightsActivity extends Activity {
 				resultContainer.post(new Runnable() {
 					@Override
 					public void run() {
-						refreshState(false);
+						if (!requestsActive()) {
+							refreshState(false);
+						}
 					}
 				});
 			}
@@ -326,10 +330,16 @@ public class LightsActivity extends Activity {
 	private Timer indicatorTimer = new Timer();
 	private int indicatorStack = 0; // Keep track of multiple tasks starting and ending
 	
+	private boolean requestsActive() {
+		return indicatorStack > 0;
+	}
+	
 	private void setActivityIndicator(boolean enabled, boolean forced) {		
-		if (enabled) {
+		if (enabled) {			
 			// Tasks shorter than 300 ms don't warrant a visual loading indicator
 			if (!forced && indicatorStack == 0) {
+				indicatorTimer.cancel();
+				
 				indicatorTimer = new Timer();
 				indicatorTimer.schedule(new TimerTask() {
 					@Override
@@ -337,19 +347,22 @@ public class LightsActivity extends Activity {
 						refreshButton.post(new Runnable() {
 							@Override
 							public void run() {
+								// Sometimes there's a race condition that causes this to run after canceling the timer
+								if (!requestsActive()) return;
+								
 								refreshButton.setVisibility(View.GONE);
-								loadingSpinner.setVisibility(View.VISIBLE);
+								loadingSpinner.setVisibility(View.VISIBLE);;
 							}
 						});
 					}
 				}, 300);
-			} else {
+			} else if (forced) {
 				refreshButton.setVisibility(View.GONE);
 				loadingSpinner.setVisibility(View.VISIBLE);
 			}
 			
 			indicatorStack++;
-		} else {			
+		} else {	
 			indicatorStack = Math.max(0, indicatorStack - 1);
 			
 			if (indicatorStack == 0) {
@@ -547,6 +560,8 @@ public class LightsActivity extends Activity {
 					}
 					
 					setActivityIndicator(true, true);
+				} else {
+					setActivityIndicator(true, false);
 				}
 			}
 			
@@ -572,8 +587,10 @@ public class LightsActivity extends Activity {
 
 			@Override
 			protected void onPostExecute(Boolean success) {
-				messageView.setVisibility(success ? View.GONE : View.VISIBLE);
-				messageView.setText(R.string.lights_not_connected);
+				if (flush) {
+					messageView.setVisibility(success ? View.GONE : View.VISIBLE);
+					messageView.setText(R.string.lights_not_connected);
+				}
 				
 				if (success) {
 					connected = true;
