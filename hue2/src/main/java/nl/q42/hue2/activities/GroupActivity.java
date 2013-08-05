@@ -21,6 +21,7 @@ import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -131,7 +132,7 @@ public class GroupActivity extends Activity {
 		}
 		
 		// Add lights button event handler
-		lightsButton.setText(getLightsList());
+		setLights(new ArrayList<String>(group.lights));
 		lightsButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -252,7 +253,14 @@ public class GroupActivity extends Activity {
 	// Called by GroupLightDialog after confirmation
 	public void setLights(ArrayList<String> lights) {
 		group.lights = lights;
-		lightsButton.setText(getLightsList());
+		
+		if (group.lights.size() == 0) {
+			lightsButton.setText(getString(R.string.group_no_lights));
+			lightsButton.setTextColor(Color.rgb(50, 187, 226));
+		} else {
+			lightsButton.setText(getLightsList());
+			lightsButton.setTextColor(Color.WHITE);
+		}
 	}
 	
 	private void saveGroup(boolean addPreset) {

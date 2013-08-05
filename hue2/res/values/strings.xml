@@ -34,6 +34,7 @@
     <string name="group_save_preset">Save as preset</string>
     <string name="group_create">Create group</string>
     <string name="group_new">New group</string>
+    <string name="group_no_lights">Tap to select lights</string>
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>

@@ -9,11 +9,13 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.q42.hue2.models.Bridge;
+import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -128,6 +130,82 @@ public class Util {
 				}
 			}
 		});
+	}
+	
+	/**
+	 * Sorts map of groups by name and returns the ids in order
+	 */
+	public static ArrayList<String> getSortedGroups(HashMap<String, Group> groups) {
+		class GroupPair implements Comparable<GroupPair> {
+			public String id;
+			public Group group;
+			
+			@Override
+			public int compareTo(GroupPair another) {
+				return group.name.compareTo(another.group.name);
+			}
+		}
+		
+		// Build list of (id, group) tuples and sort it
+		ArrayList<GroupPair> pairs = new ArrayList<GroupPair>();
+		
+		for (String id : groups.keySet()) {
+			GroupPair pair = new GroupPair();
+			pair.id = id;
+			pair.group = groups.get(id);
+			pairs.add(pair);
+		}
+		
+		Collections.sort(pairs);
+		
+		// Return ids of sorted groups
+		ArrayList<String> ids = new ArrayList<String>();
+		
+		for (GroupPair pair : pairs) {
+			ids.add(pair.id);
+		}
+		
+		// Make sure "all" group comes first
+		ids.remove("0");
+		ids.add(0, "0");
+		
+		return ids;
+	}
+	
+	/**
+	 * Sorts map of lights by name and returns the ids in order
+	 */
+	public static ArrayList<String> getSortedLights(HashMap<String, Light> lights) {
+		class LightPair implements Comparable<LightPair> {
+			public String id;
+			public Light light;
+			
+			@Override
+			public int compareTo(LightPair another) {
+				return light.name.compareTo(another.light.name);
+			}
+		}
+		
+		// Build list of (id, light) tuples and sort it
+		ArrayList<LightPair> pairs = new ArrayList<LightPair>();
+		
+		for (String id : lights.keySet()) {
+			LightPair pair = new LightPair();
+			pair.id = id;
+			pair.light = lights.get(id);
+			pairs.add(pair);
+		}
+		
+		Collections.sort(pairs);
+		
+		// Return ids of sorted lights
+		ArrayList<String> ids = new ArrayList<String>();
+		
+		for (LightPair pair : pairs) {
+			ids.add(pair.id);
+		}
+		
+		return ids;
 	}
 	
 	/**

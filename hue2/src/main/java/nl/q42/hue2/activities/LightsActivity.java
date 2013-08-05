@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -637,15 +636,7 @@ public class LightsActivity extends Activity {
 	private void populateGroupList() {
 		View lastView = null;
 		
-		// Show group header only when there's actually multiple groups
-		findViewById(R.id.lights_groups_header).setVisibility(groups.size() > 1 ? View.VISIBLE : View.GONE);
-		
-		// Sort groups by id
-		ArrayList<String> groupIds = new ArrayList<String>();
-		groupIds.addAll(groups.keySet());
-		Util.sortNumericallyIfPossible(groupIds);
-		
-		for (final String id : groupIds) {
+		for (final String id : Util.getSortedGroups(groups)) {
 			Group group = groups.get(id);
 			
 			// Create view
@@ -655,49 +646,17 @@ public class LightsActivity extends Activity {
 			groupViews.put(id, lastView);
 		}
 		
-		if (lastView != null && groups.size() > 1) {
-			lastView.findViewById(R.id.lights_group_divider).setVisibility(View.INVISIBLE);
-			lastView.findViewById(R.id.lights_group_divider).setBackgroundColor(Color.rgb(87, 87, 87));
-		} else if (lastView != null) {
-			lastView.findViewById(R.id.lights_group_divider).setBackgroundColor(Color.rgb(51, 181, 229));
+		if (lastView != null) {
+			lastView.findViewById(R.id.lights_group_divider).setVisibility(View.GONE);
 		}
 	}
 	
 	private void populateGroups() {
-		// Sort groups by id
-		ArrayList<String> groupIds = new ArrayList<String>();
-		groupIds.addAll(groups.keySet());
-		Util.sortNumericallyIfPossible(groupIds);
-		
-		// Build sorted list of all lights 
-		ArrayList<String> otherLights = new ArrayList<String>();
-		otherLights.addAll(lights.keySet());
-		Util.sortNumericallyIfPossible(otherLights);
-		
-		// For each group, add a header and the lights		
-		for (final String id : groupIds) {
-			Group group = groups.get(id);
-			if (id.equals("0")) continue;
-			
-			otherLights.removeAll(group.lights);
-			
-			// Create view
-			addGroupView(groupResultList, id, group);
-		}
-		
-		// Create group with any remaining lights
-		if (otherLights.size() > 0) {
-			Group otherGroup = new Group();
-			otherGroup.lights = otherLights;
-			
-			if (otherLights.size() == lights.size()) {
-				otherGroup.name = getString(R.string.lights_group_other_only);
-			} else {
-				otherGroup.name = getString(R.string.lights_group_other);
-			}
-			
-			addGroupView(groupResultList, null, otherGroup);
-		}
+		Group allGroup = new Group();
+		allGroup.lights = Util.getSortedLights(lights);
+		allGroup.name = getString(R.string.lights_group_other_only);
+
+		addGroupView(groupResultList, "0", allGroup);
 	}
 	
 	private View addGroupView(ViewGroup container, final String id, final Group group) {
@@ -706,18 +665,10 @@ public class LightsActivity extends Activity {
 		((TextView) view.findViewById(R.id.lights_group_container_title)).setText(group.name);
 		LinearLayout lightList = (LinearLayout) view.findViewById(R.id.lights_group_container_list);
 		
-		// Only show header if there are custom groups
-		view.findViewById(R.id.lights_group_container_header).setVisibility(groups.size() > 1 ? View.VISIBLE : View.GONE);
-		
-		// Sort lights in group by id
-		ArrayList<String> lightIds = new ArrayList<String>();
-		lightIds.addAll(group.lights);
-		Util.sortNumericallyIfPossible(lightIds);
-		
 		// Create and add view for all lights
 		View lastView = null;
 		
-		for (final String lid : lightIds) {
+		for (final String lid : group.lights) {
 			Light light = lights.get(lid);
 			
 			// Create view
@@ -741,16 +692,6 @@ public class LightsActivity extends Activity {
 	
 	private View addGroupListView(ViewGroup container, final String id, final Group group) {
 		View view = getLayoutInflater().inflate(R.layout.lights_group, container, false);
-		
-		// Highlight all group if it's the only one
-		TextView nameView = ((TextView) view.findViewById(R.id.lights_group_name));
-		if (groups.size() == 1) {
-			nameView.setTextColor(Color.rgb(51, 181, 229));
-			nameView.setTextSize(TypedValue.COMPLEX_UNIT_PT, 10);
-		} else {
-			nameView.setTextColor(Color.WHITE);
-			nameView.setTextSize(TypedValue.COMPLEX_UNIT_PT, 7);
-		}
 		
 		// Set group edit event handler
 		view.setOnClickListener(new OnClickListener() {
