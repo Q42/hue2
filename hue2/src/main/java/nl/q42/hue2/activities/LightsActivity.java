@@ -326,6 +326,10 @@ public class LightsActivity extends Activity {
 		if (enabled) {
 			// Tasks shorter than 300 ms don't warrant a visual loading indicator
 			if (!forced) {
+				if (indicatorTimer != null) {
+					indicatorTimer.cancel();
+				}
+				
 				indicatorTimer = new Timer();
 				indicatorTimer.schedule(new TimerTask() {
 					@Override
