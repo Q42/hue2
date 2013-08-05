@@ -28,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
@@ -143,6 +144,8 @@ public class GroupActivity extends Activity {
 		if (id == null) {
 			findViewById(R.id.group_save).setVisibility(View.GONE);
 			findViewById(R.id.group_create).setVisibility(View.VISIBLE);
+			
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 		}
 		
 		if (savedInstanceState == null) {
