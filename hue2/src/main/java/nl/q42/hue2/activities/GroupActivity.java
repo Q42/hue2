@@ -32,10 +32,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class GroupActivity extends Activity {
@@ -48,7 +46,6 @@ public class GroupActivity extends Activity {
 	
 	private EditText nameView;
 	private Button lightsButton;
-	private LinearLayout colorPicker;
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
 	private TempSlider tempSlider;
@@ -75,11 +72,6 @@ public class GroupActivity extends Activity {
 		lights = (HashMap<String, Light>) getIntent().getSerializableExtra("lights");
 		service = (HueService) getIntent().getSerializableExtra("service");
 		
-		if (group == null) {
-			group = new Group();
-			group.lights = new ArrayList<String>();
-		}
-		
 		// UI setup
 		setContentView(R.layout.activity_group);
 		
@@ -87,7 +79,6 @@ public class GroupActivity extends Activity {
 		
 		nameView = (EditText) findViewById(R.id.group_name);
 		lightsButton = (Button) findViewById(R.id.group_lights);
-		colorPicker = (LinearLayout) findViewById(R.id.group_color_picker);
 		hueSlider = (HueSlider) findViewById(R.id.group_color_hue);
 		satBriSlider = (SatBriSlider) findViewById(R.id.group_color_sat_bri);
 		tempSlider = (TempSlider) findViewById(R.id.group_color_temp);
@@ -134,22 +125,15 @@ public class GroupActivity extends Activity {
 			}
 		});
 		
-		// Special actions for creating group or editing 'all' pseudo group
-		if (id == null) {
-			colorPicker.setVisibility(View.GONE);
-			
-			findViewById(R.id.group_save).setVisibility(View.GONE);
-			findViewById(R.id.group_create).setVisibility(View.VISIBLE);
-			
-			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-		} else if (id.equals("0")) {
+		// Special actions for editing 'all' pseudo group
+		if (id.equals("0")) {
 			findViewById(R.id.group_details).setVisibility(View.GONE);
 			((TextView) findViewById(R.id.group_color_header)).setText(getString(R.string.group_all_lights));
 		}
 		
 		colorMode = "xy";
 		
-		if (savedInstanceState == null && id != null) {
+		if (savedInstanceState == null) {
 			nameView.setText(group.name);
 			
 			// Fill in color if all lights in group have the same color
@@ -194,7 +178,7 @@ public class GroupActivity extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-		if (id != null) saveGroup(false);
+		saveGroup(false);
 		super.onBackPressed();
 	}
 	
@@ -347,33 +331,25 @@ public class GroupActivity extends Activity {
 		ArrayList<String> groupLights = new ArrayList<String>();
 		groupLights.addAll(group.lights);
 		
-		if (id != null) {
-			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
-			int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-			int ct = (int) tempSlider.getTemp();
-			
-			Intent result = new Intent();
-			result.putExtra("id", id);
-			result.putExtra("name", nameView.getText().toString().trim());
-			result.putExtra("lights", groupLights);
-			result.putExtra("mode", colorMode);
-			result.putExtra("xy", xy);
-			result.putExtra("ct", ct);
-			result.putExtra("bri", bri);
-			
-			if (addPreset) result.putExtra("addPreset", true);
-			
-			// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
-			result.putExtra("colorChanged", hasColorChanged());
-			
-			setResult(RESULT_OK, result);
-		} else {
-			Intent result = new Intent();
-			result.putExtra("name", nameView.getText().toString().trim());
-			result.putExtra("lights", groupLights);
-			
-			setResult(RESULT_OK, result);
-		}
+		float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+		int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+		int ct = (int) tempSlider.getTemp();
+		
+		Intent result = new Intent();
+		result.putExtra("id", id);
+		result.putExtra("name", nameView.getText().toString().trim());
+		result.putExtra("lights", groupLights);
+		result.putExtra("mode", colorMode);
+		result.putExtra("xy", xy);
+		result.putExtra("ct", ct);
+		result.putExtra("bri", bri);
+		
+		if (addPreset) result.putExtra("addPreset", true);
+		
+		// If the color sliders registered touch events, we know the color has been changed (easier than conversion and checking)
+		result.putExtra("colorChanged", hasColorChanged());
+		
+		setResult(RESULT_OK, result);
 	}
 	
 	@Override
@@ -382,7 +358,7 @@ public class GroupActivity extends Activity {
 	    inflater.inflate(R.menu.group, menu);
 	    
 	    // Pseudo group with all lights (or a new group) cannot be removed
-	    menu.findItem(R.id.menu_delete_group).setVisible(id != null && !id.equals("0"));
+	    menu.findItem(R.id.menu_delete_group).setVisible(!id.equals("0"));
 	    
 	    return true;
 	}
@@ -397,7 +373,7 @@ public class GroupActivity extends Activity {
 			finish();			
 			return true;
 		} else if (item.getItemId() == android.R.id.home) {
-			if (id != null) saveGroup(false);
+			saveGroup(false);
 			finish();
 			
 			return true;

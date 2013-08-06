@@ -13,7 +13,6 @@
     <string name="lights_groups">Groups</string>
     
     <string name="lights_group_all">All lights</string>
-    <string name="lights_group_other">Other</string>
     <string name="lights_group_other_only">Lights</string>
     
     <string name="lights_on">ON</string>
@@ -43,8 +42,6 @@
     <string name="dialog_bridge_lost_title">Link failed</string>
     
     <string name="dialog_link">Press the link button on the bridge to connect.</string>
-    
-    <string name="dialog_connection_title">Connection failed</string>
     
     <string name="dialog_bridge_ip">IP address</string>
     <string name="dialog_bridge_mac">MAC address</string>
