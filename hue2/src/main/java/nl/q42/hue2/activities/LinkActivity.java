@@ -42,6 +42,7 @@ import android.widget.RelativeLayout;
 
 public class LinkActivity extends Activity {
 	private static final int SEARCH_TIMEOUT = 30000;
+	private static final int BROADCAST_INTERVAL = 5000;
 	private static final int LINK_INTERVAL = 1000;
 	
 	private BridgeAdapter bridgesAdapter;
@@ -268,8 +269,15 @@ public class LinkActivity extends Activity {
 				}
 				
 				long start = System.currentTimeMillis();
+				long nextBroadcast = start + BROADCAST_INTERVAL;
 				
-				while (true) {					
+				while (true) {
+					// Send a new discovery broadcast once a second
+					if (System.currentTimeMillis() > nextBroadcast) {
+						upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
+						nextBroadcast = System.currentTimeMillis() + BROADCAST_INTERVAL;
+					}
+					
 					byte[] responseBuffer = new byte[1024];
 					
 					DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
