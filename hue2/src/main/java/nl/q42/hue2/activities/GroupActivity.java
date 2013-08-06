@@ -55,6 +55,7 @@ public class GroupActivity extends Activity {
 	private ColorButton presetColorView;
 	
 	private String colorMode;
+	private boolean defaultColor = true;
 	
 	private Timer colorPreviewTimer = new Timer();
 	private boolean previewNeeded = false; // Set to true when color slider is moved
@@ -146,6 +147,8 @@ public class GroupActivity extends Activity {
 			((TextView) findViewById(R.id.group_color_header)).setText(getString(R.string.group_all_lights));
 		}
 		
+		colorMode = "xy";
+		
 		if (savedInstanceState == null && id != null) {
 			nameView.setText(group.name);
 			
@@ -181,10 +184,11 @@ public class GroupActivity extends Activity {
 					satBriSlider.setBrightness(first.bri / 255.0f);
 					colorMode = "xy";
 				}
+				
+				defaultColor = false;
 			}
 		}
 		
-		colorMode = "xy";
 		updatePresetPreview();
 	}
 	
@@ -249,6 +253,7 @@ public class GroupActivity extends Activity {
 			public boolean onTouch(View v, MotionEvent event) {				
 				colorMode = mode;
 				previewNeeded = true;
+				defaultColor = false;
 				updatePresetPreview();
 				return false;
 			}
@@ -314,16 +319,18 @@ public class GroupActivity extends Activity {
 					}
 					
 					// Preview color on new lights in group
-					for (String id : newLights) {
-						if (!oldLights.contains(id)) {
-							float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
-							int bri = (int) (satBriSlider.getBrightness() * 255.0f);
-							int ct = (int) tempSlider.getTemp();
-							
-							if (colorMode.equals("ct")) {
-								service.setLightCT(id, ct, bri, true);
-							} else {
-								service.setLightXY(id, xy, bri, true);
+					if (!defaultColor) {
+						for (String id : newLights) {
+							if (!oldLights.contains(id)) {
+								float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+								int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+								int ct = (int) tempSlider.getTemp();
+								
+								if (colorMode.equals("ct")) {
+									service.setLightCT(id, ct, bri, true);
+								} else {
+									service.setLightXY(id, xy, bri, true);
+								}
 							}
 						}
 					}
