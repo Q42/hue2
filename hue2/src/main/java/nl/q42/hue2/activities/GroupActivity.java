@@ -130,7 +130,7 @@ public class GroupActivity extends Activity {
 		lightsButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				GroupLightDialog.newInstance(lights, group).show(getFragmentManager(), "dialog_lights");
+				GroupLightDialog.newInstance(lights, group, service).show(getFragmentManager(), "dialog_lights");
 			}
 		});
 		

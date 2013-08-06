@@ -6,6 +6,7 @@ import java.util.HashMap;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.activities.GroupActivity;
+import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
 import android.app.AlertDialog;
@@ -13,20 +14,25 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 
 public class GroupLightDialog extends DialogFragment {
 	private HashMap<String, CheckBox> lightViews = new HashMap<String, CheckBox>();
 	private ArrayList<String> lightIds = new ArrayList<String>();
+	private HueService service;
 	
-	public static GroupLightDialog newInstance(HashMap<String, Light> lights, Group group) {
+	public static GroupLightDialog newInstance(HashMap<String, Light> lights, Group group, HueService service) {
 		GroupLightDialog dialog = new GroupLightDialog();
 		
 		Bundle args = new Bundle();
 		args.putSerializable("group", group);
 		args.putSerializable("lights", lights);
+		args.putSerializable("service", service);
 		dialog.setArguments(args);
 		
 		return dialog;
@@ -37,6 +43,7 @@ public class GroupLightDialog extends DialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		final HashMap<String, Light> lights = (HashMap<String, Light>) getArguments().getSerializable("lights");
 		final Group group = (Group) getArguments().getSerializable("group");
+		service = (HueService) getArguments().getSerializable("service");
 		
 		LinearLayout layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.dialog_lights, null);
 		
@@ -44,13 +51,31 @@ public class GroupLightDialog extends DialogFragment {
 		lightIds = Util.getSortedLights(lights);
 		
 		// Create checkbox for each light
-		for (String id : lightIds) {
+		for (final String id : lightIds) {
 			CheckBox lightView = new CheckBox(getActivity());
 			lightView.setPadding(0, 20, 0, 20);
 			
 			lightView.setId(id.hashCode()); // Save instance state properly
 			lightView.setText(lights.get(id).name);
 			lightView.setChecked(group.lights.contains(id));
+			
+			// Add callback to flash light on check change
+			lightView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					new AsyncTask<Void, Void, Void>() {
+						@Override
+						protected Void doInBackground(Void... params) {
+							try {
+								service.setLightAlert(id);
+							} catch (Exception e) {
+								// Flashing lights is a non-essential feature, ignore errors
+							}
+							return null;
+						}
+					}.execute();
+				}
+			});
 			
 			layout.addView(lightView);
 			lightViews.put(id, lightView);

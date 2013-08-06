@@ -129,6 +129,13 @@ public class HueService implements Serializable {
 			throw new ApiException(result);
 	}
 	
+	public void setLightAlert(String id) throws IOException, ApiException {
+		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state",
+				"{\"alert\":\"select\"}");
+		if (result.getResponseCode() != 200)
+			throw new ApiException(result);
+	}
+	
 	public void setLightName(String id, String name) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id,
 				"{\"name\":\"" + name.replace("\"", "\\\"") + "\"}");
