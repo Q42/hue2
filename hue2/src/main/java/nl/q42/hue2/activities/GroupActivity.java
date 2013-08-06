@@ -201,6 +201,7 @@ public class GroupActivity extends Activity {
 	private void restoreLights() {
 		Intent result = new Intent();
 		result.putExtra("id", id);
+		result.putExtra("lights", new ArrayList<String>(group.lights));
 		result.putExtra("colorChanged", hasColorChanged());
 		
 		setResult(RESULT_CANCELED, result);

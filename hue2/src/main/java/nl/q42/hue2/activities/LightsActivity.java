@@ -217,12 +217,13 @@ public class LightsActivity extends Activity {
 		boolean colorChanged = data.getBooleanExtra("colorChanged", false);
 		
 		// If user was picking colors and then cancelled, restore original colors for individual light or entire group
-		if (resultCode == RESULT_CANCELED && colorChanged) {
-			ArrayList<String> lightsToRestore = new ArrayList<String>();
+		if (resultCode == RESULT_CANCELED) {
+			ArrayList<String> lightsToRestore = (ArrayList<String>) data.getSerializableExtra("lights");
 			
 			if (requestCode == ACTIVITY_GROUP) {
-				lightsToRestore.addAll(groups.get(id).lights);
+				setGroupLights(id, new ArrayList<String>(groups.get(id).lights));
 			} else {
+				lightsToRestore = new ArrayList<String>();
 				lightsToRestore.add(id);
 			}
 			
