@@ -35,6 +35,7 @@
     <string name="group_create">Create group</string>
     <string name="group_new">New group</string>
     <string name="group_no_lights">Tap to select lights</string>
+    <string name="group_all_lights">All lights</string>
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>
@@ -75,5 +76,5 @@
     <string name="menu_bridges">Search bridges</string>
     <string name="menu_new_group">New group</string>
     <string name="menu_delete_group">Remove group</string>
-    <string name="menu_cancel">Cancel</string>
+    <string name="menu_undo">Undo</string>
 </resources>

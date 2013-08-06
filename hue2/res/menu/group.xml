@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/menu_cancel" android:showAsAction="ifRoom" android:title="@string/menu_cancel"></item>
+    <item android:id="@+id/menu_undo" android:showAsAction="ifRoom" android:title="@string/menu_undo"></item>
     <item android:id="@+id/menu_delete_group" android:showAsAction="always" android:title="@string/menu_delete_group" android:icon="@drawable/ic_menu_delete" />
 </menu>

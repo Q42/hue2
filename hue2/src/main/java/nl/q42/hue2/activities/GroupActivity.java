@@ -18,6 +18,7 @@ import nl.q42.hue2.views.TempSlider;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
+import nl.q42.javahueapi.models.State;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
@@ -122,15 +123,6 @@ public class GroupActivity extends Activity {
 			}
 		});
 		
-		// If this is the all lights pseudo group, only the color can be changed
-		if ("0".equals(id)) {
-			nameView.setEnabled(false);
-			lightsButton.setEnabled(false);
-		} else if (id == null) {
-			// Or if a new group is being created, no color can be set yet
-			colorPicker.setVisibility(View.GONE);
-		}
-		
 		// Add lights button event handler
 		setLights(new ArrayList<String>(group.lights));
 		lightsButton.setOnClickListener(new OnClickListener() {
@@ -140,16 +132,55 @@ public class GroupActivity extends Activity {
 			}
 		});
 		
-		// Switch buttons when creating group and open keyboard for name
+		// Special actions for creating group or editing 'all' pseudo group
 		if (id == null) {
+			colorPicker.setVisibility(View.GONE);
+			
 			findViewById(R.id.group_save).setVisibility(View.GONE);
 			findViewById(R.id.group_create).setVisibility(View.VISIBLE);
 			
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+		} else if (id.equals("0")) {
+			findViewById(R.id.group_details).setVisibility(View.GONE);
+			((TextView) findViewById(R.id.group_color_header)).setText(getString(R.string.group_all_lights));
 		}
 		
-		if (savedInstanceState == null) {
-			nameView.setText(id == null ? "" : group.name);
+		if (savedInstanceState == null && id != null) {
+			nameView.setText(group.name);
+			
+			// Fill in color if all lights in group have the same color
+			State first = null;
+			Light firstLight = null;
+			boolean same = true;
+			
+			for (String id : group.lights) {
+				State cur = lights.get(id).state;
+				
+				if (first == null) {
+					first = cur;
+					firstLight = lights.get(id);
+				} else if (cur.on != first.on || !cur.colormode.equals(first.colormode) || cur.bri != first.bri) {
+					same = false;
+				} else {
+					if (cur.colormode.equals("ct") && cur.ct != first.ct) same = false;
+					else if (cur.colormode.equals("hs") && (cur.hue != first.hue || cur.sat != first.sat)) same = false;
+					else if (cur.colormode.equals("xy") && (cur.xy[0] != first.xy[0] || cur.xy[1] != first.xy[1])) same = false;
+				}
+			}
+			
+			if (same && first != null) {
+				if (first.colormode.equals("ct")) {
+					tempSlider.setTemp(first.ct);
+					colorMode = "ct";
+				} else {
+					float hsv[] = new float[3];
+					Color.colorToHSV(Util.getRGBColor(firstLight), hsv);
+					hueSlider.setHue(hsv[0]);
+					satBriSlider.setSaturation(hsv[1]);
+					satBriSlider.setBrightness(first.bri / 255.0f);
+					colorMode = "xy";
+				}
+			}
 		}
 		
 		colorMode = "xy";
@@ -312,7 +343,7 @@ public class GroupActivity extends Activity {
 		if (item.getItemId() == R.id.menu_delete_group) {
 			GroupRemoveDialog.newInstance().show(getFragmentManager(), "dialog_remove_group");
 			return true;
-		} else if (item.getItemId() == R.id.menu_cancel) {
+		} else if (item.getItemId() == R.id.menu_undo) {
 			restoreLights();
 			finish();			
 			return true;
