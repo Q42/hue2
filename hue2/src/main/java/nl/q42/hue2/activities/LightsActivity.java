@@ -20,6 +20,7 @@ import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.FullConfig;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
+import nl.q42.javahueapi.models.State;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
@@ -226,15 +227,7 @@ public class LightsActivity extends Activity {
 			}
 			
 			for (String lid : lightsToRestore) {
-				Light light = lights.get(lid);
-				
-				if (light.state.colormode.equals("ct")) {
-					setLightColorCT(lid, light.state.ct, light.state.bri, light.state.on);
-				} else if (light.state.colormode.equals("hs")) {
-					setLightColorHS(lid, light.state.hue, light.state.sat, light.state.bri, light.state.on);
-				} else {
-					setLightColorXY(lid, light.state.xy, light.state.bri, light.state.on);
-				}
+				setLightColor(lid, lights.get(lid).state);
 			}
 		} else if (resultCode == RESULT_OK) {
 			String name = data.getStringExtra("name");
@@ -988,26 +981,6 @@ public class LightsActivity extends Activity {
 		});
 	}
 	
-	private void setLightColorHS(final String id, final int hue, final int sat, final int bri, final boolean on) {
-		asyncUpdate(new AsyncCallbacks() {			
-			@Override
-			public Object doUpdate() throws Exception {
-				service.setLightHS(id, hue, sat, bri, on);
-				return null;
-			}
-			
-			@Override
-			public void updateState(Object result) {
-				Light light = lights.get(id);
-				light.state.on = on;
-				light.state.colormode = "hs";
-				light.state.hue = hue;
-				light.state.sat = sat;
-				light.state.bri = bri;
-			}
-		});
-	}
-	
 	private void setLightColorXY(final String id, final float[] xy, final int bri, final boolean on) {
 		asyncUpdate(new AsyncCallbacks() {			
 			@Override
@@ -1023,6 +996,22 @@ public class LightsActivity extends Activity {
 				light.state.colormode = "xy";
 				light.state.xy = xy;
 				light.state.bri = bri;
+			}
+		});
+	}
+	
+	private void setLightColor(final String id, final State state) {
+		asyncUpdate(new AsyncCallbacks() {			
+			@Override
+			public Object doUpdate() throws Exception {
+				service.setLightColor(id, state);
+				return null;
+			}
+			
+			@Override
+			public void updateState(Object result) {
+				Light light = lights.get(id);
+				light.state = state;
 			}
 		});
 	}

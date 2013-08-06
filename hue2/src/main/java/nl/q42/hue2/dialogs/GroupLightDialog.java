@@ -1,10 +1,10 @@
 package nl.q42.hue2.dialogs;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import nl.q42.hue2.R;
+import nl.q42.hue2.Util;
 import nl.q42.hue2.activities.GroupActivity;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
@@ -41,8 +41,7 @@ public class GroupLightDialog extends DialogFragment {
 		LinearLayout layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.dialog_lights, null);
 		
 		// Ordered list of lights
-		lightIds.addAll(lights.keySet());
-		Collections.sort(lightIds);
+		lightIds = Util.getSortedLights(lights);
 		
 		// Create checkbox for each light
 		for (String id : lightIds) {

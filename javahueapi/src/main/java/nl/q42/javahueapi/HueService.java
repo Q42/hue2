@@ -16,6 +16,7 @@ import nl.q42.javahueapi.models.FullConfig;
 import nl.q42.javahueapi.models.Light;
 import nl.q42.javahueapi.models.NupnpEntry;
 import nl.q42.javahueapi.models.SimpleConfig;
+import nl.q42.javahueapi.models.State;
 import nl.q42.javahueapi.models.UserCreateRequest;
 
 import com.google.gson.Gson;
@@ -166,6 +167,16 @@ public class HueService implements Serializable {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state", body);
 		if (result.getResponseCode() != 200)
 			throw new ApiException(result);
+	}
+	
+	public void setLightColor(String id, State state) throws IOException, ApiException {
+		if (state.colormode.equals("xy")) {
+			setLightXY(id, state.xy, state.bri, state.on);
+		} else if (state.colormode.equals("ct")) {
+			setLightCT(id, state.ct, state.bri, state.on);
+		} else {
+			setLightHS(id, state.hue, state.sat, state.bri, state.on);
+		}
 	}
 	
 	public void setGroupXY(String id, float[] xy, int bri) throws IOException, ApiException {

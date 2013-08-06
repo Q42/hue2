@@ -23,6 +23,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -281,9 +282,12 @@ public class GroupActivity extends Activity {
 		finish();
 	}
 	
-	// Called by GroupLightDialog after confirmation
-	public void setLights(ArrayList<String> lights) {
-		group.lights = lights;
+	// Called by GroupLightDialog after confirmation	
+	public void setLights(final ArrayList<String> newLights) {
+		// Update group with regards to color previews
+		updateLightColors(new ArrayList<String>(group.lights), newLights);
+		
+		group.lights = newLights;
 		
 		if (group.lights.size() == 0) {
 			lightsButton.setText(getString(R.string.group_no_lights));
@@ -292,6 +296,43 @@ public class GroupActivity extends Activity {
 			lightsButton.setText(getLightsList());
 			lightsButton.setTextColor(Color.WHITE);
 		}
+	}
+	
+	private void updateLightColors(final ArrayList<String> oldLights, final ArrayList<String> newLights) {
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					service.setGroupLights(id, new ArrayList<String>(group.lights));
+					
+					// Restore lights removed from group
+					for (String id : oldLights) {
+						if (!newLights.contains(id)) {
+							service.setLightColor(id, lights.get(id).state);
+						}
+					}
+					
+					// Preview color on new lights in group
+					for (String id : newLights) {
+						if (!oldLights.contains(id)) {
+							float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
+							int bri = (int) (satBriSlider.getBrightness() * 255.0f);
+							int ct = (int) tempSlider.getTemp();
+							
+							if (colorMode.equals("ct")) {
+								service.setLightCT(id, ct, bri, true);
+							} else {
+								service.setLightXY(id, xy, bri, true);
+							}
+						}
+					}
+				} catch (Exception e) {
+					// Previewing is non-essential, so ignore
+				}
+				
+				return null;
+			}
+		}.execute();
 	}
 	
 	private void saveGroup(boolean addPreset) {
