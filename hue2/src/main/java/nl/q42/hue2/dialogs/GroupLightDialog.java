@@ -6,6 +6,7 @@ import java.util.HashMap;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.activities.GroupActivity;
+import nl.q42.hue2.activities.LightsActivity;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
@@ -22,9 +23,15 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 
 public class GroupLightDialog extends DialogFragment {
+	private HashMap<String, Light> lights;
 	private HashMap<String, CheckBox> lightViews = new HashMap<String, CheckBox>();
 	private ArrayList<String> lightIds = new ArrayList<String>();
 	private HueService service;
+	
+	// Intended for selecting lights for a new group
+	public static GroupLightDialog newInstance(HashMap<String, Light> lights, HueService service) {
+		return newInstance(lights, null, service);
+	}
 	
 	public static GroupLightDialog newInstance(HashMap<String, Light> lights, Group group, HueService service) {
 		GroupLightDialog dialog = new GroupLightDialog();
@@ -41,8 +48,8 @@ public class GroupLightDialog extends DialogFragment {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		final HashMap<String, Light> lights = (HashMap<String, Light>) getArguments().getSerializable("lights");
 		final Group group = (Group) getArguments().getSerializable("group");
+		lights = (HashMap<String, Light>) getArguments().getSerializable("lights");
 		service = (HueService) getArguments().getSerializable("service");
 		
 		LinearLayout layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.dialog_lights, null);
@@ -57,7 +64,10 @@ public class GroupLightDialog extends DialogFragment {
 			
 			lightView.setId(id.hashCode()); // Save instance state properly
 			lightView.setText(lights.get(id).name);
-			lightView.setChecked(group.lights.contains(id));
+			
+			if (group != null) {
+				lightView.setChecked(group.lights.contains(id));
+			}
 			
 			// Add callback to flash light on check change
 			lightView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -84,10 +94,15 @@ public class GroupLightDialog extends DialogFragment {
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(getString(R.string.dialog_lights_title))
 			.setView(layout)
-			.setPositiveButton(R.string.dialog_ok, new OnClickListener() {
+			.setPositiveButton(group == null ? R.string.dialog_create : R.string.dialog_ok, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					((GroupActivity) getActivity()).setLights(getCheckedLights());
+					// If editing existing group, call back to edit activity, otherwise create group
+					if (getActivity() instanceof GroupActivity) {
+						((GroupActivity) getActivity()).setLights(getCheckedLights());
+					} else {
+						((LightsActivity) getActivity()).createGroup(generateGroupName(), getCheckedLights());
+					}
 					
 					dialog.dismiss();
 				}
@@ -99,6 +114,22 @@ public class GroupLightDialog extends DialogFragment {
 				}
 			})
 			.create();
+	}
+	
+	private String generateGroupName() {
+		ArrayList<String> checkedLights = getCheckedLights();
+		
+		String lightsStr = "";
+		for (int i = 0; i < checkedLights.size(); i++) {
+			lightsStr += lights.get(checkedLights.get(i)).name;
+			if (i < checkedLights.size() - 1) lightsStr += ", ";
+		}
+		
+		if (lightsStr.length() > 32) {
+			return lightsStr.substring(0, 29) + "...";
+		} else {
+			return lightsStr;
+		}
 	}
 	
 	private ArrayList<String> getCheckedLights() {

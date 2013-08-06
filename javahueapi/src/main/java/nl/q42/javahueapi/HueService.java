@@ -233,7 +233,7 @@ public class HueService implements Serializable {
 			throw new ApiException(result);
 	}
 	
-	public int createGroup(String name, List<String> lights) throws IOException, ApiException {
+	public String createGroup(String name, List<String> lights) throws IOException, ApiException {
 		String lightsStr = "";
 		for (int i = 0; i < lights.size(); i++) {
 			lightsStr += "\"" + lights.get(i) + "\"";
@@ -252,7 +252,7 @@ public class HueService implements Serializable {
 		// Parse new group id
 		Matcher m = Pattern.compile("[0-9]+").matcher(result.getBody());
 		m.find();
-		return Integer.valueOf(m.group());
+		return m.group();
 	}
 	
 	public void setBridgeIp(String bridgeIp) {

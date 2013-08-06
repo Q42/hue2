@@ -11,6 +11,7 @@ import nl.q42.hue2.PresetsDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.dialogs.ErrorDialog;
+import nl.q42.hue2.dialogs.GroupLightDialog;
 import nl.q42.hue2.dialogs.PresetRemoveDialog;
 import nl.q42.hue2.models.Bridge;
 import nl.q42.hue2.models.Preset;
@@ -172,9 +173,7 @@ public class LightsActivity extends Activity {
 			if (groups.size() >= 1 + 15) {
 				ErrorDialog.show(getFragmentManager(), R.string.dialog_too_many_groups_title, R.string.dialog_too_many_groups);
 			} else {
-				Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
-				groupIntent.putExtra("lights", lights);
-				startActivityForResult(groupIntent, ACTIVITY_GROUP);
+				GroupLightDialog.newInstance(lights, service).show(getFragmentManager(), "dialog_group_lights");
 			}
 			
 			return true;
@@ -944,21 +943,28 @@ public class LightsActivity extends Activity {
 		});
 	}
 	
-	public void createGroup(final String name, final List<String> lights) {		
+	public void createGroup(final String name, final List<String> groupLights) {		
 		asyncUpdate(new AsyncCallbacks() {			
 			@Override
 			public Object doUpdate() throws Exception {
-				return service.createGroup(name, lights);
+				return service.createGroup(name, groupLights);
 			}
 			
 			@Override
 			public void updateState(Object result) {
 				Group group = new Group();
 				group.name = name;
-				group.lights = new ArrayList<String>(lights);
+				group.lights = new ArrayList<String>(groupLights);
 				groups.put(String.valueOf(result), group);
 				
 				repopulateViews();
+				
+				Intent groupIntent = new Intent(LightsActivity.this, GroupActivity.class);
+				groupIntent.putExtra("id", (String) result);
+				groupIntent.putExtra("group", group);
+				groupIntent.putExtra("lights", lights);
+				groupIntent.putExtra("service", service);
+				startActivityForResult(groupIntent, ACTIVITY_GROUP);
 			}
 		});
 	}

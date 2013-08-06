@@ -71,6 +71,7 @@
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_create">Create</string>
     
     <!-- Menus -->
     <string name="menu_bridges">Search bridges</string>
