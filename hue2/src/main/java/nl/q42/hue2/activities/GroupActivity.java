@@ -135,6 +135,7 @@ public class GroupActivity extends Activity {
 		
 		if (savedInstanceState == null) {
 			nameView.setText(group.name);
+			nameView.setSelection(group.name.length());
 			
 			// Fill in color if all lights in group have the same color
 			State first = null;
