@@ -9,8 +9,6 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 
-// TODO: Use state info to not need the getLightDetails call
-// TODO: Create configuration page instead of hardcoding lights
 // TODO: Handle disconnect, unreachable lights and lights no longer existing
 
 public class WidgetProvider extends AppWidgetProvider {	

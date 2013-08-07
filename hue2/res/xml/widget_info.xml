@@ -4,4 +4,5 @@
 	android:minHeight="50dp"
 	android:initialLayout="@layout/widget" 
 	android:resizeMode="none"
-	android:widgetCategory="home_screen" />
+	android:widgetCategory="home_screen|keyguard"
+	android:configure="nl.q42.hue2.activities.WidgetConfigActivity" />

@@ -79,6 +79,8 @@ public class WidgetUpdateService extends Service {
 					
 					widgetManager.updateAppWidget(widgetId, views);
 				}
+				
+				stopSelf();
 			}
 		}.execute();
 		
