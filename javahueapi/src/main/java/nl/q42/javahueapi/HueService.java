@@ -122,6 +122,15 @@ public class HueService implements Serializable {
 		throw new ApiException(result);
 	}
 	
+	public Light getLightDetails(String id) throws IOException, ApiException {
+		Result result = Networker.get("http://" + bridgeIp + "/api/" + username + "/lights/" + id);
+		
+		if (result.getResponseCode() == 200) {
+			return gson.fromJson(result.getBody(), Light.class);
+		}
+		throw new ApiException(result);
+	}
+	
 	public void turnLightOn(String id, boolean on) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state",
 				"{\"on\":" + on + "}");
