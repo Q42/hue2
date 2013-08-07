@@ -50,7 +50,8 @@
 		</receiver>
 		
 		<!-- Widget service -->
-		<service android:name="nl.q42.hue2.widgets.WidgetService" />
+		<service android:name="nl.q42.hue2.widgets.WidgetToggleService" />
+		<service android:name="nl.q42.hue2.widgets.WidgetUpdateService" />
     </application>
 
 </manifest>

@@ -1,50 +1,49 @@
 package nl.q42.hue2.widgets;
 
-import nl.q42.hue2.R;
+import java.util.Calendar;
+
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.RemoteViews;
 
-public class WidgetProvider extends AppWidgetProvider {
-	// TODO: Create configuration page instead of hardcoding lights
-	// TODO: Handle disconnect, unreachable lights and lights no longer existing
-	// TODO: Progress bar for initialization (as initialLayout)
-	public void onUpdate(Context context, AppWidgetManager widgetManager, int[] widgetIds) {
-		for (int i = 0; i < widgetIds.length; i++) {
-			int widgetId = widgetIds[i];
-			
-			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
-			
-			// Add event handlers
-			views.setOnClickPendingIntent(R.id.widget_light1_button, createIntent(context, widgetIds, "1"));
-			views.setOnClickPendingIntent(R.id.widget_light2_button, createIntent(context, widgetIds, "2"));
-			views.setOnClickPendingIntent(R.id.widget_light3_button, createIntent(context, widgetIds, "3"));
-			views.setOnClickPendingIntent(R.id.widget_light4_button, createIntent(context, widgetIds, "4"));
-			
-			// TODO: Show actual state
-			// TODO: Periodically update state if screen is on, so light details get is no longer required
-			views.setTextViewText(R.id.widget_light1_name, "Light 1");
-			views.setInt(R.id.widget_light1_color, "setBackgroundColor", android.graphics.Color.RED);
-			views.setTextViewText(R.id.widget_light2_name, "Light 2");
-			views.setInt(R.id.widget_light2_color, "setBackgroundColor", android.graphics.Color.GREEN);
-			views.setTextViewText(R.id.widget_light3_name, "Light 3");
-			views.setInt(R.id.widget_light3_color, "setBackgroundColor", android.graphics.Color.BLUE);
-			views.setTextViewText(R.id.widget_light4_name, "Light 4");
-			views.setInt(R.id.widget_light4_color, "setBackgroundColor", android.graphics.Color.BLACK);
-			
-			widgetManager.updateAppWidget(widgetId, views);
+// TODO: Use state info to not need the getLightDetails call
+// TODO: Create configuration page instead of hardcoding lights
+// TODO: Handle disconnect, unreachable lights and lights no longer existing
+
+public class WidgetProvider extends AppWidgetProvider {	
+	private final static int UPDATE_INTERVAL = 5000;
+	
+	private PendingIntent service = null; 
+	
+	@Override
+	public void onUpdate(final Context context, final AppWidgetManager widgetManager, final int[] widgetIds) {
+		super.onUpdate(context, widgetManager, widgetIds);
+		
+		// Start alarm for running light state update service periodically
+		final Intent intent = new Intent(context, WidgetUpdateService.class);
+		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+		
+		if (service == null) {
+			service = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 		}
+		
+		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE); 
+		
+		Calendar time = Calendar.getInstance();
+		time.set(Calendar.MINUTE, 0);
+		time.set(Calendar.SECOND, 0);
+		time.set(Calendar.MILLISECOND, 0);
+		
+		alarmManager.setRepeating(AlarmManager.RTC, time.getTime().getTime(), UPDATE_INTERVAL, service);
 	}
 	
-	private PendingIntent createIntent(Context context, int[] widgetIds, String light) {
-		Intent intent = new Intent(context, WidgetService.class);
-		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
-		intent.putExtra("light", light);
-		PendingIntent pendingIntent = PendingIntent.getService(context, light.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		
-		return pendingIntent;
+	@Override
+	public void onDisabled(Context context) {
+		// Stop running update service
+		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		alarmManager.cancel(service);
 	}
 }

@@ -1,188 +1,219 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:gravity="bottom"
+    android:background="@drawable/appwidget_bg_holo"
     android:paddingLeft="0dp"
-    android:paddingRight="0dp"
-    android:background="@drawable/appwidget_bg_holo">
+    android:paddingRight="0dp">
     
-    <RelativeLayout
-        android:id="@+id/widget_light1_button"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:background="@drawable/dark_button_background">
-        
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-            
-            <ImageView
-                android:id="@+id/widget_light1_color"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:scaleX="0.9"
-	            android:scaleY="0.9"
-	            android:src="@drawable/light_widget" />
-	        
-	        <TextView
-	            android:id="@+id/widget_light1_name"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="2dp"
-	            android:textColor="#fff"
-	            android:textSize="12sp" />
-        </LinearLayout>
-        
-        <ImageView
-            android:id="@+id/widget_light1_indicator"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
-        
-        <ImageView
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:background="#1d1d1d" />
-    </RelativeLayout>
+    <ProgressBar
+        android:id="@+id/widget_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:layout_centerInParent="true" />
     
-    <RelativeLayout
-        android:id="@+id/widget_light2_button"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:background="@drawable/dark_button_background">
-        
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-            
-            <ImageView
-                android:id="@+id/widget_light2_color"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:scaleX="0.9"
-	            android:scaleY="0.9"
-	            android:src="@drawable/light_widget" />
-	        
-	        <TextView
-	            android:id="@+id/widget_light2_name"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="2dp"
-	            android:textColor="#fff"
-	            android:textSize="12sp" />
-        </LinearLayout>
-        
-        <ImageView
-            android:id="@+id/widget_light2_indicator"
+	<LinearLayout
+	    android:id="@+id/widget_content"
+	    android:visibility="gone"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="horizontal"
+	    android:gravity="bottom">
+	    
+	    <RelativeLayout
+	        android:id="@+id/widget_light1_button"
 	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:background="@drawable/appwidget_settings_ind_off_c_holo" />
-        
-        <ImageView
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:background="#1d1d1d" />
-    </RelativeLayout>
-    
-    <RelativeLayout
-        android:id="@+id/widget_light3_button"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:background="@drawable/dark_button_background">
-        
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-            
-            <ImageView
-                android:id="@+id/widget_light3_color"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:scaleX="0.9"
-	            android:scaleY="0.9"
-	            android:src="@drawable/light_widget" />
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:clickable="true"
+	        android:background="@drawable/dark_button_background">
 	        
-	        <TextView
-	            android:id="@+id/widget_light3_name"
-	            android:layout_width="wrap_content"
+	        <LinearLayout
+	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
-	            android:layout_marginTop="2dp"
-	            android:textColor="#fff"
-	            android:textSize="12sp" />
-        </LinearLayout>
-        
-        <ImageView
-            android:id="@+id/widget_light3_indicator"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
-        
-        <ImageView
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:background="#1d1d1d" />
-    </RelativeLayout>
-    
-    <RelativeLayout
-        android:id="@+id/widget_light4_button"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:background="@drawable/dark_button_background">
-        
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-            
-            <ImageView
-                android:id="@+id/widget_light4_color"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:scaleX="0.9"
-	            android:scaleY="0.9"
-	            android:src="@drawable/light_widget" />
+	            android:layout_centerInParent="true"
+	            android:gravity="center_horizontal"
+	            android:orientation="vertical">
+	            
+	            <ImageView
+	                android:id="@+id/widget_light1_color"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:scaleX="0.9"
+		            android:scaleY="0.9"
+		            android:src="@drawable/light_widget" />
+		        
+		        <TextView
+		            android:id="@+id/widget_light1_name"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginLeft="5dp"
+		            android:layout_marginRight="5dp"
+		            android:layout_marginTop="2dp"
+		            android:textColor="#fff"
+		            android:textSize="12sp"
+		            android:singleLine="true"
+		            android:ellipsize="end" />
+	        </LinearLayout>
 	        
-	        <TextView
-	            android:id="@+id/widget_light4_name"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginTop="2dp"
-	            android:textColor="#fff"
-	            android:textSize="12sp" />
-        </LinearLayout>
-        
-        <ImageView
-            android:id="@+id/widget_light4_indicator"
+	        <ImageView
+	            android:id="@+id/widget_light1_indicator"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentBottom="true"
+		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	        
+	        <ImageView
+	            android:layout_width="1dp"
+	            android:layout_height="match_parent"
+	            android:layout_alignParentRight="true"
+	            android:background="#1d1d1d" />
+	    </RelativeLayout>
+	    
+	    <RelativeLayout
+	        android:id="@+id/widget_light2_button"
 	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
-    </RelativeLayout>
-</LinearLayout>
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:clickable="true"
+	        android:background="@drawable/dark_button_background">
+	        
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_centerInParent="true"
+	            android:gravity="center_horizontal"
+	            android:orientation="vertical">
+	            
+	            <ImageView
+	                android:id="@+id/widget_light2_color"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:scaleX="0.9"
+		            android:scaleY="0.9"
+		            android:src="@drawable/light_widget" />
+		        
+		        <TextView
+		            android:id="@+id/widget_light2_name"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginLeft="5dp"
+		            android:layout_marginRight="5dp"
+		            android:layout_marginTop="2dp"
+		            android:textColor="#fff"
+		            android:textSize="12sp"
+		            android:singleLine="true"
+		            android:ellipsize="end" />
+	        </LinearLayout>
+	        
+	        <ImageView
+	            android:id="@+id/widget_light2_indicator"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentBottom="true"
+		        android:background="@drawable/appwidget_settings_ind_off_c_holo" />
+	        
+	        <ImageView
+	            android:layout_width="1dp"
+	            android:layout_height="match_parent"
+	            android:layout_alignParentRight="true"
+	            android:background="#1d1d1d" />
+	    </RelativeLayout>
+	    
+	    <RelativeLayout
+	        android:id="@+id/widget_light3_button"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:clickable="true"
+	        android:background="@drawable/dark_button_background">
+	        
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_centerInParent="true"
+	            android:gravity="center_horizontal"
+	            android:orientation="vertical">
+	            
+	            <ImageView
+	                android:id="@+id/widget_light3_color"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:scaleX="0.9"
+		            android:scaleY="0.9"
+		            android:src="@drawable/light_widget" />
+		        
+		        <TextView
+		            android:id="@+id/widget_light3_name"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginLeft="5dp"
+		            android:layout_marginRight="5dp"
+		            android:layout_marginTop="2dp"
+		            android:textColor="#fff"
+		            android:textSize="12sp"
+		            android:singleLine="true"
+		            android:ellipsize="end" />
+	        </LinearLayout>
+	        
+	        <ImageView
+	            android:id="@+id/widget_light3_indicator"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentBottom="true"
+		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	        
+	        <ImageView
+	            android:layout_width="1dp"
+	            android:layout_height="match_parent"
+	            android:layout_alignParentRight="true"
+	            android:background="#1d1d1d" />
+	    </RelativeLayout>
+	    
+	    <RelativeLayout
+	        android:id="@+id/widget_light4_button"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:clickable="true"
+	        android:background="@drawable/dark_button_background">
+	        
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_centerInParent="true"
+	            android:gravity="center_horizontal"
+	            android:orientation="vertical">
+	            
+	            <ImageView
+	                android:id="@+id/widget_light4_color"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:scaleX="0.9"
+		            android:scaleY="0.9"
+		            android:src="@drawable/light_widget" />
+		        
+		        <TextView
+		            android:id="@+id/widget_light4_name"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginLeft="5dp"
+		            android:layout_marginRight="5dp"
+		            android:layout_marginTop="2dp"
+		            android:textColor="#fff"
+		            android:textSize="12sp"
+		            android:singleLine="true"
+		            android:ellipsize="end" />
+	        </LinearLayout>
+	        
+	        <ImageView
+	            android:id="@+id/widget_light4_indicator"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentBottom="true"
+		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	    </RelativeLayout>
+	</LinearLayout>
+</RelativeLayout>

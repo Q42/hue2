@@ -12,7 +12,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 
-public class WidgetService extends Service {
+public class WidgetToggleService extends Service {
 	@Override
 	public int onStartCommand(final Intent intent, int flags, int startId) {
 		final AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
@@ -37,18 +37,22 @@ public class WidgetService extends Service {
 						RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
 						
 						if (id.equals("1")) {
+							views.setTextViewText(R.id.widget_light1_name, light.name);
 							views.setTextColor(R.id.widget_light1_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
 							views.setInt(R.id.widget_light1_color, "setBackgroundColor", lightColor);
 							views.setInt(R.id.widget_light1_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
 						} else if (id.equals("2")) {
+							views.setTextViewText(R.id.widget_light2_name, light.name);
 							views.setTextColor(R.id.widget_light2_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
 							views.setInt(R.id.widget_light2_color, "setBackgroundColor", lightColor);
 							views.setInt(R.id.widget_light2_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
 						} else if (id.equals("3")) {
+							views.setTextViewText(R.id.widget_light3_name, light.name);
 							views.setTextColor(R.id.widget_light3_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
 							views.setInt(R.id.widget_light3_color, "setBackgroundColor", lightColor);
 							views.setInt(R.id.widget_light3_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
 						} else {
+							views.setTextViewText(R.id.widget_light4_name, light.name);
 							views.setTextColor(R.id.widget_light4_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
 							views.setInt(R.id.widget_light4_color, "setBackgroundColor", lightColor);
 							views.setInt(R.id.widget_light4_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
