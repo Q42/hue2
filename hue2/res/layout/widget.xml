@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:background="@drawable/appwidget_bg">
+    
+	<ImageView
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="20dp"
+	    android:layout_centerVertical="true"
+	    android:src="@drawable/lights" />
+	
+	<TextView
+	    android:id="@+id/widget_name"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="65dp"
+	    android:layout_marginRight="10dp"
+	    android:layout_centerVertical="true"
+	    android:textSize="17sp"
+	    android:textColor="#fff"
+	    android:singleLine="true"
+	    android:ellipsize="end"
+	    android:text="All lights" />
+	
+	<LinearLayout
+	    android:id="@+id/widget_indicator"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentBottom="true"
+	    android:orientation="horizontal">
+	    
+	    <ImageView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="0"
+	        android:background="@drawable/appwidget_settings_ind_on_l_holo" />
+	    
+	    <ImageView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	    
+	    <ImageView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="0"
+	        android:background="@drawable/appwidget_settings_ind_on_r_holo" />	    
+	</LinearLayout>
+</RelativeLayout>

@@ -40,6 +40,17 @@
         <!-- Landscape orientation doesn't fit color picker -->
         <activity android:name=".activities.LightActivity" android:screenOrientation="portrait"></activity>
         <activity android:name=".activities.GroupActivity" android:screenOrientation="portrait"></activity>
+        
+        <!-- Widget provider -->
+		<receiver android:name="nl.q42.hue2.widgets.WidgetProvider" >
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info" />
+		</receiver>
+		
+		<!-- Widget service -->
+		<service android:name="nl.q42.hue2.widgets.WidgetService" />
     </application>
 
 </manifest>
