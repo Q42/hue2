@@ -8,6 +8,8 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 // TODO: Handle disconnect, unreachable lights and lights no longer existing
 
@@ -39,7 +41,23 @@ public class WidgetProvider extends AppWidgetProvider {
 	}
 	
 	@Override
+	public void onDeleted(Context context, int[] widgetIds) {
+		super.onDeleted(context, widgetIds);
+		
+		SharedPreferences.Editor prefsEdit = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		
+		for (int id : widgetIds) {
+			prefsEdit.remove("widget_" + id + "_ip");
+			prefsEdit.remove("widget_" + id + "_ids");
+		}
+		
+		prefsEdit.commit();
+	}
+	
+	@Override
 	public void onDisabled(Context context) {
+		super.onDisabled(context);
+		
 		// Stop running update service
 		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		alarmManager.cancel(service);
