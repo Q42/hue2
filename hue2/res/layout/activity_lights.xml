@@ -24,7 +24,8 @@
     
     <ScrollView
 	    android:layout_width="match_parent"
-	    android:layout_height="match_parent">
+	    android:layout_height="match_parent"
+	    android:layout_marginTop="2.5dp">
 	    
 	    	<LinearLayout
 	    	    android:id="@+id/lights_result_container"
