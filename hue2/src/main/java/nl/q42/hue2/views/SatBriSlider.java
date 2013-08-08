@@ -24,6 +24,10 @@ public class SatBriSlider extends View {
 	private float hue = 0.0f;
 	private float sat = 1.0f;
 	private float bri = 1.0f;
+	private boolean active = false;
+	
+	private HueSlider hueSlider;
+	private TempSlider tempSlider;
 	
 	private boolean userSet = false;
 	
@@ -36,6 +40,11 @@ public class SatBriSlider extends View {
 	
 	public boolean hasUserSet() {
 		return userSet;
+	}
+	
+	public void setActive(boolean active) {
+		this.active = active;
+		invalidate();
 	}
 	
 	@Override
@@ -57,6 +66,11 @@ public class SatBriSlider extends View {
 		setHue(bundle.getFloat("hue"));
 		setSaturation(bundle.getFloat("sat"));
 		setBrightness(bundle.getFloat("bri"));
+	}
+	
+	public void setSliders(HueSlider slider, TempSlider slider2) {
+		hueSlider = slider;
+		tempSlider = slider2;
 	}
 	
 	public void setHue(float hue) {
@@ -119,17 +133,19 @@ public class SatBriSlider extends View {
 		canvas.drawBitmap(foreground, foregroundRect, contentRect, paint);
 		
 		// Draw selection circle
-		int x = (int) (sat * viewRect.right);
-		int y = (int) ((1.0f - bri) * viewRect.bottom);
-		
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setARGB(255, 0, 0, 0);
-		canvas.drawCircle(x, y, 8, paint);
-		paint.setARGB(255, 255, 255, 255);
-		canvas.drawCircle(x, y, 10, paint);
-		paint.setARGB(255, 0, 0, 0);
-		canvas.drawCircle(x, y, 12, paint);
-		paint.setStyle(Paint.Style.FILL);
+		if (active) {
+			int x = (int) (sat * viewRect.right);
+			int y = (int) ((1.0f - bri) * viewRect.bottom);
+			
+			paint.setStyle(Paint.Style.STROKE);
+			paint.setARGB(255, 0, 0, 0);
+			canvas.drawCircle(x, y, 8, paint);
+			paint.setARGB(255, 255, 255, 255);
+			canvas.drawCircle(x, y, 10, paint);
+			paint.setARGB(255, 0, 0, 0);
+			canvas.drawCircle(x, y, 12, paint);
+			paint.setStyle(Paint.Style.FILL);
+		}
 	}
 	
 	@Override
@@ -142,6 +158,9 @@ public class SatBriSlider extends View {
 				sat = Math.max(0.0f, Math.min(event.getX() / viewRect.right, 1.0f));
 				bri = Math.max(1.0f / 255.0f, Math.min(1.0f - event.getY() / viewRect.bottom, 1.0f));
 				userSet = true;
+				active = true;
+				if (hueSlider != null) hueSlider.setActive(true);
+				if (tempSlider != null) tempSlider.setActive(false);
 				invalidate();
 				break;
 		}

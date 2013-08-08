@@ -66,7 +66,8 @@ public class LightActivity extends Activity {
 		satBriSlider = (SatBriSlider) findViewById(R.id.light_color_sat_bri);
 		tempSlider = (TempSlider) findViewById(R.id.light_color_temp);
 		
-		hueSlider.setSatBriSlider(satBriSlider);
+		satBriSlider.setSliders(hueSlider, tempSlider);
+		hueSlider.setSliders(satBriSlider, tempSlider);
 		tempSlider.setSliders(hueSlider, satBriSlider);
 		
 		presetColorView = (ColorButton) findViewById(R.id.light_preset_color);
@@ -92,6 +93,7 @@ public class LightActivity extends Activity {
 			
 			if (light.state.colormode.equals("ct")) {
 				tempSlider.setTemp(light.state.ct);
+				tempSlider.setActive(true);
 				colorMode = "ct";
 			} else {
 				float hsv[] = new float[3];
@@ -99,6 +101,8 @@ public class LightActivity extends Activity {
 				hueSlider.setHue(hsv[0]);
 				satBriSlider.setSaturation(hsv[1]);
 				satBriSlider.setBrightness(light.state.bri / 255.0f);
+				hueSlider.setActive(true);
+				satBriSlider.setActive(true);
 				colorMode = "xy";
 			}
 		}

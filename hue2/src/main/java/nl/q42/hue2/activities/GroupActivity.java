@@ -83,7 +83,8 @@ public class GroupActivity extends Activity {
 		satBriSlider = (SatBriSlider) findViewById(R.id.group_color_sat_bri);
 		tempSlider = (TempSlider) findViewById(R.id.group_color_temp);
 		
-		hueSlider.setSatBriSlider(satBriSlider);
+		satBriSlider.setSliders(hueSlider, tempSlider);
+		hueSlider.setSliders(satBriSlider, tempSlider);
 		tempSlider.setSliders(hueSlider, satBriSlider);
 		
 		presetColorView = (ColorButton) findViewById(R.id.group_preset_color);
@@ -160,6 +161,7 @@ public class GroupActivity extends Activity {
 			if (same && first != null) {
 				if (first.colormode.equals("ct")) {
 					tempSlider.setTemp(first.ct);
+					tempSlider.setActive(true);
 					colorMode = "ct";
 				} else {
 					float hsv[] = new float[3];
@@ -167,6 +169,8 @@ public class GroupActivity extends Activity {
 					hueSlider.setHue(hsv[0]);
 					satBriSlider.setSaturation(hsv[1]);
 					satBriSlider.setBrightness(first.bri / 255.0f);
+					hueSlider.setActive(true);
+					satBriSlider.setActive(true);
 					colorMode = "xy";
 				}
 				

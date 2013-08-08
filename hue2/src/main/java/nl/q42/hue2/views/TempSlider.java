@@ -23,6 +23,7 @@ public class TempSlider extends View {
 	private int w, h;
 	
 	private float temp = 326.0f;
+	private boolean active = false;
 	
 	private HueSlider hueSlider;
 	private SatBriSlider satBriSlider;
@@ -38,6 +39,11 @@ public class TempSlider extends View {
 	
 	public boolean hasUserSet() {
 		return userSet;
+	}
+	
+	public void setActive(boolean active) {
+		this.active = active;
+		invalidate();
 	}
 	
 	public void setTemp(float temp) {
@@ -106,8 +112,10 @@ public class TempSlider extends View {
 		canvas.drawBitmap(background, backgroundRect, contentRect, paint);
 		
 		// Draw selector
-		int tempX = (int) ((float) w / 347.0f * (temp - 153.0f));
-		canvas.drawLine(tempX, 0, tempX, h, paint);
+		if (active) {
+			int tempX = (int) ((float) w / 347.0f * (temp - 153.0f));
+			canvas.drawLine(tempX, 0, tempX, h, paint);
+		}
 	}
 	
 	@Override
@@ -127,9 +135,13 @@ public class TempSlider extends View {
 					hueSlider.setHue(hsv[0]);
 					satBriSlider.setSaturation(hsv[1]);
 					satBriSlider.setBrightness(hsv[2]);
+					
+					hueSlider.setActive(false);
+					satBriSlider.setActive(false);
 				}
 				
 				userSet = true;
+				active = true;
 				invalidate();
 				break;
 		}

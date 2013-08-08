@@ -21,8 +21,10 @@ public class HueSlider extends View {
 	private int w, h;
 	
 	private float hue = 180.0f;
+	private boolean active = false;
 	
 	private SatBriSlider satBri;
+	private TempSlider tempSlider;
 	
 	private boolean userSet = false;
 	
@@ -35,6 +37,11 @@ public class HueSlider extends View {
 	
 	public boolean hasUserSet() {
 		return userSet;
+	}
+	
+	public void setActive(boolean active) {
+		this.active = active;
+		invalidate();
 	}
 	
 	@Override
@@ -54,9 +61,10 @@ public class HueSlider extends View {
 		setHue(bundle.getFloat("hue"));
 	}
 	
-	public void setSatBriSlider(SatBriSlider slider) {
+	public void setSliders(SatBriSlider slider, TempSlider slider2) {
 		satBri = slider;
 		satBri.setHue(hue);
+		tempSlider = slider2;
 	}
 	
 	public void setHue(float hue) {
@@ -92,8 +100,10 @@ public class HueSlider extends View {
 		canvas.drawBitmap(background, backgroundRect, contentRect, paint);
 		
 		// Draw selector
-		int hueY = h - (int) ((float) h / 360.0f * hue);
-		canvas.drawLine(0, hueY, w, hueY, paint);
+		if (active) {
+			int hueY = h - (int) ((float) h / 360.0f * hue);
+			canvas.drawLine(0, hueY, w, hueY, paint);
+		}
 	}
 	
 	@Override
@@ -105,7 +115,14 @@ public class HueSlider extends View {
 			case MotionEvent.ACTION_MOVE:
 				hue = 360.0f - Math.max(0.0f, Math.min(event.getY() / viewRect.bottom * 360.0f, 359.0f));
 				userSet = true;
-				if (satBri != null) satBri.setHue(hue);
+				active = true;
+				if (tempSlider != null) {
+					tempSlider.setActive(false);
+				}
+				if (satBri != null) {
+					satBri.setHue(hue);
+					satBri.setActive(true);
+				}
 				invalidate();
 				break;
 		}
