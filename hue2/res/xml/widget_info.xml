@@ -2,6 +2,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:minWidth="250dp"
 	android:minHeight="50dp"
+	android:minResizeWidth="50dp"
 	android:initialLayout="@layout/widget" 
 	android:resizeMode="horizontal"
 	android:widgetCategory="home_screen|keyguard"

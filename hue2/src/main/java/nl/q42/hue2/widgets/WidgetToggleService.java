@@ -16,50 +16,35 @@ public class WidgetToggleService extends Service {
 	@Override
 	public int onStartCommand(final Intent intent, int flags, int startId) {
 		final AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
-		final int[] widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+		final String ip = intent.getStringExtra("ip");
 		final String id = intent.getStringExtra("light");
+		final int widget = intent.getIntExtra("widget", -1);
+		final int button = intent.getIntExtra("button", -1);
 		
 		new AsyncTask<Void, Void, Void>() {
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					HueService service = new HueService("192.168.1.101", "aValidUser");
+					HueService service = new HueService(ip, Util.getDeviceIdentifier(getApplicationContext()));
 					
 					// Toggle light
 					Light light = service.getLightDetails(id);
 					light.state.on = !light.state.on;
 					service.turnLightOn(id, light.state.on);
 					
-					int lightColor = Util.getRGBColor(light);
+					// Update button
+					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
 					
-					// Update widgets
-					for (int wid : widgetIds) {
-						RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
-						
-						if (id.equals("1")) {
-							views.setTextViewText(R.id.widget_light1_name, light.name);
-							views.setTextColor(R.id.widget_light1_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-							views.setInt(R.id.widget_light1_color, "setBackgroundColor", lightColor);
-							views.setInt(R.id.widget_light1_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
-						} else if (id.equals("2")) {
-							views.setTextViewText(R.id.widget_light2_name, light.name);
-							views.setTextColor(R.id.widget_light2_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-							views.setInt(R.id.widget_light2_color, "setBackgroundColor", lightColor);
-							views.setInt(R.id.widget_light2_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
-						} else if (id.equals("3")) {
-							views.setTextViewText(R.id.widget_light3_name, light.name);
-							views.setTextColor(R.id.widget_light3_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-							views.setInt(R.id.widget_light3_color, "setBackgroundColor", lightColor);
-							views.setInt(R.id.widget_light3_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
-						} else {
-							views.setTextViewText(R.id.widget_light4_name, light.name);
-							views.setTextColor(R.id.widget_light4_name, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-							views.setInt(R.id.widget_light4_color, "setBackgroundColor", lightColor);
-							views.setInt(R.id.widget_light4_indicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
-						}
-						
-						widgetManager.updateAppWidget(wid, views);
-					}
+					int idName = getResources().getIdentifier("widget_light" + button + "_name", "id", getPackageName());
+					int idColor = getResources().getIdentifier("widget_light" + button + "_color", "id", getPackageName());
+					int idIndicator = getResources().getIdentifier("widget_light" + button + "_indicator", "id", getPackageName());
+					
+					views.setTextViewText(idName, light.name);
+					views.setTextColor(idName, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
+					views.setInt(idColor, "setBackgroundColor", Util.getRGBColor(light));
+					views.setInt(idIndicator, "setBackgroundResource", light.state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
+					
+					widgetManager.updateAppWidget(widget, views);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -73,7 +58,7 @@ public class WidgetToggleService extends Service {
 			}
 		}.execute();
 		
-		return START_STICKY;
+		return START_NOT_STICKY;
 	}
 	
 	// Not used, but required to be implemented

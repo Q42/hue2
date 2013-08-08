@@ -24,6 +24,16 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 public class WidgetUpdateService extends Service {
+	public static class WidgetButton {
+		public int widget;
+		public int button;
+		
+		public WidgetButton(int widget, int button) {
+			this.widget = widget;
+			this.button = button;
+		}
+	}
+	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		final AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
@@ -57,22 +67,22 @@ public class WidgetUpdateService extends Service {
 			protected void onPostExecute(Map<String, FullConfig> configs) {
 				if (configs == null) return;
 				
-				for (int i : widgetIds) {
+				for (int id : widgetIds) {
 					// Build map of lights in this widget
-					Map<String, Light> bridgeLights = configs.get(prefs.getString("widget_" + i + "_ip", null)).lights;
+					FullConfig cfg = configs.get(prefs.getString("widget_" + id + "_ip", null));
 					HashMap<String, Light> lights = new HashMap<String, Light>();
-					Set<String> widgetLights = prefs.getStringSet("widget_" + i + "_ids", null);
+					Set<String> widgetLights = prefs.getStringSet("widget_" + id + "_ids", null);
 					
 					for (String lid : widgetLights) {
-						lights.put(lid, bridgeLights.get(lid));
+						lights.put(lid, cfg.lights.get(lid));
 					}
 					
 					// Update widget UI
 					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
 					
-					updateWidget(widgetIds, views, lights);
+					updateWidget(widgetIds, id, views, lights, cfg.config.ipaddress);
 					
-					widgetManager.updateAppWidget(i, views);
+					widgetManager.updateAppWidget(id, views);
 				}
 				
 				stopSelf();
@@ -82,8 +92,7 @@ public class WidgetUpdateService extends Service {
 		return START_NOT_STICKY;
 	}
 	
-	// TODO: Clean up code
-	private void updateWidget(int[] widgetIds, RemoteViews views, HashMap<String, Light> lights) {
+	private void updateWidget(int[] widgetIds, int id, RemoteViews views, HashMap<String, Light> lights, String ip) {
 		// Used to preserve light name order
 		ArrayList<String> sids = Util.getSortedLights(lights);
 		
@@ -98,46 +107,35 @@ public class WidgetUpdateService extends Service {
 		views.setViewVisibility(R.id.widget_light4_button, sids.size() >= 4 ? View.VISIBLE : View.GONE);
 		
 		// Update views
-		if (sids.size() >= 1) {
-			views.setOnClickPendingIntent(R.id.widget_light1_button, createToggleIntent(WidgetUpdateService.this, widgetIds, sids.get(0)));
-			views.setTextViewText(R.id.widget_light1_name, lights.get(sids.get(0)).name);
-			views.setTextColor(R.id.widget_light1_name, lights.get(sids.get(0)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-			views.setInt(R.id.widget_light1_color, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(0))));
-			views.setInt(R.id.widget_light1_indicator, "setBackgroundResource", lights.get(sids.get(0)).state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
-		}
-		
-		if (sids.size() >= 2) {
-			views.setOnClickPendingIntent(R.id.widget_light2_button, createToggleIntent(WidgetUpdateService.this, widgetIds, sids.get(1)));
-			views.setTextViewText(R.id.widget_light2_name, lights.get(sids.get(1)).name);
-			views.setTextColor(R.id.widget_light2_name, lights.get(sids.get(1)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-			views.setInt(R.id.widget_light2_color, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(1))));
-			views.setInt(R.id.widget_light2_indicator, "setBackgroundResource", lights.get(sids.get(1)).state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
-		}
-		
-		if (sids.size() >= 3) {
-			views.setOnClickPendingIntent(R.id.widget_light3_button, createToggleIntent(WidgetUpdateService.this, widgetIds, sids.get(2)));
-			views.setTextViewText(R.id.widget_light3_name, lights.get(sids.get(2)).name);
-			views.setTextColor(R.id.widget_light3_name, lights.get(sids.get(2)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-			views.setInt(R.id.widget_light3_color, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(2))));
-			views.setInt(R.id.widget_light3_indicator, "setBackgroundResource", lights.get(sids.get(2)).state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
-		}
-		
-		if (sids.size() >= 4) {
-			views.setOnClickPendingIntent(R.id.widget_light4_button, createToggleIntent(WidgetUpdateService.this, widgetIds, sids.get(3)));
-			views.setTextViewText(R.id.widget_light4_name, lights.get(sids.get(3)).name);
-			views.setTextColor(R.id.widget_light4_name, lights.get(sids.get(3)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
-			views.setInt(R.id.widget_light4_color, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(3))));
-			views.setInt(R.id.widget_light4_indicator, "setBackgroundResource", lights.get(sids.get(3)).state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
+		for (int i = 0; i < 4; i++) {
+			int idButton = getResources().getIdentifier("widget_light" + (i + 1) + "_button", "id", getPackageName());
+			int idName = getResources().getIdentifier("widget_light" + (i + 1) + "_name", "id", getPackageName());
+			int idColor = getResources().getIdentifier("widget_light" + (i + 1) + "_color", "id", getPackageName());
+			int idIndicator = getResources().getIdentifier("widget_light" + (i + 1) + "_indicator", "id", getPackageName());
+			
+			if (sids.size() > i) {
+				views.setViewVisibility(idButton, View.VISIBLE);
+				views.setOnClickPendingIntent(idButton, createToggleIntent(WidgetUpdateService.this, widgetIds, ip, sids.get(i), id, i + 1));
+				views.setTextViewText(idName, lights.get(sids.get(i)).name);
+				views.setTextColor(idName, lights.get(sids.get(i)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
+				views.setInt(idColor, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(i))));
+				views.setInt(idIndicator, "setBackgroundResource", lights.get(sids.get(i)).state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
+			} else {
+				views.setViewVisibility(idButton, View.GONE);
+			}
 		}
 	}
 	
-	private PendingIntent createToggleIntent(Context context, int[] widgetIds, String light) {
+	private PendingIntent createToggleIntent(Context context, int[] widgetIds, String ip, String light, int widget, int button) {
 		// This is needed so that intents are not re-used with wrong extras data
-		int requestCode = (int) (System.currentTimeMillis() + light.hashCode());
+		int requestCode = ip.hashCode() + light.hashCode();
 		
 		Intent intent = new Intent(context, WidgetToggleService.class);
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+		intent.putExtra("ip", ip);
 		intent.putExtra("light", light);
+		intent.putExtra("widget", widget);
+		intent.putExtra("button", button);
 		PendingIntent pendingIntent = PendingIntent.getService(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
 		return pendingIntent;
