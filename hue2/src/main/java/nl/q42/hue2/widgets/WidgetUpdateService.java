@@ -21,6 +21,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -38,6 +39,13 @@ public class WidgetUpdateService extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		// Ignore if screen is off
+		PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+		if (!powerManager.isScreenOn()) {
+			stopSelf();
+			return START_NOT_STICKY;
+		}
+		
 		final AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
 		final int[] widgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
