@@ -96,18 +96,12 @@ public class WidgetUpdateService extends Service {
 		// Used to preserve light name order
 		ArrayList<String> sids = Util.getSortedLights(lights);
 		
-		// Swap loading spinner with content
+		// Replace loading spinner with content
 		views.setViewVisibility(R.id.widget_spinner, View.GONE);
 		views.setViewVisibility(R.id.widget_content, View.VISIBLE);
 		
-		// Only show as much views as used
-		views.setViewVisibility(R.id.widget_light1_button, sids.size() >= 1 ? View.VISIBLE : View.GONE);
-		views.setViewVisibility(R.id.widget_light2_button, sids.size() >= 2 ? View.VISIBLE : View.GONE);
-		views.setViewVisibility(R.id.widget_light3_button, sids.size() >= 3 ? View.VISIBLE : View.GONE);
-		views.setViewVisibility(R.id.widget_light4_button, sids.size() >= 4 ? View.VISIBLE : View.GONE);
-		
 		// Update views
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 6; i++) {
 			int idButton = getResources().getIdentifier("widget_light" + (i + 1) + "_button", "id", getPackageName());
 			int idName = getResources().getIdentifier("widget_light" + (i + 1) + "_name", "id", getPackageName());
 			int idColor = getResources().getIdentifier("widget_light" + (i + 1) + "_color", "id", getPackageName());

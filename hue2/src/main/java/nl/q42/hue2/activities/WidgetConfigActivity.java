@@ -21,12 +21,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-// TODO: Min 1 light, max 4 lights
 public class WidgetConfigActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
@@ -34,6 +36,7 @@ public class WidgetConfigActivity extends Activity {
 	private RelativeLayout loader, abLoader;
 	private LinearLayout content;
 	private LinearLayout lightsList;
+	private Button createButton;
 	
 	private HashMap<String, Light> lights = new HashMap<String, Light>();
 	private HashMap<String, CheckBox> lightViews = new HashMap<String, CheckBox>();
@@ -56,7 +59,8 @@ public class WidgetConfigActivity extends Activity {
 		content = (LinearLayout) findViewById(R.id.widget_config_content);
 		lightsList = (LinearLayout) findViewById(R.id.widget_config_lights);
 		
-		findViewById(R.id.widget_config_create).setOnClickListener(new OnClickListener() {
+		createButton = (Button) findViewById(R.id.widget_config_create);
+		createButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				createWidget();
@@ -165,6 +169,15 @@ public class WidgetConfigActivity extends Activity {
 			CheckBox cb = (CheckBox) lastView.findViewById(R.id.widget_config_light_name);
 			cb.setText(lights.get(id).name);
 			cb.setId(id.hashCode());
+			
+			cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					boolean tooMany = getSelectedLights().size() > 6;
+					createButton.setEnabled(!tooMany);
+					createButton.setText(tooMany ? R.string.widget_config_error_too_many : R.string.widget_config_create);
+				}
+			});
 			
 			lightViews.put(id, cb);
 			lightsList.addView(lastView);

@@ -215,5 +215,93 @@
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	    </RelativeLayout>
+	    
+	    <RelativeLayout
+	        android:id="@+id/widget_light5_button"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:clickable="true"
+	        android:background="@drawable/dark_button_background">
+	        
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_centerInParent="true"
+	            android:gravity="center_horizontal"
+	            android:orientation="vertical">
+	            
+	            <ImageView
+	                android:id="@+id/widget_light5_color"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:scaleX="0.9"
+		            android:scaleY="0.9"
+		            android:src="@drawable/light_widget" />
+		        
+		        <TextView
+		            android:id="@+id/widget_light5_name"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginLeft="5dp"
+		            android:layout_marginRight="5dp"
+		            android:layout_marginTop="2dp"
+		            android:textColor="#fff"
+		            android:textSize="12sp"
+		            android:singleLine="true"
+		            android:ellipsize="end" />
+	        </LinearLayout>
+	        
+	        <ImageView
+	            android:id="@+id/widget_light5_indicator"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentBottom="true"
+		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	    </RelativeLayout>
+	    
+	    <RelativeLayout
+	        android:id="@+id/widget_light6_button"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:clickable="true"
+	        android:background="@drawable/dark_button_background">
+	        
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_centerInParent="true"
+	            android:gravity="center_horizontal"
+	            android:orientation="vertical">
+	            
+	            <ImageView
+	                android:id="@+id/widget_light6_color"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:scaleX="0.9"
+		            android:scaleY="0.9"
+		            android:src="@drawable/light_widget" />
+		        
+		        <TextView
+		            android:id="@+id/widget_light6_name"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_marginLeft="5dp"
+		            android:layout_marginRight="5dp"
+		            android:layout_marginTop="2dp"
+		            android:textColor="#fff"
+		            android:textSize="12sp"
+		            android:singleLine="true"
+		            android:ellipsize="end" />
+	        </LinearLayout>
+	        
+	        <ImageView
+	            android:id="@+id/widget_light6_indicator"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentBottom="true"
+		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	    </RelativeLayout>
 	</LinearLayout>
 </RelativeLayout>
