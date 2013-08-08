@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 
 public class Util {
@@ -37,7 +38,7 @@ public class Util {
 	 * Returns unique app installation identifier, used to identify this device
 	 */
 	public static String getDeviceIdentifier(Context ctx) {
-		SharedPreferences prefs = ctx.getApplicationContext().getSharedPreferences("app_prefs", 0);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 		
 		if (prefs.contains("uuid")) {
 			return prefs.getString("uuid", null);
@@ -54,7 +55,7 @@ public class Util {
 	
 	public static void setLastBridge(Context ctx, Bridge b) {
 		if (b == null) {
-			SharedPreferences.Editor prefs = ctx.getApplicationContext().getSharedPreferences("app_prefs", 0).edit();
+			SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
 			prefs.remove("lastBridge");
 			prefs.commit();
 			return;
@@ -67,7 +68,7 @@ public class Util {
 			objStr.writeObject(b);
 			objStr.close();
 			
-			SharedPreferences.Editor prefs = ctx.getApplicationContext().getSharedPreferences("app_prefs", 0).edit();
+			SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
 			prefs.putString("lastBridge", Base64.encodeToString(binStr.toByteArray(), Base64.DEFAULT));
 			prefs.commit();
 		} catch (IOException e) {
@@ -77,7 +78,7 @@ public class Util {
 	}
 	
 	public static Bridge getLastBridge(Context ctx) {
-		SharedPreferences prefs = ctx.getApplicationContext().getSharedPreferences("app_prefs", 0);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 		
 		if (prefs.contains("lastBridge")) {
 			try {

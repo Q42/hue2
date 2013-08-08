@@ -153,9 +153,9 @@ public class HueService implements Serializable {
 	}
 	
 	public void setLightXY(String id, float[] xy, int bri, boolean on) throws IOException, ApiException {
-		String body = "{\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}"; 
+		String body = "{\"effect\": \"none\",\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}"; 
 		if (!on) {
-			body = "{\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + ",\"on\":false}";
+			body = "{\"effect\": \"none\",\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + ",\"on\":false}";
 		}
 		
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state", body);
@@ -164,9 +164,9 @@ public class HueService implements Serializable {
 	}
 	
 	public void setLightHS(String id, int hue, int sat, int bri, boolean on) throws IOException, ApiException {
-		String body = "{\"on\":true,\"hue\":" + hue + ",\"sat\":" + sat + ",\"bri\":" + bri + "}"; 
+		String body = "{\"effect\": \"none\",\"on\":true,\"hue\":" + hue + ",\"sat\":" + sat + ",\"bri\":" + bri + "}"; 
 		if (!on) {
-			body = "{\"hue\":" + hue + ",\"sat\":" + sat + ",\"bri\":" + bri + ",\"on\":false}";
+			body = "{\"effect\": \"none\",\"hue\":" + hue + ",\"sat\":" + sat + ",\"bri\":" + bri + ",\"on\":false}";
 		}
 		
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state", body);
@@ -175,9 +175,9 @@ public class HueService implements Serializable {
 	}
 	
 	public void setLightCT(String id, int ct, int bri, boolean on) throws IOException, ApiException {
-		String body = "{\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}"; 
+		String body = "{\"effect\": \"none\",\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}"; 
 		if (!on) {
-			body = "{\"ct\":" + ct + ",\"bri\":" + bri + ",\"on\":false}";
+			body = "{\"effect\": \"none\",\"ct\":" + ct + ",\"bri\":" + bri + ",\"on\":false}";
 		}
 		
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/lights/" + id + "/state", body);
@@ -197,14 +197,14 @@ public class HueService implements Serializable {
 	
 	public void setGroupXY(String id, float[] xy, int bri) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id + "/action",
-				"{\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}");
+				"{\"effect\": \"none\",\"on\":true,\"xy\":[" + xy[0] + "," + xy[1] + "],\"bri\":" + bri + "}");
 		if (result.getResponseCode() != 200)
 			throw new ApiException(result);
 	}
 	
 	public void setGroupCT(String id, int ct, int bri) throws IOException, ApiException {
 		Result result = Networker.put("http://" + bridgeIp + "/api/" + username + "/groups/" + id + "/action",
-				"{\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}");
+				"{\"effect\": \"none\",\"on\":true,\"ct\":" + ct + ",\"bri\":" + bri + "}");
 		if (result.getResponseCode() != 200)
 			throw new ApiException(result);
 	}

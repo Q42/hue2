@@ -19,7 +19,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
@@ -27,7 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-// TODO: Set light limit?
+// TODO: Min 1 light, max 4 lights
 public class WidgetConfigActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
@@ -118,7 +117,6 @@ public class WidgetConfigActivity extends Activity {
 		SharedPreferences.Editor prefsEdit = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
 		prefsEdit.putString("widget_" + widgetId + "_ip", bridge.getIp());
 		prefsEdit.putStringSet("widget_" + widgetId + "_ids", getSelectedLights());
-		Log.d("hue2", "Put widget_" + widgetId + "_ip");
 		prefsEdit.commit();
 		
 		// Send initial update request
