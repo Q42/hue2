@@ -86,6 +86,8 @@ public class WidgetConfigActivity extends Activity {
 			addLights();
 		}
 		
+		checkConditions();
+		
 		// Make sure this is set unless the create button is pressed
 		setResult(RESULT_CANCELED);
 	}
@@ -160,6 +162,13 @@ public class WidgetConfigActivity extends Activity {
 		}.execute();
 	}
 	
+	private void checkConditions() {
+		boolean tooMany = getSelectedLights().size() > 6;
+		boolean tooFew = getSelectedLights().size() == 0;
+		createButton.setEnabled(!tooMany && !tooFew);
+		createButton.setText(tooMany ? R.string.widget_config_error_too_many : (tooFew ? R.string.widget_config_error_too_few : R.string.widget_config_create));
+	}
+	
 	private void addLights() {
 		View lastView = null;
 		
@@ -173,9 +182,7 @@ public class WidgetConfigActivity extends Activity {
 			cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					boolean tooMany = getSelectedLights().size() > 6;
-					createButton.setEnabled(!tooMany);
-					createButton.setText(tooMany ? R.string.widget_config_error_too_many : R.string.widget_config_create);
+					checkConditions();
 				}
 			});
 			

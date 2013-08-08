@@ -58,31 +58,40 @@ public class WidgetUpdateService extends Service {
 					
 					return bridgeConfigs;
 				} catch (Exception e) {
-					// TODO: Handle network error
 					return null;
 				}
 			}
 			
 			@Override
 			protected void onPostExecute(Map<String, FullConfig> configs) {
-				if (configs == null) return;
-				
-				for (int id : widgetIds) {
-					// Build map of lights in this widget
-					FullConfig cfg = configs.get(prefs.getString("widget_" + id + "_ip", null));
-					HashMap<String, Light> lights = new HashMap<String, Light>();
-					Set<String> widgetLights = prefs.getStringSet("widget_" + id + "_ids", null);
-					
-					for (String lid : widgetLights) {
-						lights.put(lid, cfg.lights.get(lid));
+				if (configs == null) {
+					for (int id : widgetIds) {
+						RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
+						
+						// Replace content with loading spinner
+						views.setViewVisibility(R.id.widget_spinner, View.VISIBLE);
+						views.setViewVisibility(R.id.widget_content, View.GONE);
+						
+						widgetManager.updateAppWidget(id, views);
 					}
-					
-					// Update widget UI
-					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
-					
-					updateWidget(widgetIds, id, views, lights, cfg.config.ipaddress);
-					
-					widgetManager.updateAppWidget(id, views);
+				} else {
+					for (int id : widgetIds) {
+						// Build map of lights in this widget
+						FullConfig cfg = configs.get(prefs.getString("widget_" + id + "_ip", null));
+						HashMap<String, Light> lights = new HashMap<String, Light>();
+						Set<String> widgetLights = prefs.getStringSet("widget_" + id + "_ids", null);
+						
+						for (String lid : widgetLights) {
+							lights.put(lid, cfg.lights.get(lid));
+						}
+						
+						// Update widget UI
+						RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
+						
+						updateWidget(widgetIds, id, views, lights, cfg.config.ipaddress);
+						
+						widgetManager.updateAppWidget(id, views);
+					}
 				}
 				
 				stopSelf();
@@ -107,7 +116,7 @@ public class WidgetUpdateService extends Service {
 			int idColor = getResources().getIdentifier("widget_light" + (i + 1) + "_color", "id", getPackageName());
 			int idIndicator = getResources().getIdentifier("widget_light" + (i + 1) + "_indicator", "id", getPackageName());
 			
-			if (sids.size() > i) {
+			if (sids.size() > i && lights.get(sids.get(i)).state.reachable && lights.containsKey(sids.get(i))) {
 				views.setViewVisibility(idButton, View.VISIBLE);
 				views.setOnClickPendingIntent(idButton, createToggleIntent(WidgetUpdateService.this, widgetIds, ip, sids.get(i), id, i + 1));
 				views.setTextViewText(idName, lights.get(sids.get(i)).name);

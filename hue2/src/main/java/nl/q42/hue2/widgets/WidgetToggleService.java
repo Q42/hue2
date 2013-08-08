@@ -29,6 +29,8 @@ public class WidgetToggleService extends Service {
 					
 					// Toggle light
 					Light light = service.getLightDetails(id);
+					if (!light.state.reachable) return null; // Ignore command if light is unreachable anyway
+					
 					light.state.on = !light.state.on;
 					service.turnLightOn(id, light.state.on);
 					

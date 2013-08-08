@@ -43,6 +43,7 @@
     <string name="widget_config_create">Create widget</string>
     
     <string name="widget_config_error_too_many">Maximum of 6 lights exceeded</string>
+    <string name="widget_config_error_too_few">Minimum of 1 light required</string>
     <string name="widget_config_error_bridge">First select a bridge in the application!</string>
     <string name="widget_config_error_connection">Failed to connect to bridge!</string>
     
