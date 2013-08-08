@@ -17,6 +17,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -44,6 +46,14 @@ public class WidgetUpdateService extends Service {
 		new AsyncTask<Void, Void, Map<String, FullConfig>>() {
 			@Override
 			protected Map<String, FullConfig> doInBackground(Void... params) {
+				// Check if WiFi is connected at all before wasting time
+				ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+				NetworkInfo wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+				
+				if (!wifi.isConnected()) {
+					return null;
+				}
+				
 				// Fetch current state of all bridges used in widgets (usually just one)				
 				try {
 					HashMap<String, FullConfig> bridgeConfigs = new HashMap<String, FullConfig>();
