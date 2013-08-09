@@ -6,31 +6,27 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class WidgetProvider extends AppWidgetProvider {	
 	private final static int UPDATE_INTERVAL = 5000;
 	
-	private PendingIntent service = null; 
+	private PendingIntent service = null;
 	
 	@Override
-	public void onUpdate(Context context, final AppWidgetManager widgetManager, final int[] widgetIds) {
+	public void onUpdate(Context context, AppWidgetManager widgetManager, int[] widgetIds) {
 		super.onUpdate(context, widgetManager, widgetIds);
-		
-		String widgetList = "";
-		for (int i = 0; i < widgetIds.length; i++) {
-			widgetList += widgetIds[i];
-			if (i < widgetIds.length - 2) widgetList += ", ";
-		}
-		Log.d("hue2", "onUpdate -> " + widgetList);
 		
 		// Start alarm for running light state update service periodically
 		final Intent intent = new Intent(context, WidgetUpdateService.class);
-		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+		
+		// Update service needs all widget ids
+		int[] allWidgetIds = widgetManager.getAppWidgetIds(new ComponentName(context, WidgetProvider.class));
+		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
 		
 		if (service == null) {
 			service = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -50,13 +46,6 @@ public class WidgetProvider extends AppWidgetProvider {
 	@Override
 	public void onDeleted(Context context, int[] widgetIds) {
 		super.onDeleted(context, widgetIds);
-		
-		String widgetList = "";
-		for (int i = 0; i < widgetIds.length; i++) {
-			widgetList += widgetIds[i];
-			if (i < widgetIds.length - 2) widgetList += ", ";
-		}
-		Log.d("hue2", "onDeleted -> " + widgetList);
 		
 		SharedPreferences.Editor prefsEdit = PreferenceManager.getDefaultSharedPreferences(context).edit();
 		
