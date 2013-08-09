@@ -127,6 +127,8 @@ public class WidgetUpdateService extends Service {
 		views.setViewVisibility(R.id.widget_content, View.VISIBLE);
 		
 		// Update views
+		int idDivider = -1;
+		
 		for (int i = 0; i < 6; i++) {
 			int idButton = getResources().getIdentifier("widget_light" + (i + 1) + "_button", "id", getPackageName());
 			int idName = getResources().getIdentifier("widget_light" + (i + 1) + "_name", "id", getPackageName());
@@ -140,9 +142,16 @@ public class WidgetUpdateService extends Service {
 				views.setTextColor(idName, lights.get(sids.get(i)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
 				views.setInt(idColor, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(i))));
 				views.setInt(idIndicator, "setBackgroundResource", lights.get(sids.get(i)).state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
+				
+				idDivider = getResources().getIdentifier("widget_light" + (i + 1) + "_divider", "id", getPackageName());
+				views.setViewVisibility(idDivider, View.VISIBLE);
 			} else {
 				views.setViewVisibility(idButton, View.GONE);
 			}
+		}
+		
+		if (idDivider != -1) {
+			views.setViewVisibility(idDivider, View.GONE);
 		}
 	}
 	

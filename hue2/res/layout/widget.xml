@@ -66,6 +66,7 @@
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	        
 	        <ImageView
+	            android:id="@+id/widget_light1_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -116,6 +117,7 @@
 		        android:background="@drawable/appwidget_settings_ind_off_c_holo" />
 	        
 	        <ImageView
+	            android:id="@+id/widget_light2_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -166,6 +168,7 @@
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	        
 	        <ImageView
+	            android:id="@+id/widget_light3_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -214,6 +217,13 @@
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	        
+	        <ImageView
+	            android:id="@+id/widget_light4_divider"
+	            android:layout_width="1dp"
+	            android:layout_height="match_parent"
+	            android:layout_alignParentRight="true"
+	            android:background="#1d1d1d" />
 	    </RelativeLayout>
 	    
 	    <RelativeLayout
@@ -258,6 +268,13 @@
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	        
+	        <ImageView
+	            android:id="@+id/widget_light5_divider"
+	            android:layout_width="1dp"
+	            android:layout_height="match_parent"
+	            android:layout_alignParentRight="true"
+	            android:background="#1d1d1d" />
 	    </RelativeLayout>
 	    
 	    <RelativeLayout
@@ -302,6 +319,13 @@
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
+	        
+	        <ImageView
+	            android:id="@+id/widget_light6_divider"
+	            android:layout_width="1dp"
+	            android:layout_height="match_parent"
+	            android:layout_alignParentRight="true"
+	            android:background="#1d1d1d" />
 	    </RelativeLayout>
 	</LinearLayout>
 </RelativeLayout>
