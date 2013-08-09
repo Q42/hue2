@@ -12,7 +12,6 @@ import nl.q42.javahueapi.models.Light;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -127,7 +126,7 @@ public class LightsWidgetUpdateService extends Service {
 			
 			if (sids.size() > i && lights.get(sids.get(i)).state.reachable && lights.containsKey(sids.get(i))) {
 				views.setViewVisibility(idButton, View.VISIBLE);
-				views.setOnClickPendingIntent(idButton, createToggleIntent(LightsWidgetUpdateService.this, widgetIds, ip, sids.get(i), id, i + 1));
+				views.setOnClickPendingIntent(idButton, createToggleIntent(widgetIds, ip, sids.get(i), id, i + 1));
 				views.setTextViewText(idName, lights.get(sids.get(i)).name);
 				views.setTextColor(idName, lights.get(sids.get(i)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
 				views.setInt(idColor, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(i))));
@@ -145,17 +144,17 @@ public class LightsWidgetUpdateService extends Service {
 		}
 	}
 	
-	private PendingIntent createToggleIntent(Context context, int[] widgetIds, String ip, String light, int widget, int button) {
+	private PendingIntent createToggleIntent(int[] widgetIds, String ip, String light, int widget, int button) {
 		// This is needed so that intents are not re-used with wrong extras data
 		int requestCode = ip.hashCode() + light.hashCode();
 		
-		Intent intent = new Intent(context, LightsWidgetToggleService.class);
+		Intent intent = new Intent(this, LightsWidgetToggleService.class);
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
 		intent.putExtra("ip", ip);
 		intent.putExtra("light", light);
 		intent.putExtra("widget", widget);
 		intent.putExtra("button", button);
-		PendingIntent pendingIntent = PendingIntent.getService(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent pendingIntent = PendingIntent.getService(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
 		return pendingIntent;
 	}

@@ -10,8 +10,10 @@ import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.FullConfig;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -85,7 +87,7 @@ public class GroupWidgetUpdateService extends Service {
 						FullConfig cfg = configs.get(id);
 						String widgetGroup = prefs.getString("widget_" + id + "_id", null);
 						
-						updateWidget(widgetIds, id, views, cfg.groups.get(widgetGroup), cfg.lights, cfg.config.ipaddress);
+						updateWidget(GroupWidgetUpdateService.this, widgetIds, id, views, widgetGroup, cfg.groups.get(widgetGroup), cfg.lights, cfg.config.ipaddress);
 					} else {
 						// Replace content with loading spinner
 						views.setViewVisibility(R.id.widget_group_spinner, View.VISIBLE);
@@ -102,7 +104,7 @@ public class GroupWidgetUpdateService extends Service {
 		return START_NOT_STICKY;
 	}
 	
-	private void updateWidget(int[] widgetIds, int id, RemoteViews views, Group group, Map<String, Light> lights, String ip) {
+	public static void updateWidget(Context context, int[] widgetIds, int id, RemoteViews views, String gid, Group group, Map<String, Light> lights, String ip) {
 		// Replace loading spinner with content
 		views.setViewVisibility(R.id.widget_group_spinner, View.GONE);
 		views.setViewVisibility(R.id.widget_group_content, View.VISIBLE);
@@ -110,7 +112,7 @@ public class GroupWidgetUpdateService extends Service {
 		// Handle exception of "all lights" group
 		if (group == null) {
 			group = new Group();
-			group.name = getString(R.string.widget_group_config_all_lights);
+			group.name = context.getString(R.string.widget_group_config_all_lights);
 			group.lights = new ArrayList<String>();
 			group.lights.addAll(lights.keySet());
 		}
@@ -134,11 +136,29 @@ public class GroupWidgetUpdateService extends Service {
 		// This creates behaviour where toggling a group with one light on turns that light off, which seems
 		// more reasonable than turning the remaining lights on.
 		boolean groupOn = lightsOn > 0;
-		int averageColor = groupOn ? Color.rgb(totalRed / lightsOn, totalGreen / lightsOn, totalBlue / lightsOn) : Color.rgb(101, 101, 101);
+		int averageColor = groupOn ? Color.rgb(totalRed / lightsOn, totalGreen / lightsOn, totalBlue / lightsOn) : Color.BLACK;
 		
 		// Update views
+		views.setOnClickPendingIntent(R.id.widget_group_content, createToggleIntent(context, widgetIds, ip, gid, id, !groupOn));
 		views.setTextViewText(R.id.widget_group_name, group.name);
-		views.setInt(R.id.widget_group_indicator, "setBackgroundColor", averageColor);
+		views.setTextColor(R.id.widget_group_name, groupOn ? Color.WHITE : Color.rgb(101, 101, 101));
+		views.setInt(R.id.widget_group_color, "setBackgroundColor", averageColor);		
+		views.setInt(R.id.widget_group_indicator, "setBackgroundResource", groupOn ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
+	}
+	
+	private static PendingIntent createToggleIntent(Context context, int[] widgetIds, String ip, String group, int widget, boolean on) {
+		// This is needed so that intents are not re-used with wrong extras data
+		int requestCode = (int) (System.currentTimeMillis() / 1000 + ip.hashCode() + group.hashCode());
+		
+		Intent intent = new Intent(context, GroupWidgetToggleService.class);
+		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+		intent.putExtra("ip", ip);
+		intent.putExtra("group", group);
+		intent.putExtra("on", on);
+		intent.putExtra("widget", widget);
+		PendingIntent pendingIntent = PendingIntent.getService(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		return pendingIntent;
 	}
 	
 	// Unused, but has to be implemented

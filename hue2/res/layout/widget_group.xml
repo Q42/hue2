@@ -17,9 +17,11 @@
     
     <RelativeLayout
 	    android:id="@+id/widget_group_content"
+	    android:clickable="true"
 	    android:visibility="gone"
 	    android:layout_width="match_parent"
-	    android:layout_height="match_parent">
+	    android:layout_height="match_parent"
+	    android:background="@drawable/dark_button_background">
 	        
 	    <LinearLayout
 	        android:layout_width="match_parent"
@@ -28,11 +30,12 @@
 	        android:orientation="horizontal">
 	        
 	        <ImageView
+	            android:id="@+id/widget_group_color"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
 			    android:layout_weight="0"
-			    android:layout_marginLeft="20dp"
-			    android:src="@drawable/lights" />
+			    android:layout_marginLeft="12dp"
+			    android:src="@drawable/lights_transparent" />
 			
 			<TextView
 			    android:id="@+id/widget_group_name"
@@ -80,8 +83,8 @@
 		<ImageView
 		    android:id="@+id/widget_group_indicator"
 	        android:layout_width="match_parent"
-	        android:layout_height="4dp"
-	        android:background="#37b7e6"
+	        android:layout_height="wrap_content"
+	        android:background="@drawable/appwidget_settings_ind_on_c_holo"
 	        android:layout_alignParentBottom="true" />
 	</RelativeLayout>
 </RelativeLayout>
