@@ -106,6 +106,8 @@ public class LinkActivity extends Activity {
 				startSearching(false);
 			}
 		}
+		
+		bridgesAdapter.add(new Bridge("192.168.1.101", "0017880ae688", "", "aapje3", false));
 	}
 	
 	@Override

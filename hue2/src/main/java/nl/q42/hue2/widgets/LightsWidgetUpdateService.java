@@ -79,7 +79,7 @@ public class LightsWidgetUpdateService extends Service {
 				for (int id : widgetIds) {
 					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_lights);
 					
-					if (configs.get(id) != null) {
+					if (configs != null && configs.get(id) != null) {
 						// Build map of lights in this widget
 						FullConfig cfg = configs.get(id);
 						HashMap<String, Light> lights = new HashMap<String, Light>();

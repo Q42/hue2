@@ -89,7 +89,7 @@ public class GroupWidgetUpdateService extends Service {
 				for (int id : widgetIds) {
 					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_group);
 					
-					if (configs.get(id) != null) {
+					if (configs != null && configs.get(id) != null) {
 						// Get presets for group
 						FullConfig cfg = configs.get(id);
 						HashMap<String, ArrayList<Preset>> bridgePresets =
