@@ -10,8 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
-// TODO: Handle disconnect, unreachable lights and lights no longer existing
+import android.util.Log;
 
 public class WidgetProvider extends AppWidgetProvider {	
 	private final static int UPDATE_INTERVAL = 5000;
@@ -19,8 +18,15 @@ public class WidgetProvider extends AppWidgetProvider {
 	private PendingIntent service = null; 
 	
 	@Override
-	public void onUpdate(final Context context, final AppWidgetManager widgetManager, final int[] widgetIds) {
+	public void onUpdate(Context context, final AppWidgetManager widgetManager, final int[] widgetIds) {
 		super.onUpdate(context, widgetManager, widgetIds);
+		
+		String widgetList = "";
+		for (int i = 0; i < widgetIds.length; i++) {
+			widgetList += widgetIds[i];
+			if (i < widgetIds.length - 2) widgetList += ", ";
+		}
+		Log.d("hue2", "onUpdate -> " + widgetList);
 		
 		// Start alarm for running light state update service periodically
 		final Intent intent = new Intent(context, WidgetUpdateService.class);
@@ -37,12 +43,20 @@ public class WidgetProvider extends AppWidgetProvider {
 		time.set(Calendar.SECOND, 0);
 		time.set(Calendar.MILLISECOND, 0);
 		
+		alarmManager.cancel(service);
 		alarmManager.setRepeating(AlarmManager.RTC, time.getTime().getTime(), UPDATE_INTERVAL, service);
 	}
 	
 	@Override
 	public void onDeleted(Context context, int[] widgetIds) {
 		super.onDeleted(context, widgetIds);
+		
+		String widgetList = "";
+		for (int i = 0; i < widgetIds.length; i++) {
+			widgetList += widgetIds[i];
+			if (i < widgetIds.length - 2) widgetList += ", ";
+		}
+		Log.d("hue2", "onDeleted -> " + widgetList);
 		
 		SharedPreferences.Editor prefsEdit = PreferenceManager.getDefaultSharedPreferences(context).edit();
 		

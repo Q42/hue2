@@ -2,7 +2,6 @@ package nl.q42.hue2.widgets;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import nl.q42.hue2.R;
@@ -23,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -51,9 +51,9 @@ public class WidgetUpdateService extends Service {
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		
 		// Fetch light states and update UI of all widgets
-		new AsyncTask<Void, Void, Map<String, FullConfig>>() {
+		new AsyncTask<Void, Void, SparseArray<FullConfig>>() {
 			@Override
-			protected Map<String, FullConfig> doInBackground(Void... params) {
+			protected SparseArray<FullConfig> doInBackground(Void... params) {
 				// Check if WiFi is connected at all before wasting time
 				ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 				NetworkInfo wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -63,39 +63,36 @@ public class WidgetUpdateService extends Service {
 				}
 				
 				// Fetch current state of all bridges used in widgets (usually just one)				
-				try {
-					HashMap<String, FullConfig> bridgeConfigs = new HashMap<String, FullConfig>();
+				HashMap<String, FullConfig> ipConfigs = new HashMap<String, FullConfig>();
+				SparseArray<FullConfig> bridgeConfigs = new SparseArray<FullConfig>();
+				
+				for (int wid : widgetIds) {
+					if (!prefs.contains("widget_" + wid + "_ip")) continue;
 					
-					for (int wid : widgetIds) {
-						String ip = prefs.getString("widget_" + wid + "_ip", null);
-						
-						if (!bridgeConfigs.containsKey(ip)) {
-							bridgeConfigs.put(ip, new HueService(ip, Util.getDeviceIdentifier(getApplicationContext())).getFullConfig());
+					String ip = prefs.getString("widget_" + wid + "_ip", null);
+					
+					try {
+						if (!ipConfigs.containsKey(ip)) {
+							ipConfigs.put(ip, new HueService(ip, Util.getDeviceIdentifier(getApplicationContext())).getFullConfig());
 						}
+						
+						bridgeConfigs.put(wid, ipConfigs.get(ip));
+					} catch (Exception e) {
+						// Ignore network error here and move on to next widget, will be handled later
 					}
-					
-					return bridgeConfigs;
-				} catch (Exception e) {
-					return null;
 				}
+					
+				return bridgeConfigs;
 			}
 			
 			@Override
-			protected void onPostExecute(Map<String, FullConfig> configs) {
-				if (configs == null) {
-					for (int id : widgetIds) {
-						RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
-						
-						// Replace content with loading spinner
-						views.setViewVisibility(R.id.widget_spinner, View.VISIBLE);
-						views.setViewVisibility(R.id.widget_content, View.GONE);
-						
-						widgetManager.updateAppWidget(id, views);
-					}
-				} else {
-					for (int id : widgetIds) {
+			protected void onPostExecute(SparseArray<FullConfig> configs) {
+				for (int id : widgetIds) {
+					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
+					
+					if (configs.get(id) != null) {
 						// Build map of lights in this widget
-						FullConfig cfg = configs.get(prefs.getString("widget_" + id + "_ip", null));
+						FullConfig cfg = configs.get(id);
 						HashMap<String, Light> lights = new HashMap<String, Light>();
 						Set<String> widgetLights = prefs.getStringSet("widget_" + id + "_ids", null);
 						
@@ -104,12 +101,14 @@ public class WidgetUpdateService extends Service {
 						}
 						
 						// Update widget UI
-						RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
-						
 						updateWidget(widgetIds, id, views, lights, cfg.config.ipaddress);
-						
-						widgetManager.updateAppWidget(id, views);
+					} else {
+						// Replace content with loading spinner
+						views.setViewVisibility(R.id.widget_spinner, View.VISIBLE);
+						views.setViewVisibility(R.id.widget_content, View.GONE);
 					}
+					
+					widgetManager.updateAppWidget(id, views);
 				}
 				
 				stopSelf();
