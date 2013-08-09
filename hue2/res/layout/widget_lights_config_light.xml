@@ -7,14 +7,14 @@
     android:layout_marginRight="15dp">
 
     <CheckBox
-        android:id="@+id/widget_config_light_name"
+        android:id="@+id/widget_lights_config_light_name"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="10dp"
         android:textSize="20sp" />
 
     <View
-        android:id="@+id/widget_config_light_divider"
+        android:id="@+id/widget_lights_config_light_divider"
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:layout_alignParentBottom="true"

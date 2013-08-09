@@ -12,7 +12,7 @@
         android:src="@drawable/colorbar" />
     
     <RelativeLayout
-        android:id="@+id/widget_config_loader"
+        android:id="@+id/widget_lights_config_loader"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
@@ -30,7 +30,7 @@
 	
     <LinearLayout
         android:visibility="gone"
-        android:id="@+id/widget_config_content"
+        android:id="@+id/widget_lights_config_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -69,7 +69,7 @@
 	        android:layout_weight="1">
 	        
 	        <LinearLayout
-	            android:id="@+id/widget_config_lights"
+	            android:id="@+id/widget_lights_config_lights"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
 	            android:orientation="vertical" />
@@ -87,11 +87,11 @@
 			android:layout_weight="0">
 	
 			<Button
-				android:id="@+id/widget_config_create"
+				android:id="@+id/widget_lights_config_create"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:background="@drawable/dark_button_background"
-				android:text="@string/widget_lights_config_create" />
+				android:text="@string/widget_config_create" />
 		</RelativeLayout>
 	</LinearLayout>
 </LinearLayout>

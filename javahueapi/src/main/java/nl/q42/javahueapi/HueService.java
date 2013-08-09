@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import nl.q42.javahueapi.Networker.Result;
 import nl.q42.javahueapi.models.BridgeError;
 import nl.q42.javahueapi.models.FullConfig;
+import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
 import nl.q42.javahueapi.models.NupnpEntry;
 import nl.q42.javahueapi.models.SimpleConfig;
@@ -117,6 +118,16 @@ public class HueService implements Serializable {
 		
 		if (result.getResponseCode() == 200) {
 			Type collectionType = new TypeToken<Map<String, Light>>(){}.getType();
+			return gson.fromJson(result.getBody(), collectionType);
+		}
+		throw new ApiException(result);
+	}
+	
+	public Map<String, Group> getGroups() throws IOException, ApiException {
+		Result result = Networker.get("http://" + bridgeIp + "/api/" + username + "/groups");
+		
+		if (result.getResponseCode() == 200) {
+			Type collectionType = new TypeToken<Map<String, Group>>(){}.getType();
 			return gson.fromJson(result.getBody(), collectionType);
 		}
 		throw new ApiException(result);

@@ -41,8 +41,15 @@
         <activity android:name=".activities.LightActivity" android:screenOrientation="portrait"></activity>
         <activity android:name=".activities.GroupActivity" android:screenOrientation="portrait"></activity>
         
-        <!-- Activity for configuring new widget -->
-        <activity android:name=".activities.WidgetConfigActivity">
+        <!-- Activity for configuring new lights widgets -->
+        <activity android:name=".activities.LightsWidgetConfigActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Activity for configuring new group widgets -->
+        <activity android:name=".activities.GroupWidgetConfigActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

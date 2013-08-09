@@ -40,16 +40,25 @@
     <string name="widget_lights_label">Hue lights</string>
     <string name="widget_group_label">Hue group</string>
     
+    <!-- Config activity -->
+    <string name="widget_config_create">Create widget</string>
+    
+    <string name="widget_config_error_bridge">First select a bridge in the application!</string>
+    <string name="widget_config_error_connection">Failed to connect to bridge!</string>
+    
     <!-- Lights widget config activity -->
     <string name="widget_lights_config_connecting">Retrieving list of lights&#8230;</string>
     
     <string name="widget_lights_config_lights">Lights</string>
-    <string name="widget_lights_config_create">Create widget</string>
     
     <string name="widget_lights_config_error_too_many">Maximum of 6 lights exceeded</string>
     <string name="widget_lights_config_error_too_few">Minimum of 1 light required</string>
-    <string name="widget_lights_config_error_bridge">First select a bridge in the application!</string>
-    <string name="widget_lights_config_error_connection">Failed to connect to bridge!</string>
+    
+    <!-- Group widget config activity -->
+    <string name="widget_group_config_connecting">Retrieving list of groups&#8230;</string>
+    
+    <string name="widget_group_config_groups">Groups</string>
+    <string name="widget_group_config_all_lights">All lights</string>
     
     <!-- Dialogs -->
     <string name="dialog_bridge_search_title">Bridge search failed</string>

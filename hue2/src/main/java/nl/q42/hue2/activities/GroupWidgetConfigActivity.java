@@ -1,15 +1,13 @@
 package nl.q42.hue2.activities;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.models.Bridge;
-import nl.q42.hue2.widgets.LightsWidgetProvider;
+import nl.q42.hue2.widgets.GroupWidgetProvider;
 import nl.q42.javahueapi.HueService;
-import nl.q42.javahueapi.models.Light;
+import nl.q42.javahueapi.models.Group;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
@@ -22,30 +20,28 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class LightsWidgetConfigActivity extends Activity {
+public class GroupWidgetConfigActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
 	
 	private RelativeLayout loader, abLoader;
 	private LinearLayout content;
-	private LinearLayout lightsList;
+	private RadioGroup groupsList;
 	private Button createButton;
 	
-	private HashMap<String, Light> lights = new HashMap<String, Light>();
-	private HashMap<String, CheckBox> lightViews = new HashMap<String, CheckBox>();
+	private HashMap<String, Group> groups = new HashMap<String, Group>();
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_widget_lights_config);
+		setContentView(R.layout.activity_widget_group_config);
 		
 		ActionBar ab = getActionBar();
 		ab.setCustomView(R.layout.loader);
@@ -55,11 +51,11 @@ public class LightsWidgetConfigActivity extends Activity {
 		abLoader.findViewById(R.id.loader_refresh).setVisibility(View.GONE);
 		abLoader.findViewById(R.id.loader_spinner).setVisibility(View.VISIBLE);
 		
-		loader = (RelativeLayout) findViewById(R.id.widget_lights_config_loader);
-		content = (LinearLayout) findViewById(R.id.widget_lights_config_content);
-		lightsList = (LinearLayout) findViewById(R.id.widget_lights_config_lights);
+		loader = (RelativeLayout) findViewById(R.id.widget_group_config_loader);
+		content = (LinearLayout) findViewById(R.id.widget_group_config_content);
+		groupsList = (RadioGroup) findViewById(R.id.widget_group_config_groups);
 		
-		createButton = (Button) findViewById(R.id.widget_lights_config_create);
+		createButton = (Button) findViewById(R.id.widget_group_config_create);
 		createButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -67,7 +63,7 @@ public class LightsWidgetConfigActivity extends Activity {
 			}
 		});
 		
-		// Select a light from the bridge currently used in the main app
+		// Select a group from the bridge currently used in the main app
 		bridge = Util.getLastBridge(this);
 		
 		if (bridge == null) {
@@ -78,15 +74,13 @@ public class LightsWidgetConfigActivity extends Activity {
 		
 		service = new HueService(bridge.getIp(), Util.getDeviceIdentifier(this));
 		
-		// Load list of lights
+		// Load list of groups
 		if (savedInstanceState == null) {
-			loadLights();
+			loadGroups();
 		} else {
-			lights = (HashMap<String, Light>) savedInstanceState.getSerializable("lights");
-			addLights();
+			groups = (HashMap<String, Group>) savedInstanceState.getSerializable("groups");
+			addGroups();
 		}
-		
-		checkConditions();
 		
 		// Make sure this is set unless the create button is pressed
 		setResult(RESULT_CANCELED);
@@ -96,37 +90,27 @@ public class LightsWidgetConfigActivity extends Activity {
 	protected void onSaveInstanceState(Bundle state) {
 		super.onSaveInstanceState(state);
 		
-		state.putSerializable("lights", lights);
-	}
-	
-	private Set<String> getSelectedLights() {
-		Set<String> selectedLights = new HashSet<String>();
-		
-		for (String id : lights.keySet()) {
-			if (lightViews.get(id).isChecked()) {
-				selectedLights.add(id);
-			}
-		}
-		
-		return selectedLights;
+		state.putSerializable("groups", groups);
 	}
 	
 	private void createWidget() {
+		String groupId = ((RadioButton) groupsList.findViewById(groupsList.getCheckedRadioButtonId())).getHint().toString();
+		
 		Bundle extras = getIntent().getExtras();
 		int widgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		
 		AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
-		ComponentName widget = new ComponentName(getPackageName(), LightsWidgetConfigActivity.class.getName());
+		ComponentName widget = new ComponentName(getPackageName(), GroupWidgetConfigActivity.class.getName());
 		int[] widgetIds = widgetManager.getAppWidgetIds(widget);
 		
 		// Store the configuration for this widget
 		SharedPreferences.Editor prefsEdit = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
 		prefsEdit.putString("widget_" + widgetId + "_ip", bridge.getIp());
-		prefsEdit.putStringSet("widget_" + widgetId + "_ids", getSelectedLights());
+		prefsEdit.putString("widget_" + widgetId + "_id", groupId);
 		prefsEdit.commit();
 		
 		// Send initial update request
-		Intent initialUpdate = new Intent(this, LightsWidgetProvider.class);
+		Intent initialUpdate = new Intent(this, GroupWidgetProvider.class);
 		initialUpdate.setAction("android.appwidget.action.APPWIDGET_UPDATE");
 		initialUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
 		sendBroadcast(initialUpdate);
@@ -137,12 +121,12 @@ public class LightsWidgetConfigActivity extends Activity {
 		finish();
 	}
 	
-	private void loadLights() {
+	private void loadGroups() {
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected Boolean doInBackground(Void... params) {
 				try {
-					lights = new HashMap<String, Light>(service.getLights());
+					groups = new HashMap<String, Group>(service.getGroups());
 				} catch (Exception e) {
 					return false;
 				}
@@ -153,10 +137,10 @@ public class LightsWidgetConfigActivity extends Activity {
 			@Override
 			protected void onPostExecute(Boolean result) {
 				if (result) {					
-					addLights();
+					addGroups();
 				} else {
 					Toast.makeText(
-							LightsWidgetConfigActivity.this,
+							GroupWidgetConfigActivity.this,
 							getString(R.string.widget_config_error_connection),
 							Toast.LENGTH_SHORT).show();
 					
@@ -166,43 +150,32 @@ public class LightsWidgetConfigActivity extends Activity {
 		}.execute();
 	}
 	
-	private void checkConditions() {
-		boolean tooMany = getSelectedLights().size() > 6;
-		boolean tooFew = getSelectedLights().size() == 0;
-		createButton.setEnabled(!tooMany && !tooFew);
-		
-		if (tooMany) {
-			createButton.setText(R.string.widget_lights_config_error_too_many);
-		} else if (tooFew) {
-			createButton.setText(R.string.widget_lights_config_error_too_few);
-		} else {
-			createButton.setText(R.string.widget_config_create);
-		}
-	}
-	
-	private void addLights() {
+	private void addGroups() {
 		View lastView = null;
 		
-		for (String id : Util.getSortedLights(lights)) {
-			lastView = getLayoutInflater().inflate(R.layout.widget_lights_config_light, lightsList, false);
+		for (String id : Util.getSortedGroups(groups)) {
+			RadioButton rb = (RadioButton) getLayoutInflater().inflate(R.layout.widget_group_config_group, groupsList, false);
 			
-			CheckBox cb = (CheckBox) lastView.findViewById(R.id.widget_lights_config_light_name);
-			cb.setText(lights.get(id).name);
-			cb.setId(id.hashCode());
+			if (id.equals("0")) {
+				rb.setChecked(true);
+				rb.setText(R.string.widget_group_config_all_lights);
+			} else {
+				rb.setText(groups.get(id).name);
+			}
 			
-			cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					checkConditions();
-				}
-			});
+			// Put id in unused property
+			rb.setId(id.hashCode());
+			rb.setHint(id);
 			
-			lightViews.put(id, cb);
-			lightsList.addView(lastView);
+			groupsList.addView(rb);
+			
+			// Divider has to be added separately, because RadioGroup dislikes nested RadioButtons
+			lastView = getLayoutInflater().inflate(R.layout.widget_group_config_divider, groupsList, false);
+			groupsList.addView(lastView);
 		}
 		
 		if (lastView != null) {
-			lastView.findViewById(R.id.widget_lights_config_light_divider).setVisibility(View.GONE);
+			lastView.setVisibility(View.GONE);
 		}
 		
 		abLoader.findViewById(R.id.loader_spinner).setVisibility(View.GONE);

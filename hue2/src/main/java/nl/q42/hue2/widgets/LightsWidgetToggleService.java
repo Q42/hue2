@@ -37,9 +37,9 @@ public class LightsWidgetToggleService extends Service {
 					// Update button
 					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_lights);
 					
-					int idName = getResources().getIdentifier("widget_light" + button + "_name", "id", getPackageName());
-					int idColor = getResources().getIdentifier("widget_light" + button + "_color", "id", getPackageName());
-					int idIndicator = getResources().getIdentifier("widget_light" + button + "_indicator", "id", getPackageName());
+					int idName = getResources().getIdentifier("widget_lights_light" + button + "_name", "id", getPackageName());
+					int idColor = getResources().getIdentifier("widget_lights_light" + button + "_color", "id", getPackageName());
+					int idIndicator = getResources().getIdentifier("widget_lights_light" + button + "_indicator", "id", getPackageName());
 					
 					views.setTextViewText(idName, light.name);
 					views.setTextColor(idName, light.state.on ? Color.WHITE : Color.rgb(101, 101, 101));
