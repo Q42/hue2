@@ -12,7 +12,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 
-public class WidgetToggleService extends Service {
+public class LightsWidgetToggleService extends Service {
 	@Override
 	public int onStartCommand(final Intent intent, int flags, int startId) {
 		final AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
@@ -35,7 +35,7 @@ public class WidgetToggleService extends Service {
 					service.turnLightOn(id, light.state.on);
 					
 					// Update button
-					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
+					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_lights);
 					
 					int idName = getResources().getIdentifier("widget_light" + button + "_name", "id", getPackageName());
 					int idColor = getResources().getIdentifier("widget_light" + button + "_color", "id", getPackageName());

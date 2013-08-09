@@ -12,7 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class WidgetProvider extends AppWidgetProvider {	
+public class LightsWidgetProvider extends AppWidgetProvider {	
 	private final static int UPDATE_INTERVAL = 5000;
 	
 	private PendingIntent service = null;
@@ -22,10 +22,10 @@ public class WidgetProvider extends AppWidgetProvider {
 		super.onUpdate(context, widgetManager, widgetIds);
 		
 		// Start alarm for running light state update service periodically
-		final Intent intent = new Intent(context, WidgetUpdateService.class);
+		final Intent intent = new Intent(context, LightsWidgetUpdateService.class);
 		
 		// Update service needs all widget ids
-		int[] allWidgetIds = widgetManager.getAppWidgetIds(new ComponentName(context, WidgetProvider.class));
+		int[] allWidgetIds = widgetManager.getAppWidgetIds(new ComponentName(context, LightsWidgetProvider.class));
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
 		
 		if (service == null) {

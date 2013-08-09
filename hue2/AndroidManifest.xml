@@ -48,17 +48,25 @@
             </intent-filter>
         </activity>
         
-        <!-- Widget provider -->
-		<receiver android:name="nl.q42.hue2.widgets.WidgetProvider" >
+        <!-- Lights widget provider -->
+		<receiver android:name="nl.q42.hue2.widgets.LightsWidgetProvider" android:label="@string/widget_lights_label">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
 			</intent-filter>
-			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info" />
+			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_lights_info" />
 		</receiver>
 		
-		<!-- Widget service -->
-		<service android:name="nl.q42.hue2.widgets.WidgetToggleService" />
-		<service android:name="nl.q42.hue2.widgets.WidgetUpdateService" />
+		<!-- Lights widget service -->
+		<service android:name="nl.q42.hue2.widgets.LightsWidgetToggleService" />
+		<service android:name="nl.q42.hue2.widgets.LightsWidgetUpdateService" />
+		
+		<!-- Group widget provider -->
+		<receiver android:name="nl.q42.hue2.widgets.GroupWidgetProvider" android:label="@string/widget_group_label">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_group_info" />
+		</receiver>
     </application>
 
 </manifest>

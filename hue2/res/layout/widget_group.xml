@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/appwidget_bg"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp">
+    
+    <ProgressBar
+        android:id="@+id/widget_group_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:layout_centerInParent="true" />
+    
+    <RelativeLayout
+	    android:id="@+id/widget_group_content"
+	    android:visibility="gone"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent">
+	        
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_centerVertical="true"
+	        android:orientation="horizontal">
+	        
+	        <ImageView
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="0"
+			    android:layout_marginLeft="20dp"
+			    android:src="@drawable/lights" />
+			
+			<TextView
+			    android:id="@+id/widget_group_name"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_gravity="center_vertical"
+			    android:layout_weight="1"
+			    android:layout_marginLeft="15dp"
+			    android:layout_marginRight="10dp"
+			    android:textSize="16sp"
+			    android:textColor="#fff"
+			    android:singleLine="true"
+			    android:ellipsize="end" />
+			
+			<LinearLayout
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_gravity="center_vertical"
+			    android:layout_marginRight="15dp"
+			    android:layout_weight="0"
+			    android:orientation="horizontal">
+			    
+			    <ImageView
+			        android:id="@+id/widget_group_preset1"
+			        android:layout_width="40dp"
+			        android:layout_height="40dp"
+			        android:layout_marginRight="10dp"
+			        android:background="#d00" />
+			    
+			    <ImageView
+			        android:id="@+id/widget_group_preset2"
+			        android:layout_width="40dp"
+			        android:layout_height="40dp"
+			        android:layout_marginRight="10dp"
+			        android:background="#0d0" />
+			    
+			    <ImageView
+			        android:id="@+id/widget_group_preset3"
+			        android:layout_width="40dp"
+			        android:layout_height="40dp"
+			        android:background="#00d" />
+			</LinearLayout>
+	    </LinearLayout>
+		
+		<ImageView
+		    android:id="@+id/widget_group_indicator"
+	        android:layout_width="match_parent"
+	        android:layout_height="4dp"
+	        android:background="#37b7e6"
+	        android:layout_alignParentBottom="true" />
+	</RelativeLayout>
+</RelativeLayout>

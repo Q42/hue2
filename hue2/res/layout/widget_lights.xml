@@ -7,7 +7,7 @@
     android:paddingRight="0dp">
     
     <ProgressBar
-        android:id="@+id/widget_spinner"
+        android:id="@+id/widget_lights_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleX="0.8"
@@ -15,7 +15,7 @@
         android:layout_centerInParent="true" />
     
 	<LinearLayout
-	    android:id="@+id/widget_content"
+	    android:id="@+id/widget_lights_content"
 	    android:visibility="gone"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
@@ -23,7 +23,7 @@
 	    android:gravity="bottom">
 	    
 	    <RelativeLayout
-	        android:id="@+id/widget_light1_button"
+	        android:id="@+id/widget_lights_light1_button"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
@@ -38,7 +38,7 @@
 	            android:orientation="vertical">
 	            
 	            <ImageView
-	                android:id="@+id/widget_light1_color"
+	                android:id="@+id/widget_lights_light1_color"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:scaleX="0.9"
@@ -46,7 +46,7 @@
 		            android:src="@drawable/light_widget" />
 		        
 		        <TextView
-		            android:id="@+id/widget_light1_name"
+		            android:id="@+id/widget_lights_light1_name"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_marginLeft="5dp"
@@ -59,14 +59,14 @@
 	        </LinearLayout>
 	        
 	        <ImageView
-	            android:id="@+id/widget_light1_indicator"
+	            android:id="@+id/widget_lights_light1_indicator"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	        
 	        <ImageView
-	            android:id="@+id/widget_light1_divider"
+	            android:id="@+id/widget_lights_light1_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -74,7 +74,7 @@
 	    </RelativeLayout>
 	    
 	    <RelativeLayout
-	        android:id="@+id/widget_light2_button"
+	        android:id="@+id/widget_lights_light2_button"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
@@ -89,7 +89,7 @@
 	            android:orientation="vertical">
 	            
 	            <ImageView
-	                android:id="@+id/widget_light2_color"
+	                android:id="@+id/widget_lights_light2_color"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:scaleX="0.9"
@@ -97,7 +97,7 @@
 		            android:src="@drawable/light_widget" />
 		        
 		        <TextView
-		            android:id="@+id/widget_light2_name"
+		            android:id="@+id/widget_lights_light2_name"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_marginLeft="5dp"
@@ -110,14 +110,14 @@
 	        </LinearLayout>
 	        
 	        <ImageView
-	            android:id="@+id/widget_light2_indicator"
+	            android:id="@+id/widget_lights_light2_indicator"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_off_c_holo" />
 	        
 	        <ImageView
-	            android:id="@+id/widget_light2_divider"
+	            android:id="@+id/widget_lights_light2_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -125,7 +125,7 @@
 	    </RelativeLayout>
 	    
 	    <RelativeLayout
-	        android:id="@+id/widget_light3_button"
+	        android:id="@+id/widget_lights_light3_button"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
@@ -140,7 +140,7 @@
 	            android:orientation="vertical">
 	            
 	            <ImageView
-	                android:id="@+id/widget_light3_color"
+	                android:id="@+id/widget_lights_light3_color"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:scaleX="0.9"
@@ -148,7 +148,7 @@
 		            android:src="@drawable/light_widget" />
 		        
 		        <TextView
-		            android:id="@+id/widget_light3_name"
+		            android:id="@+id/widget_lights_light3_name"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_marginLeft="5dp"
@@ -161,14 +161,14 @@
 	        </LinearLayout>
 	        
 	        <ImageView
-	            android:id="@+id/widget_light3_indicator"
+	            android:id="@+id/widget_lights_light3_indicator"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	        
 	        <ImageView
-	            android:id="@+id/widget_light3_divider"
+	            android:id="@+id/widget_lights_light3_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -176,7 +176,7 @@
 	    </RelativeLayout>
 	    
 	    <RelativeLayout
-	        android:id="@+id/widget_light4_button"
+	        android:id="@+id/widget_lights_light4_button"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
@@ -191,7 +191,7 @@
 	            android:orientation="vertical">
 	            
 	            <ImageView
-	                android:id="@+id/widget_light4_color"
+	                android:id="@+id/widget_lights_light4_color"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:scaleX="0.9"
@@ -199,7 +199,7 @@
 		            android:src="@drawable/light_widget" />
 		        
 		        <TextView
-		            android:id="@+id/widget_light4_name"
+		            android:id="@+id/widget_lights_light4_name"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_marginLeft="5dp"
@@ -212,14 +212,14 @@
 	        </LinearLayout>
 	        
 	        <ImageView
-	            android:id="@+id/widget_light4_indicator"
+	            android:id="@+id/widget_lights_light4_indicator"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	        
 	        <ImageView
-	            android:id="@+id/widget_light4_divider"
+	            android:id="@+id/widget_lights_light4_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -227,7 +227,7 @@
 	    </RelativeLayout>
 	    
 	    <RelativeLayout
-	        android:id="@+id/widget_light5_button"
+	        android:id="@+id/widget_lights_light5_button"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
@@ -242,7 +242,7 @@
 	            android:orientation="vertical">
 	            
 	            <ImageView
-	                android:id="@+id/widget_light5_color"
+	                android:id="@+id/widget_lights_light5_color"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:scaleX="0.9"
@@ -250,7 +250,7 @@
 		            android:src="@drawable/light_widget" />
 		        
 		        <TextView
-		            android:id="@+id/widget_light5_name"
+		            android:id="@+id/widget_lights_light5_name"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_marginLeft="5dp"
@@ -263,14 +263,14 @@
 	        </LinearLayout>
 	        
 	        <ImageView
-	            android:id="@+id/widget_light5_indicator"
+	            android:id="@+id/widget_lights_light5_indicator"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	        
 	        <ImageView
-	            android:id="@+id/widget_light5_divider"
+	            android:id="@+id/widget_lights_light5_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"
@@ -278,7 +278,7 @@
 	    </RelativeLayout>
 	    
 	    <RelativeLayout
-	        android:id="@+id/widget_light6_button"
+	        android:id="@+id/widget_lights_light6_button"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
@@ -293,7 +293,7 @@
 	            android:orientation="vertical">
 	            
 	            <ImageView
-	                android:id="@+id/widget_light6_color"
+	                android:id="@+id/widget_lights_light6_color"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:scaleX="0.9"
@@ -301,7 +301,7 @@
 		            android:src="@drawable/light_widget" />
 		        
 		        <TextView
-		            android:id="@+id/widget_light6_name"
+		            android:id="@+id/widget_lights_light6_name"
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_marginLeft="5dp"
@@ -314,14 +314,14 @@
 	        </LinearLayout>
 	        
 	        <ImageView
-	            android:id="@+id/widget_light6_indicator"
+	            android:id="@+id/widget_lights_light6_indicator"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_alignParentBottom="true"
 		        android:background="@drawable/appwidget_settings_ind_on_c_holo" />
 	        
 	        <ImageView
-	            android:id="@+id/widget_light6_divider"
+	            android:id="@+id/widget_lights_light6_divider"
 	            android:layout_width="1dp"
 	            android:layout_height="match_parent"
 	            android:layout_alignParentRight="true"

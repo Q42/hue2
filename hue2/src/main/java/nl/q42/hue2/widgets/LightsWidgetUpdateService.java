@@ -26,7 +26,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.widget.RemoteViews;
 
-public class WidgetUpdateService extends Service {
+public class LightsWidgetUpdateService extends Service {
 	public static class WidgetButton {
 		public int widget;
 		public int button;
@@ -88,7 +88,7 @@ public class WidgetUpdateService extends Service {
 			@Override
 			protected void onPostExecute(SparseArray<FullConfig> configs) {
 				for (int id : widgetIds) {
-					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget);
+					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_lights);
 					
 					if (configs.get(id) != null) {
 						// Build map of lights in this widget
@@ -104,8 +104,8 @@ public class WidgetUpdateService extends Service {
 						updateWidget(widgetIds, id, views, lights, cfg.config.ipaddress);
 					} else {
 						// Replace content with loading spinner
-						views.setViewVisibility(R.id.widget_spinner, View.VISIBLE);
-						views.setViewVisibility(R.id.widget_content, View.GONE);
+						views.setViewVisibility(R.id.widget_lights_spinner, View.VISIBLE);
+						views.setViewVisibility(R.id.widget_lights_content, View.GONE);
 					}
 					
 					widgetManager.updateAppWidget(id, views);
@@ -123,27 +123,27 @@ public class WidgetUpdateService extends Service {
 		ArrayList<String> sids = Util.getSortedLights(lights);
 		
 		// Replace loading spinner with content
-		views.setViewVisibility(R.id.widget_spinner, View.GONE);
-		views.setViewVisibility(R.id.widget_content, View.VISIBLE);
+		views.setViewVisibility(R.id.widget_lights_spinner, View.GONE);
+		views.setViewVisibility(R.id.widget_lights_content, View.VISIBLE);
 		
 		// Update views
 		int idDivider = -1;
 		
 		for (int i = 0; i < 6; i++) {
-			int idButton = getResources().getIdentifier("widget_light" + (i + 1) + "_button", "id", getPackageName());
-			int idName = getResources().getIdentifier("widget_light" + (i + 1) + "_name", "id", getPackageName());
-			int idColor = getResources().getIdentifier("widget_light" + (i + 1) + "_color", "id", getPackageName());
-			int idIndicator = getResources().getIdentifier("widget_light" + (i + 1) + "_indicator", "id", getPackageName());
+			int idButton = getResources().getIdentifier("widget_lights_light" + (i + 1) + "_button", "id", getPackageName());
+			int idName = getResources().getIdentifier("widget_lights_light" + (i + 1) + "_name", "id", getPackageName());
+			int idColor = getResources().getIdentifier("widget_lights_light" + (i + 1) + "_color", "id", getPackageName());
+			int idIndicator = getResources().getIdentifier("widget_lights_light" + (i + 1) + "_indicator", "id", getPackageName());
 			
 			if (sids.size() > i && lights.get(sids.get(i)).state.reachable && lights.containsKey(sids.get(i))) {
 				views.setViewVisibility(idButton, View.VISIBLE);
-				views.setOnClickPendingIntent(idButton, createToggleIntent(WidgetUpdateService.this, widgetIds, ip, sids.get(i), id, i + 1));
+				views.setOnClickPendingIntent(idButton, createToggleIntent(LightsWidgetUpdateService.this, widgetIds, ip, sids.get(i), id, i + 1));
 				views.setTextViewText(idName, lights.get(sids.get(i)).name);
 				views.setTextColor(idName, lights.get(sids.get(i)).state.on ? Color.WHITE : Color.rgb(101, 101, 101));
 				views.setInt(idColor, "setBackgroundColor", Util.getRGBColor(lights.get(sids.get(i))));
 				views.setInt(idIndicator, "setBackgroundResource", lights.get(sids.get(i)).state.on ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
 				
-				idDivider = getResources().getIdentifier("widget_light" + (i + 1) + "_divider", "id", getPackageName());
+				idDivider = getResources().getIdentifier("widget_lights_light" + (i + 1) + "_divider", "id", getPackageName());
 				views.setViewVisibility(idDivider, View.VISIBLE);
 			} else {
 				views.setViewVisibility(idButton, View.GONE);
@@ -159,7 +159,7 @@ public class WidgetUpdateService extends Service {
 		// This is needed so that intents are not re-used with wrong extras data
 		int requestCode = ip.hashCode() + light.hashCode();
 		
-		Intent intent = new Intent(context, WidgetToggleService.class);
+		Intent intent = new Intent(context, LightsWidgetToggleService.class);
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
 		intent.putExtra("ip", ip);
 		intent.putExtra("light", light);

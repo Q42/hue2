@@ -7,7 +7,7 @@ import java.util.Set;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
 import nl.q42.hue2.models.Bridge;
-import nl.q42.hue2.widgets.WidgetProvider;
+import nl.q42.hue2.widgets.LightsWidgetProvider;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.Light;
 import android.app.ActionBar;
@@ -29,7 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class WidgetConfigActivity extends Activity {
+public class LightsWidgetConfigActivity extends Activity {
 	private Bridge bridge;
 	private HueService service;
 	
@@ -71,7 +71,7 @@ public class WidgetConfigActivity extends Activity {
 		bridge = Util.getLastBridge(this);
 		
 		if (bridge == null) {
-			Toast.makeText(this, getString(R.string.widget_config_error_bridge), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getString(R.string.widget_lights_config_error_bridge), Toast.LENGTH_SHORT).show();
 			finish();
 			return;
 		}
@@ -116,7 +116,7 @@ public class WidgetConfigActivity extends Activity {
 		int widgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		
 		AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
-		ComponentName widget = new ComponentName(getPackageName(), WidgetConfigActivity.class.getName());
+		ComponentName widget = new ComponentName(getPackageName(), LightsWidgetConfigActivity.class.getName());
 		int[] widgetIds = widgetManager.getAppWidgetIds(widget);
 		
 		// Store the configuration for this widget
@@ -126,7 +126,7 @@ public class WidgetConfigActivity extends Activity {
 		prefsEdit.commit();
 		
 		// Send initial update request
-		Intent initialUpdate = new Intent(this, WidgetProvider.class);
+		Intent initialUpdate = new Intent(this, LightsWidgetProvider.class);
 		initialUpdate.setAction("android.appwidget.action.APPWIDGET_UPDATE");
 		initialUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
 		sendBroadcast(initialUpdate);
@@ -155,7 +155,11 @@ public class WidgetConfigActivity extends Activity {
 				if (result) {					
 					addLights();
 				} else {
-					Toast.makeText(WidgetConfigActivity.this, getString(R.string.widget_config_error_connection), Toast.LENGTH_SHORT).show();
+					Toast.makeText(
+							LightsWidgetConfigActivity.this,
+							getString(R.string.widget_lights_config_error_connection),
+							Toast.LENGTH_SHORT).show();
+					
 					finish();
 				}
 			}
@@ -166,7 +170,14 @@ public class WidgetConfigActivity extends Activity {
 		boolean tooMany = getSelectedLights().size() > 6;
 		boolean tooFew = getSelectedLights().size() == 0;
 		createButton.setEnabled(!tooMany && !tooFew);
-		createButton.setText(tooMany ? R.string.widget_config_error_too_many : (tooFew ? R.string.widget_config_error_too_few : R.string.widget_config_create));
+		
+		if (tooMany) {
+			createButton.setText(R.string.widget_lights_config_error_too_many);
+		} else if (tooFew) {
+			createButton.setText(R.string.widget_lights_config_error_too_few);
+		} else {
+			createButton.setText(R.string.widget_lights_config_create);
+		}
 	}
 	
 	private void addLights() {
