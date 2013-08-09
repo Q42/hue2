@@ -76,7 +76,7 @@
 		</receiver>
 		
 		<!-- Group widget services -->
-		<service android:name="nl.q42.hue2.widgets.GroupWidgetToggleService" />
+		<service android:name="nl.q42.hue2.widgets.GroupWidgetChangeService" />
 		<service android:name="nl.q42.hue2.widgets.GroupWidgetUpdateService" />
     </application>
 </manifest>

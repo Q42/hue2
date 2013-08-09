@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import nl.q42.hue2.PHUtilitiesImpl;
+import nl.q42.hue2.PresetsDataSource;
 import nl.q42.hue2.R;
 import nl.q42.hue2.Util;
+import nl.q42.hue2.models.Bridge;
+import nl.q42.hue2.models.Preset;
 import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.models.FullConfig;
 import nl.q42.javahueapi.models.Group;
@@ -79,15 +83,22 @@ public class GroupWidgetUpdateService extends Service {
 			
 			@Override
 			protected void onPostExecute(SparseArray<FullConfig> configs) {
+				PresetsDataSource datasource = new PresetsDataSource(GroupWidgetUpdateService.this);
+				datasource.open();
+				
 				for (int id : widgetIds) {
 					RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_group);
 					
 					if (configs.get(id) != null) {
-						// Update widget UI
+						// Get presets for group
 						FullConfig cfg = configs.get(id);
+						HashMap<String, ArrayList<Preset>> bridgePresets =
+								datasource.getGroupPresets(new Bridge(null, cfg.config.mac.replace(":", "").toLowerCase(), null, null));
+						
+						// Update widget UI
 						String widgetGroup = prefs.getString("widget_" + id + "_id", null);
 						
-						updateWidget(GroupWidgetUpdateService.this, widgetIds, id, views, widgetGroup, cfg.groups.get(widgetGroup), cfg.lights, cfg.config.ipaddress);
+						updateWidget(GroupWidgetUpdateService.this, widgetIds, id, views, widgetGroup, cfg.groups.get(widgetGroup), bridgePresets.get(widgetGroup), cfg.lights, cfg.config.ipaddress);
 					} else {
 						// Replace content with loading spinner
 						views.setViewVisibility(R.id.widget_group_spinner, View.VISIBLE);
@@ -104,7 +115,7 @@ public class GroupWidgetUpdateService extends Service {
 		return START_NOT_STICKY;
 	}
 	
-	public static void updateWidget(Context context, int[] widgetIds, int id, RemoteViews views, String gid, Group group, Map<String, Light> lights, String ip) {
+	public static void updateWidget(Context context, int[] widgetIds, int id, RemoteViews views, String gid, Group group, ArrayList<Preset> presets, Map<String, Light> lights, String ip) {
 		// Replace loading spinner with content
 		views.setViewVisibility(R.id.widget_group_spinner, View.GONE);
 		views.setViewVisibility(R.id.widget_group_content, View.VISIBLE);
@@ -139,22 +150,61 @@ public class GroupWidgetUpdateService extends Service {
 		int averageColor = groupOn ? Color.rgb(totalRed / lightsOn, totalGreen / lightsOn, totalBlue / lightsOn) : Color.BLACK;
 		
 		// Update views
-		views.setOnClickPendingIntent(R.id.widget_group_content, createToggleIntent(context, widgetIds, ip, gid, id, !groupOn));
+		views.setOnClickPendingIntent(R.id.widget_group_content, createToggleIntent(context, widgetIds, ip, gid, id, !groupOn, presets));
 		views.setTextViewText(R.id.widget_group_name, group.name);
 		views.setTextColor(R.id.widget_group_name, groupOn ? Color.WHITE : Color.rgb(101, 101, 101));
 		views.setInt(R.id.widget_group_color, "setBackgroundColor", averageColor);		
 		views.setInt(R.id.widget_group_indicator, "setBackgroundResource", groupOn ? R.drawable.appwidget_settings_ind_on_c_holo : R.drawable.appwidget_settings_ind_off_c_holo);
+		
+		// Show up to first 3 presets
+		for (int i = 0; i < 3; i++) {
+			int idPresetView = context.getResources().getIdentifier("widget_group_preset" + (i + 1), "id", context.getPackageName());
+			
+			if (presets.size() > i) {
+				Preset preset = presets.get(i);
+				
+				views.setViewVisibility(idPresetView, View.VISIBLE);
+				
+				if (preset.color_mode.equals("xy")) {
+					views.setInt(idPresetView, "setBackgroundColor", PHUtilitiesImpl.colorFromXY(preset.xy, null));
+				} else {
+					views.setInt(idPresetView, "setBackgroundColor", Util.temperatureToColor(1000000 / (int) preset.ct));
+				}
+				
+				views.setOnClickPendingIntent(idPresetView, createPresetIntent(context, widgetIds, ip, gid, id, groupOn, preset, presets));
+			} else {
+				views.setViewVisibility(idPresetView, View.GONE);
+			}
+		}
 	}
 	
-	private static PendingIntent createToggleIntent(Context context, int[] widgetIds, String ip, String group, int widget, boolean on) {
+	private static PendingIntent createToggleIntent(Context context, int[] widgetIds, String ip, String group, int widget, boolean on, ArrayList<Preset> presets) {
 		// This is needed so that intents are not re-used with wrong extras data
 		int requestCode = (int) (System.currentTimeMillis() / 1000 + ip.hashCode() + group.hashCode());
 		
-		Intent intent = new Intent(context, GroupWidgetToggleService.class);
+		Intent intent = new Intent(context, GroupWidgetChangeService.class);
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
 		intent.putExtra("ip", ip);
 		intent.putExtra("group", group);
 		intent.putExtra("on", on);
+		intent.putExtra("presets", presets);
+		intent.putExtra("widget", widget);
+		PendingIntent pendingIntent = PendingIntent.getService(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		return pendingIntent;
+	}
+	
+	private static PendingIntent createPresetIntent(Context context, int[] widgetIds, String ip, String group, int widget, boolean on, Preset preset, ArrayList<Preset> presets) {
+		// This is needed so that intents are not re-used with wrong extras data
+		int requestCode = (int) (System.currentTimeMillis() / 1000 + ip.hashCode() + group.hashCode() + preset.hashCode());
+		
+		Intent intent = new Intent(context, GroupWidgetChangeService.class);
+		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+		intent.putExtra("ip", ip);
+		intent.putExtra("group", group);
+		intent.putExtra("on", on);
+		intent.putExtra("preset", preset);
+		intent.putExtra("presets", presets);
 		intent.putExtra("widget", widget);
 		PendingIntent pendingIntent = PendingIntent.getService(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
