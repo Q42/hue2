@@ -15,7 +15,7 @@ public class Action implements Serializable {
 	
 	public int sat;
 	
-	public double[] xy;
+	public float[] xy;
 	
 	public int ct;
 	

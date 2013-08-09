@@ -6,24 +6,8 @@ import java.io.Serializable;
  * Represents a light state.
  */
 @SuppressWarnings("serial")
-public class State implements Serializable {
-	public boolean on;
-	
-	public int bri;
-	
-	public int hue;
-	
-	public int sat;
-	
-	public float[] xy;
-	
-	public int ct;
-	
+public class State extends Action implements Serializable {
 	public String alert;
-	
-	public String effect;
-	
-	public String colormode;
 	
 	public boolean reachable;
 }

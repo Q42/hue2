@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.q42.hue2.models.Bridge;
+import nl.q42.javahueapi.models.Action;
 import nl.q42.javahueapi.models.Group;
 import nl.q42.javahueapi.models.Light;
 import android.content.Context;
@@ -213,24 +214,32 @@ public class Util {
 	 * Color conversion helper functions
 	 */
 	public static int getRGBColor(Light light) {
-		if (!light.state.on) {
+		return getRGBColor(light.state, light.modelid);
+	}
+	
+	public static int getRGBColor(Group group) {
+		return getRGBColor(group.action, null);
+	}
+	
+	private static int getRGBColor(Action state, String model) {
+		if (!state.on) {
 			return Color.BLACK;
 		}
 		
 		// Convert HSV color to RGB
-		if (light.state.colormode.equals("hs")) {
+		if (state.colormode.equals("hs")) {
 			float[] components = new float[] {
-				(float) light.state.hue / 65535.0f * 360.0f,
-				(float) light.state.sat / 255.0f,
+				(float) state.hue / 65535.0f * 360.0f,
+				(float) state.sat / 255.0f,
 				1.0f // Ignore brightness for more clear color view, hue is most important anyway
 			};
 			
 			return Color.HSVToColor(components);
-		} else if (light.state.colormode.equals("xy")) {
-			float[] points = new float[] { (float) light.state.xy[0], (float) light.state.xy[1] };
-			return PHUtilitiesImpl.colorFromXY(points, light.modelid);
-		} else if (light.state.colormode.equals("ct")) {
-			return temperatureToColor(1000000 / light.state.ct);
+		} else if (state.colormode.equals("xy")) {
+			float[] points = new float[] { (float) state.xy[0], (float) state.xy[1] };
+			return PHUtilitiesImpl.colorFromXY(points, model);
+		} else if (state.colormode.equals("ct")) {
+			return temperatureToColor(1000000 / state.ct);
 		} else {
 			return Color.WHITE;
 		}

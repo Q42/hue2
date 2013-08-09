@@ -63,7 +63,7 @@
 			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_lights_info" />
 		</receiver>
 		
-		<!-- Lights widget service -->
+		<!-- Lights widget services -->
 		<service android:name="nl.q42.hue2.widgets.LightsWidgetToggleService" />
 		<service android:name="nl.q42.hue2.widgets.LightsWidgetUpdateService" />
 		
@@ -74,6 +74,8 @@
 			</intent-filter>
 			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_group_info" />
 		</receiver>
+		
+		<!-- Group widget services -->
+		<service android:name="nl.q42.hue2.widgets.GroupWidgetUpdateService" />
     </application>
-
 </manifest>

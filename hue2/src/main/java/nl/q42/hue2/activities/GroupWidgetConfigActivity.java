@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -108,6 +109,8 @@ public class GroupWidgetConfigActivity extends Activity {
 		prefsEdit.putString("widget_" + widgetId + "_ip", bridge.getIp());
 		prefsEdit.putString("widget_" + widgetId + "_id", groupId);
 		prefsEdit.commit();
+		
+		Log.d("hue2", "The new widgetId = " + widgetId);
 		
 		// Send initial update request
 		Intent initialUpdate = new Intent(this, GroupWidgetProvider.class);

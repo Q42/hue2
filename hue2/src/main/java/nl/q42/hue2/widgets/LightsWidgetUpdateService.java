@@ -27,16 +27,6 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 public class LightsWidgetUpdateService extends Service {
-	public static class WidgetButton {
-		public int widget;
-		public int button;
-		
-		public WidgetButton(int widget, int button) {
-			this.widget = widget;
-			this.button = button;
-		}
-	}
-	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// Ignore if screen is off
