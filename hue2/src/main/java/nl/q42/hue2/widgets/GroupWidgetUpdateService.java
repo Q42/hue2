@@ -160,7 +160,7 @@ public class GroupWidgetUpdateService extends Service {
 		for (int i = 0; i < 3; i++) {
 			int idPresetView = context.getResources().getIdentifier("widget_group_preset" + (i + 1), "id", context.getPackageName());
 			
-			if (presets.size() > i) {
+			if (presets != null && presets.size() > i) {
 				Preset preset = presets.get(i);
 				
 				views.setViewVisibility(idPresetView, View.VISIBLE);
