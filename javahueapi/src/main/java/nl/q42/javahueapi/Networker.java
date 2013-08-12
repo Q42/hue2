@@ -27,12 +27,16 @@ public class Networker {
 		return doNetwork(address, "DELETE", "");
 	}
 	
-	private static Result doNetwork(String address, String requestMethod, String body) throws IOException {
+	public static Result doNetwork(String address, String requestMethod, String body) throws IOException {
+		return doNetwork(address, requestMethod, body, 4 * 1000);
+	}
+	
+	public static Result doNetwork(String address, String requestMethod, String body, int timeout) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(address).openConnection();
 		try {
 			conn.setRequestMethod(requestMethod);
 			conn.setRequestProperty("Content-Type", "application/xml");
-			conn.setConnectTimeout(4 * 1000); // TODO
+			conn.setConnectTimeout(timeout); // TODO
 			//conn.setReadTimeout(timeout) // TODO
 			
 			if (body != null && !body.equals("")) {

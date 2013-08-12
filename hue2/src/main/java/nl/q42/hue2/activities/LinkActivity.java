@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -106,8 +106,6 @@ public class LinkActivity extends Activity {
 				startSearching(false);
 			}
 		}
-		
-		bridgesAdapter.add(new Bridge("192.168.1.101", "0017880ae688", "", "aapje3", false));
 	}
 	
 	@Override
@@ -255,82 +253,13 @@ public class LinkActivity extends Activity {
 		}
 		
 		@Override
-		protected Boolean doInBackground(Void... params) {			
-			// Search bridges on local network using UPnP
-			try {				
-				String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 8\nST:SsdpSearch:all";
-				DatagramSocket upnpSock = new DatagramSocket();
-				upnpSock.setSoTimeout(100);
-				upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
-				
-				HashMap<String, Boolean> ipsDiscovered = new HashMap<String, Boolean>();
-				
-				// Add any existing results if continuing from an existing search
-				for (Bridge b : bridges) {
-					ipsDiscovered.put(b.getIp(), true);
-				}
-				
-				long start = System.currentTimeMillis();
-				long nextBroadcast = start + BROADCAST_INTERVAL;
-				
-				while (true) {
-					// Send a new discovery broadcast once a second
-					if (System.currentTimeMillis() > nextBroadcast) {
-						upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
-						nextBroadcast = System.currentTimeMillis() + BROADCAST_INTERVAL;
-					}
-					
-					byte[] responseBuffer = new byte[1024];
-					
-					DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
-					
-					try {
-						upnpSock.receive(responsePacket);
-					} catch (SocketTimeoutException e) {
-						if (System.currentTimeMillis() - start > SEARCH_TIMEOUT || isCancelled()) {
-							break;
-						} else {
-							continue;
-						}
-					}
-					
-					final String ip = responsePacket.getAddress().getHostAddress();
-					final String response = new String(responsePacket.getData());
-					
-					if (!ipsDiscovered.containsKey(ip)) {
-						Matcher m = Pattern.compile("LOCATION: (.*)", Pattern.CASE_INSENSITIVE).matcher(response);
-						
-						if (m.find()) {
-							final String description = Networker.get(m.group(1)).getBody();
-							
-							// Parsing with RegEx allowed here because the output format is fairly strict
-							final String modelName = Util.quickMatch("<modelName>(.*?)</modelName>", description);
-															
-							// Check from description if we're dealing with a hue bridge or some other device
-							if (modelName.toLowerCase().contains("philips hue bridge")) {
-								try {
-									final SimpleConfig cfg = HueService.getSimpleConfig(ip);
-									final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
-									final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
-									
-									bridgesList.post(new Runnable() {
-										@Override
-										public void run() {
-											Bridge b = new Bridge(ip, mac, cfg.swversion, cfg.name, access);
-											bridges.add(b);
-											bridgesAdapter.add(b);
-										}
-									});
-								} catch (ApiException e) {
-									// Do nothing, this basically serves as an extra check to see if it's really a hue bridge
-								}
-							}
-						}
-						
-						// Ignore subsequent packets
-						ipsDiscovered.put(ip, true);
-					}
-				}
+		protected Boolean doInBackground(Void... params) {
+			// Two different search methods are used in order
+			// 1. Bruteforce all IPs from 192.168.1.0 to 192.168.1.255 (used by other apps, usually works when UPnP fails)
+			// 2. Search bridges through UPnP discovery
+			try {
+				searchBridgesBruteforce(this);
+				searchBridgesUPnP(this);
 			} catch (SocketException e) {
 				return false;
 			} catch (IOException e) {
@@ -339,6 +268,133 @@ public class LinkActivity extends Activity {
 			}
 			
 			return true;
+		}
+	}
+	
+	private void searchBridgesBruteforce(BridgeSearchTask task) throws IOException, SocketException {
+		HashSet<String> ipsDiscovered = new HashSet<String>();
+		
+		// Add any existing results if continuing from an existing search
+		for (Bridge b : bridges) {
+			ipsDiscovered.add(b.getIp());
+		}
+		
+		// Build list of IPs to search (search from center to outer range, because devices are usually around 192.168.1.100)
+		ArrayList<String> ips = new ArrayList<String>(255);
+		
+		ips.add("192.168.1.127");
+		
+		for (int i = 1; i <= 127; i++) {
+			ips.add("192.168.1." + (127 - i));
+			ips.add("192.168.1." + (127 + i));
+		}
+		
+		//  Check every IP for a listening device
+		for (int i = 0; i < 255; i++) {			
+			try {
+				final String ip = ips.get(i);
+				if (ipsDiscovered.contains(ip)) continue;
+				
+				// First try to get UPnP description to see if a device is a Hue bridge
+				final String description = Networker.doNetwork("http://" + ip + "/description.xml", "GET", "", 10).getBody();
+				final String modelname = Util.quickMatch("<modelName>(.*?)</modelName>", description);
+				
+				if (modelname.toLowerCase().contains("philips hue bridge")) {
+					final SimpleConfig cfg = HueService.getSimpleConfig(ip);
+					final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
+					final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
+					
+					bridgesList.post(new Runnable() {
+						@Override
+						public void run() {
+							Bridge b = new Bridge(ip, mac, cfg.swversion, cfg.name, access);
+							bridges.add(b);
+							bridgesAdapter.add(b);
+						}
+					});
+				}
+			} catch (IOException e) {
+				// Either no device or not a Philips Hue bridge, move on
+			} catch (ApiException e) {
+				// Not a Philips Hue bridge
+			}
+		}
+	}
+	
+	private void searchBridgesUPnP(BridgeSearchTask task) throws IOException, SocketException {
+		// Search bridges on local network using UPnP
+		String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 8\nST:SsdpSearch:all";
+		DatagramSocket upnpSock = new DatagramSocket();
+		upnpSock.setSoTimeout(100);
+		upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
+		
+		HashSet<String> ipsDiscovered = new HashSet<String>();
+		
+		// Add any existing results from bruteforce search and previous searches
+		for (Bridge b : bridges) {
+			ipsDiscovered.add(b.getIp());
+		}
+		
+		long start = System.currentTimeMillis();
+		long nextBroadcast = start + BROADCAST_INTERVAL;
+		
+		while (true) {
+			// Send a new discovery broadcast once a second
+			if (System.currentTimeMillis() > nextBroadcast) {
+				upnpSock.send(new DatagramPacket(upnpRequest.getBytes(), upnpRequest.length(), new InetSocketAddress("239.255.255.250", 1900)));
+				nextBroadcast = System.currentTimeMillis() + BROADCAST_INTERVAL;
+			}
+			
+			byte[] responseBuffer = new byte[1024];
+			
+			DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+			
+			try {
+				upnpSock.receive(responsePacket);
+			} catch (SocketTimeoutException e) {
+				if (System.currentTimeMillis() - start > SEARCH_TIMEOUT || task.isCancelled()) {
+					break;
+				} else {
+					continue;
+				}
+			}
+			
+			final String ip = responsePacket.getAddress().getHostAddress();
+			final String response = new String(responsePacket.getData());
+			
+			if (!ipsDiscovered.contains(ip)) {
+				Matcher m = Pattern.compile("LOCATION: (.*)", Pattern.CASE_INSENSITIVE).matcher(response);
+				
+				if (m.find()) {
+					final String description = Networker.get(m.group(1)).getBody();
+					
+					// Parsing with RegEx allowed here because the output format is fairly strict
+					final String modelName = Util.quickMatch("<modelName>(.*?)</modelName>", description);
+													
+					// Check from description if we're dealing with a hue bridge or some other device
+					if (modelName.toLowerCase().contains("philips hue bridge")) {
+						try {
+							final SimpleConfig cfg = HueService.getSimpleConfig(ip);
+							final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
+							final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
+							
+							bridgesList.post(new Runnable() {
+								@Override
+								public void run() {
+									Bridge b = new Bridge(ip, mac, cfg.swversion, cfg.name, access);
+									bridges.add(b);
+									bridgesAdapter.add(b);
+								}
+							});
+						} catch (ApiException e) {
+							// Do nothing, this basically serves as an extra check to see if it's really a hue bridge
+						}
+					}
+				}
+				
+				// Ignore subsequent packets
+				ipsDiscovered.add(ip);
+			}
 		}
 	}
 	
