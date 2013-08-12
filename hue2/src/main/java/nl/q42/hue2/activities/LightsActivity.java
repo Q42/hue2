@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -459,6 +460,7 @@ public class LightsActivity extends Activity {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void refreshLights() {
 		for (final String id : lightViews.keySet()) {
 			ArrayList<View> views = lightViews.get(id);
@@ -473,7 +475,9 @@ public class LightsActivity extends Activity {
 				
 				// Set background of light icon to light color
 				final View colorView = view.findViewById(R.id.lights_light_color);
-				colorView.getBackground().setColorFilter(light.state.reachable ? Util.getRGBColor(light) : Color.BLACK, PorterDuff.Mode.MULTIPLY);
+				Drawable d = getResources().getDrawable(R.drawable.light_color).mutate();
+				d.setColorFilter(light.state.reachable ? Util.getRGBColor(light) : Color.BLACK, PorterDuff.Mode.MULTIPLY);
+				colorView.setBackgroundDrawable(d);
 				
 				// Set switch
 				FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
