@@ -26,6 +26,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -472,7 +473,7 @@ public class LightsActivity extends Activity {
 				
 				// Set background of light icon to light color
 				final View colorView = view.findViewById(R.id.lights_light_color);
-				colorView.setBackgroundColor(light.state.reachable ? Util.getRGBColor(light) : Color.BLACK);
+				colorView.getBackground().setColorFilter(light.state.reachable ? Util.getRGBColor(light) : Color.BLACK, PorterDuff.Mode.MULTIPLY);
 				
 				// Set switch
 				FeedbackSwitch switchView = (FeedbackSwitch) view.findViewById(R.id.lights_light_switch);
