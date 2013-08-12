@@ -18,15 +18,11 @@
 
         <item name="android:actionBarStyle">@style/MyActionBar</item>
 		<item name="android:textColor">@color/textColor</item>
-		<item name="android:windowBackground">@color/background</item>
-    	<item name="android:colorBackground">@color/background</item>
     </style>
 
     <!-- style for the action bar backgrounds -->
     <style name="MyActionBar" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:background">@color/ab_background</item>
-        <item name="android:backgroundStacked">@color/ab_background</item>
-        <item name="android:backgroundSplit">@color/ab_background</item>
+        <item name="android:background">@android:color/transparent</item>
     </style>
 
 </resources>

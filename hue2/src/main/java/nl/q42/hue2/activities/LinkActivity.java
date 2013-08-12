@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -257,21 +256,20 @@ public class LinkActivity extends Activity {
 			// Two different search methods are used in order
 			// 1. Bruteforce all IPs from 192.168.1.0 to 192.168.1.255 (used by other apps, usually works when UPnP fails)
 			// 2. Search bridges through UPnP discovery
+			
+			searchBridgesBruteforce(this);
+			
 			try {
-				searchBridgesBruteforce(this);
 				searchBridgesUPnP(this);
-			} catch (SocketException e) {
-				return false;
 			} catch (IOException e) {
-				// Not sure what would cause this to happen
-				e.printStackTrace();
+				// UPnP failure
 			}
 			
 			return true;
 		}
 	}
 	
-	private void searchBridgesBruteforce(BridgeSearchTask task) throws IOException, SocketException {
+	private void searchBridgesBruteforce(BridgeSearchTask task) {
 		HashSet<String> ipsDiscovered = new HashSet<String>();
 		
 		// Add any existing results if continuing from an existing search
@@ -317,11 +315,13 @@ public class LinkActivity extends Activity {
 				// Either no device or not a Philips Hue bridge, move on
 			} catch (ApiException e) {
 				// Not a Philips Hue bridge
+			} catch (Exception e) {
+				// Other types of exceptions sometimes occur when device is misbehaving (e.g. bad UPnP description file)
 			}
 		}
 	}
 	
-	private void searchBridgesUPnP(BridgeSearchTask task) throws IOException, SocketException {
+	private void searchBridgesUPnP(BridgeSearchTask task) throws IOException {
 		// Search bridges on local network using UPnP
 		String upnpRequest = "M-SEARCH * HTTP/1.1\nHOST: 239.255.255.250:1900\nMAN: ssdp:discover\nMX: 8\nST:SsdpSearch:all";
 		DatagramSocket upnpSock = new DatagramSocket();

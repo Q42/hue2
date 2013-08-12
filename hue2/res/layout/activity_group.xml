@@ -182,7 +182,7 @@
 	       android:id="@+id/group_save_preset"
 	       android:layout_width="match_parent"
 	       android:layout_height="wrap_content"
-	       android:background="@drawable/dark_button_background"
+	       android:background="@drawable/darker_button_background"
 	       android:text="@string/group_save_preset" />
 
 	   <nl.q42.hue2.views.ColorButton

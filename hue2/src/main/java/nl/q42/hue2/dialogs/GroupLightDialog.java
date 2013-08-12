@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -52,7 +53,8 @@ public class GroupLightDialog extends DialogFragment {
 		lights = (HashMap<String, Light>) getArguments().getSerializable("lights");
 		service = (HueService) getArguments().getSerializable("service");
 		
-		LinearLayout layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.dialog_lights, null);
+		View layout = getActivity().getLayoutInflater().inflate(R.layout.dialog_lights, null);
+		LinearLayout lightsList = (LinearLayout) layout.findViewById(R.id.dialog_lights_lights);
 		
 		// Ordered list of lights
 		lightIds = Util.getSortedLights(lights);
@@ -87,7 +89,7 @@ public class GroupLightDialog extends DialogFragment {
 				}
 			});
 			
-			layout.addView(lightView);
+			lightsList.addView(lightView);
 			lightViews.put(id, lightView);
 		}
 		
