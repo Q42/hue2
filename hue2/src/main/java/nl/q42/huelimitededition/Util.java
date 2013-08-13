@@ -52,8 +52,9 @@ public class Util {
 	public static String getDeviceIdentifier(Context ctx) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 		
+		// Older bridge firmware (Q42 kitchen) doesn't seem to allow dashes in usernames
 		if (prefs.contains("uuid")) {
-			return prefs.getString("uuid", null);
+			return prefs.getString("uuid", null).replace("-", "");
 		} else {
 			String uuid = generateUUID();
 			
@@ -61,7 +62,7 @@ public class Util {
 			ed.putString("uuid", uuid);
 			ed.commit();
 			
-			return uuid;
+			return uuid.replace("-", "");
 		}
 	}
 	

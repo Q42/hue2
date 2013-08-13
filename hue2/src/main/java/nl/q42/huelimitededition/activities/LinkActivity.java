@@ -294,7 +294,7 @@ public class LinkActivity extends Activity {
 				if (ipsDiscovered.contains(ip)) continue;
 				
 				// First try to get UPnP description to see if a device is a Hue bridge
-				final String description = Networker.doNetwork("http://" + ip + "/description.xml", "GET", "", 10).getBody();
+				final String description = Networker.doNetwork("http://" + ip + "/description.xml", "GET", "", 20).getBody();
 				final String modelname = Util.quickMatch("<modelName>(.*?)</modelName>", description);
 				
 				if (modelname.toLowerCase().contains("philips hue bridge")) {
