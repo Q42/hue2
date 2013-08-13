@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="nl.q42.hue2"
+    package="nl.q42.huelimitededition"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -56,7 +56,7 @@
         </activity>
         
         <!-- Lights widget provider -->
-		<receiver android:name="nl.q42.hue2.widgets.LightsWidgetProvider" android:label="@string/widget_lights_label">
+		<receiver android:name="nl.q42.huelimitededition.widgets.LightsWidgetProvider" android:label="@string/widget_lights_label">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
 			</intent-filter>
@@ -64,11 +64,11 @@
 		</receiver>
 		
 		<!-- Lights widget services -->
-		<service android:name="nl.q42.hue2.widgets.LightsWidgetToggleService" />
-		<service android:name="nl.q42.hue2.widgets.LightsWidgetUpdateService" />
+		<service android:name="nl.q42.huelimitededition.widgets.LightsWidgetToggleService" />
+		<service android:name="nl.q42.huelimitededition.widgets.LightsWidgetUpdateService" />
 		
 		<!-- Group widget provider -->
-		<receiver android:name="nl.q42.hue2.widgets.GroupWidgetProvider" android:label="@string/widget_group_label">
+		<receiver android:name="nl.q42.huelimitededition.widgets.GroupWidgetProvider" android:label="@string/widget_group_label">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
 			</intent-filter>
@@ -76,7 +76,7 @@
 		</receiver>
 		
 		<!-- Group widget services -->
-		<service android:name="nl.q42.hue2.widgets.GroupWidgetChangeService" />
-		<service android:name="nl.q42.hue2.widgets.GroupWidgetUpdateService" />
+		<service android:name="nl.q42.huelimitededition.widgets.GroupWidgetChangeService" />
+		<service android:name="nl.q42.huelimitededition.widgets.GroupWidgetUpdateService" />
     </application>
 </manifest>

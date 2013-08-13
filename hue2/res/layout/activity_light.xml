@@ -86,7 +86,7 @@
 			android:layout_marginTop="15dp"
 			android:orientation="vertical">
 	    
-			<nl.q42.hue2.views.TempSlider
+			<nl.q42.huelimitededition.views.TempSlider
 				android:id="@+id/light_color_temp"
 				android:layout_width="match_parent"
 				android:layout_marginBottom="15dp"
@@ -96,14 +96,14 @@
 				android:layout_width="match_parent"
 				android:layout_height="match_parent">
 				    
-				<nl.q42.hue2.views.SatBriSlider
+				<nl.q42.huelimitededition.views.SatBriSlider
 				    android:id="@+id/light_color_sat_bri"
 				    android:layout_width="match_parent"
 				    android:layout_height="match_parent"
 				    android:layout_weight="1"
 				    android:layout_marginRight="15dp" />
 				 
-				<nl.q42.hue2.views.HueSlider
+				<nl.q42.huelimitededition.views.HueSlider
 					android:id="@+id/light_color_hue"
 					android:layout_width="50dp"
 					android:layout_height="match_parent"
@@ -129,7 +129,7 @@
 	       android:background="@drawable/darker_button_background"
 	       android:text="@string/light_save_preset" />
 
-	   <nl.q42.hue2.views.ColorButton
+	   <nl.q42.huelimitededition.views.ColorButton
 	       android:id="@+id/light_preset_color"
 	       android:layout_width="40dp"
 	       android:layout_height="40dp"

@@ -6,5 +6,5 @@
 	android:initialLayout="@layout/widget_lights"
 	android:resizeMode="horizontal"
 	android:widgetCategory="home_screen|keyguard"
-	android:configure="nl.q42.hue2.activities.LightsWidgetConfigActivity"
+	android:configure="nl.q42.huelimitededition.activities.LightsWidgetConfigActivity"
 	android:previewImage="@drawable/hue_lights_ori_portrait" />

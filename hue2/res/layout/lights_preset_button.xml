@@ -1,4 +1,4 @@
-<nl.q42.hue2.views.ColorButton xmlns:android="http://schemas.android.com/apk/res/android"
+<nl.q42.huelimitededition.views.ColorButton xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/lights_light_preset"
 	style="?android:attr/buttonStyleSmall"
 	android:layout_width="45dp"

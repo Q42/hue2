@@ -5,5 +5,5 @@
 	android:initialLayout="@layout/widget_group"
 	android:resizeMode="none"
 	android:widgetCategory="home_screen|keyguard"
-	android:configure="nl.q42.hue2.activities.GroupWidgetConfigActivity"
+	android:configure="nl.q42.huelimitededition.activities.GroupWidgetConfigActivity"
 	android:previewImage="@drawable/hue_group_ori_portrait" />
