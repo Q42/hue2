@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -378,6 +379,8 @@ public class LinkActivity extends Activity {
 				});
 			} catch (Exception e) {
 				// Do nothing, this basically serves as an extra check to see if it's really a hue bridge
+				Log.w("hue2", "Found device that identifies as Hue bridge, but isn't one? (" + ip + ")");
+				e.printStackTrace();
 			}
 		}
 	}

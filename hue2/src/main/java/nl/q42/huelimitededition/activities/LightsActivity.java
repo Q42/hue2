@@ -30,6 +30,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -578,6 +579,8 @@ public class LightsActivity extends Activity {
 					
 					return true;
 				} catch (Exception e) {
+					Log.w("hue2", "Failed getting full bridge configuration!");
+					e.printStackTrace();
 					return false;
 				}
 			}

@@ -105,7 +105,7 @@ public class HueService implements Serializable {
 	
 	
 	public FullConfig getFullConfig() throws IOException, ApiException {
-		Result result = Networker.get("http://" + bridgeIp + "/api/" + username + "/");
+		Result result = Networker.get("http://" + bridgeIp + "/api/" + username);
 		
 		if (result.getResponseCode() == 200) {
 			return gson.fromJson(result.getBody(), FullConfig.class);
