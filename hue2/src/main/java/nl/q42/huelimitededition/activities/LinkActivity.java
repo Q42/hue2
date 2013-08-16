@@ -23,7 +23,6 @@ import nl.q42.javahueapi.HueService;
 import nl.q42.javahueapi.HueService.ApiException;
 import nl.q42.javahueapi.Networker;
 import nl.q42.javahueapi.Networker.Result;
-import nl.q42.javahueapi.models.SimpleConfig;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
@@ -293,28 +292,9 @@ public class LinkActivity extends Activity {
 				final String ip = ips.get(i);
 				if (ipsDiscovered.contains(ip)) continue;
 				
-				// First try to get UPnP description to see if a device is a Hue bridge
-				final String description = Networker.doNetwork("http://" + ip + "/description.xml", "GET", "", 20).getBody();
-				final String modelname = Util.quickMatch("<modelName>(.*?)</modelName>", description);
-				
-				if (modelname.toLowerCase().contains("philips hue bridge")) {
-					final SimpleConfig cfg = HueService.getSimpleConfig(ip);
-					final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
-					final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
-					
-					bridgesList.post(new Runnable() {
-						@Override
-						public void run() {
-							Bridge b = new Bridge(ip, mac, cfg.swversion, cfg.name, access);
-							bridges.add(b);
-							bridgesAdapter.add(b);
-						}
-					});
-				}
+				tryIP(ip, "http://" + ip + "/description.xml", 20);
 			} catch (IOException e) {
 				// Either no device or not a Philips Hue bridge, move on
-			} catch (ApiException e) {
-				// Not a Philips Hue bridge
 			} catch (Exception e) {
 				// Other types of exceptions sometimes occur when device is misbehaving (e.g. bad UPnP description file)
 			}
@@ -366,34 +346,38 @@ public class LinkActivity extends Activity {
 				Matcher m = Pattern.compile("LOCATION: (.*)", Pattern.CASE_INSENSITIVE).matcher(response);
 				
 				if (m.find()) {
-					final String description = Networker.get(m.group(1)).getBody();
-					
-					// Parsing with RegEx allowed here because the output format is fairly strict
-					final String modelName = Util.quickMatch("<modelName>(.*?)</modelName>", description);
-													
-					// Check from description if we're dealing with a hue bridge or some other device
-					if (modelName.toLowerCase().contains("philips hue bridge")) {
-						try {
-							final SimpleConfig cfg = HueService.getSimpleConfig(ip);
-							final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
-							final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
-							
-							bridgesList.post(new Runnable() {
-								@Override
-								public void run() {
-									Bridge b = new Bridge(ip, mac, cfg.swversion, cfg.name, access);
-									bridges.add(b);
-									bridgesAdapter.add(b);
-								}
-							});
-						} catch (ApiException e) {
-							// Do nothing, this basically serves as an extra check to see if it's really a hue bridge
-						}
-					}
+					tryIP(ip, m.group(1), 1000);
 				}
 				
 				// Ignore subsequent packets
 				ipsDiscovered.add(ip);
+			}
+		}
+	}
+	
+	private void tryIP(final String ip, final String location, int timeout) throws IOException {
+		final String description = Networker.doNetwork(location, "GET", "", timeout).getBody();
+		
+		// Parsing with RegEx allowed here because the output format is fairly strict
+		final String modelName = Util.quickMatch("<modelName>(.*?)</modelName>", description);
+										
+		// Check from description if we're dealing with a hue bridge or some other device
+		if (modelName.toLowerCase().contains("philips hue bridge")) {
+			try {
+				final boolean access = HueService.userExists(ip, Util.getDeviceIdentifier(LinkActivity.this));
+				final String name = Util.quickMatch("<friendlyName>(.*?) \\([0-9.]+\\)</friendlyName>", description);
+				final String mac = Util.quickMatch("<serialNumber>(.*?)</serialNumber>", description);
+				
+				bridgesList.post(new Runnable() {
+					@Override
+					public void run() {
+						Bridge b = new Bridge(ip, mac, name, access);
+						bridges.add(b);
+						bridgesAdapter.add(b);
+					}
+				});
+			} catch (Exception e) {
+				// Do nothing, this basically serves as an extra check to see if it's really a hue bridge
 			}
 		}
 	}

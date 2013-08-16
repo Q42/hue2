@@ -38,20 +38,4 @@
 	    android:textColor="#bebebe"
 	    android:textSize="16sp"
 	    android:textStyle="bold" />
-	
-	<TextView
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_marginBottom="3dp"
-	    android:textColor="#bebebe"
-	    android:textSize="14sp"
-	    android:text="@string/dialog_bridge_software" />
-	
-	<TextView
-	    android:id="@+id/dialog_bridge_software"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:textColor="#bebebe"
-	    android:textSize="16sp"
-	    android:textStyle="bold" />
 </LinearLayout>

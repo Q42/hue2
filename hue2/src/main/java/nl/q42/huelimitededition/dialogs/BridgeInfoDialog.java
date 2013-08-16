@@ -29,7 +29,6 @@ public class BridgeInfoDialog extends DialogFragment {
 		View layout = getActivity().getLayoutInflater().inflate(R.layout.dialog_bridge, null);
 		((TextView) layout.findViewById(R.id.dialog_bridge_ip)).setText(bridge.getIp());
 		((TextView) layout.findViewById(R.id.dialog_bridge_mac)).setText(serialToMAC(bridge.getSerial()));
-		((TextView) layout.findViewById(R.id.dialog_bridge_software)).setText(bridge.getSoftware());
 		
 		return new AlertDialog.Builder(getActivity())
 			.setTitle(bridge.getName())

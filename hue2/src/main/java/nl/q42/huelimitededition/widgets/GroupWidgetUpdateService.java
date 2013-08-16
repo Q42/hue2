@@ -93,7 +93,7 @@ public class GroupWidgetUpdateService extends Service {
 						// Get presets for group
 						FullConfig cfg = configs.get(id);
 						HashMap<String, ArrayList<Preset>> bridgePresets =
-								datasource.getGroupPresets(new Bridge(null, cfg.config.mac.replace(":", "").toLowerCase(), null, null));
+								datasource.getGroupPresets(new Bridge(null, cfg.config.mac.replace(":", "").toLowerCase(), null));
 						
 						// Update widget UI
 						String widgetGroup = prefs.getString("widget_" + id + "_id", null);
