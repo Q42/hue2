@@ -21,8 +21,6 @@ public class Config {
 	
 	public String UTC;
 	
-	public Map<String, WhitelistItem> whitelist;
-	
 	public String swversion;
 	
 	public SWUpdate swupdate;
