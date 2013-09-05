@@ -1,6 +1,5 @@
 package nl.q42.javahueapi.models;
 
-import java.util.Map;
 
 public class Config {
 	public String name;
