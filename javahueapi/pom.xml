@@ -19,7 +19,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <!-- TODO this library won't work on old HTC Android -->
+		    <!-- NOTE this library won't work on old (<=2.3) HTC Android devices -->
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.2.2</version>
