@@ -35,18 +35,6 @@
 			<scope>provided</scope>
 		</dependency>
 		-->
-		<!--
-			The small amount of code only relevant to Android should either
-			be in special packages in javahueapi. It's not worth making
-			an entire separate library out of it. For example, asynchronous
-			requests are an application detail, not something the library
-			should be concerned with.
-		<dependency>
-			<groupId>info.chees</groupId>
-			<artifactId>androidhueapi</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		-->
 		
 		<dependency>
 		    <groupId>nl.q42</groupId>
