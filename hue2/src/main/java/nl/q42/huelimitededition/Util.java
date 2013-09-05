@@ -117,14 +117,14 @@ public class Util {
 	}
 	
 	public static String getDeviceName() {
-		  String manufacturer = Build.MANUFACTURER;
-		  String model = Build.MODEL;
-		  
-		  if (model.startsWith(manufacturer)) {
-			  return model.substring(0, 1).toUpperCase() + model.substring(1);
-		  } else {
-			  return manufacturer.substring(0, 1).toUpperCase() + manufacturer.substring(1) + " " + model;
-		  }
+		String manufacturer = Build.MANUFACTURER;
+		String model = Build.MODEL;
+
+		if (model.startsWith(manufacturer)) {
+			return model.substring(0, 1).toUpperCase() + model.substring(1);
+		} else {
+			return manufacturer.substring(0, 1).toUpperCase() + manufacturer.substring(1) + " " + model;
+		}
 	}
 	
 	/**
@@ -239,7 +239,7 @@ public class Util {
 		}
 		
 		// Convert HSV color to RGB
-		if (state.colormode.equals("hs")) {
+		if ("hs".equals(state.colormode)) {
 			float[] components = new float[] {
 				(float) state.hue / 65535.0f * 360.0f,
 				(float) state.sat / 255.0f,
@@ -247,10 +247,10 @@ public class Util {
 			};
 			
 			return Color.HSVToColor(components);
-		} else if (state.colormode.equals("xy")) {
+		} else if ("xy".equals(state.colormode)) {
 			float[] points = new float[] { (float) state.xy[0], (float) state.xy[1] };
 			return PHUtilitiesImpl.colorFromXY(points, model);
-		} else if (state.colormode.equals("ct")) {
+		} else if ("ct".equals(state.colormode)) {
 			return temperatureToColor(1000000 / state.ct);
 		} else {
 			return Color.WHITE;
