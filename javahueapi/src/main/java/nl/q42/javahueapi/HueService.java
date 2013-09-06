@@ -197,9 +197,9 @@ public class HueService implements Serializable {
 	}
 	
 	public void setLightColor(String id, State state) throws IOException, ApiException {
-		if (state.colormode.equals("xy")) {
+		if ("xy".equals(state.colormode)) {
 			setLightXY(id, state.xy, state.bri, state.on);
-		} else if (state.colormode.equals("ct")) {
+		} else if ("ct".equals(state.colormode)) {
 			setLightCT(id, state.ct, state.bri, state.on);
 		} else {
 			setLightHS(id, state.hue, state.sat, state.bri, state.on);

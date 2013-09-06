@@ -311,4 +311,12 @@ public class Util {
 		
 		return Color.rgb(r, g, b);
 	}
+	
+	/** Checks strings for equality. Can handle null strings. */
+	public static boolean stringEquals(String a, String b) {
+		if (a == null) {
+			return b == null;
+		}
+		return a.equals(b);
+	}
 }

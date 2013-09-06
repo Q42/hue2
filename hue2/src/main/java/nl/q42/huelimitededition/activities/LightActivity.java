@@ -91,7 +91,7 @@ public class LightActivity extends Activity {
 		if (savedInstanceState == null) {
 			nameView.setText(light.name);
 			
-			if (light.state.colormode.equals("ct")) {
+			if ("ct".equals(light.state.colormode)) {
 				tempSlider.setTemp(light.state.ct);
 				tempSlider.setActive(true);
 				colorMode = "ct";

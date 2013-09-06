@@ -149,17 +149,17 @@ public class GroupActivity extends Activity {
 				if (first == null) {
 					first = cur;
 					firstLight = lights.get(id);
-				} else if (cur.on != first.on || !cur.colormode.equals(first.colormode) || cur.bri != first.bri) {
+				} else if (cur.on != first.on || !Util.stringEquals(cur.colormode, first.colormode) || cur.bri != first.bri) {
 					same = false;
 				} else {
-					if (cur.colormode.equals("ct") && cur.ct != first.ct) same = false;
-					else if (cur.colormode.equals("hs") && (cur.hue != first.hue || cur.sat != first.sat)) same = false;
-					else if (cur.colormode.equals("xy") && (cur.xy[0] != first.xy[0] || cur.xy[1] != first.xy[1])) same = false;
+					if ("ct".equals(cur.colormode) && cur.ct != first.ct) same = false;
+					else if ("hs".equals(cur.colormode) && (cur.hue != first.hue || cur.sat != first.sat)) same = false;
+					else if ("xy".equals(cur.colormode) && (cur.xy[0] != first.xy[0] || cur.xy[1] != first.xy[1])) same = false;
 				}
 			}
 			
 			if (same && first != null) {
-				if (first.colormode.equals("ct")) {
+				if ("ct".equals(first.colormode)) {
 					tempSlider.setTemp(first.ct);
 					tempSlider.setActive(true);
 					colorMode = "ct";
@@ -223,7 +223,7 @@ public class GroupActivity extends Activity {
 						int bri = (int) (satBriSlider.getBrightness() * 255.0f);
 						int ct = (int) tempSlider.getTemp();
 						
-						if (colorMode.equals("ct")) {
+						if ("ct".equals(colorMode)) {
 							service.setGroupCT(id, ct, bri);
 						} else {
 							service.setGroupXY(id, xy, bri);
@@ -250,7 +250,7 @@ public class GroupActivity extends Activity {
 	}
 	
 	private void updatePresetPreview() {
-		if (colorMode.equals("ct")) {
+		if ("ct".equals(colorMode)) {
 			presetColorView.setColor(Util.temperatureToColor(1000000 / (int) tempSlider.getTemp()));
 		} else {
 			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), null);
