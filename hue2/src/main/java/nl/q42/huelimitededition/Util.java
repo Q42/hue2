@@ -196,6 +196,8 @@ public class Util {
 			
 			@Override
 			public int compareTo(LightPair another) {
+				if (light.name == null)
+					return 1;
 				return light.name.compareTo(another.light.name);
 			}
 		}
