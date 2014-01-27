@@ -85,8 +85,10 @@ public class LightsWidgetUpdateService extends Service {
 						HashMap<String, Light> lights = new HashMap<String, Light>();
 						Set<String> widgetLights = prefs.getStringSet("widget_" + id + "_ids", null);
 						
-						for (String lid : widgetLights) {
-							lights.put(lid, cfg.lights.get(lid));
+						if (widgetLights != null) {
+							for (String lid : widgetLights) {
+								lights.put(lid, cfg.lights.get(lid));
+							}
 						}
 						
 						// Update widget UI
