@@ -199,7 +199,7 @@ public class LightActivity extends Activity {
 	}
 	
 	private void updatePresetPreview() {
-		if (colorMode.equals("ct")) {
+		if ("ct".equals(colorMode)) {
 			presetColorView.setColor(Util.temperatureToColor(1000000 / (int) tempSlider.getTemp()));
 		} else {
 			float[] xy = PHUtilitiesImpl.calculateXY(satBriSlider.getResultColor(), light.modelid);
